@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="he" dir="auto">
+<head>
+<link rel="manifest" href="manifest.json">
+<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js');}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MorseWave — לימוד קוד מורס</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Frank+Ruhl+Libre:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--bg4:#1f2a3d;
+  --border:rgba(148,163,184,.12);--border2:rgba(148,163,184,.2);
+  --cyan:#38bdf8;--mint:#34d399;--gold:#fbbf24;--rose:#f87171;--violet:#a78bfa;
+  --txt:#e2e8f0;--txt2:#94a3b8;--txt3:#4a5568;
+  --dot-col:#38bdf8;--dash-col:#fbbf24;
+  --key-on:#38bdf8;
+  --r:14px;
+}
+[data-theme=light]{
+  --bg:#f0f4f8;--bg2:#ffffff;--bg3:#e8eef5;--bg4:#dde5ee;
+  --border:rgba(15,23,42,.1);--border2:rgba(15,23,42,.18);
+  --txt:#0f172a;--txt2:#475569;--txt3:#94a3b8;
+}
+html,body{height:100%;overflow-x:hidden;}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased;transition:background .3s,color .3s;}
+
+/* ── STARS (dark only) ── */
+#starCanvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;transition:opacity .3s;}
+[data-theme=light] #starCanvas{opacity:0;}
+.glow{position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(80px);transition:opacity .3s;}
+.glow.a{width:700px;height:500px;top:-200px;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(56,189,248,.07),transparent 70%);}
+.glow.b{width:500px;height:400px;bottom:-150px;right:-100px;background:radial-gradient(ellipse,rgba(52,211,153,.05),transparent 65%);}
+[data-theme=light] .glow{opacity:0;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:56px;padding:0 1.25rem;background:rgba(11,15,26,.85);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem;}
+[data-theme=light] nav{background:rgba(240,244,248,.9);}
+.logo{font-weight:700;font-size:.95rem;letter-spacing:-.02em;background:linear-gradient(120deg,var(--cyan),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border:none;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:.45rem;flex-shrink:0;}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:ldot 2.4s ease-in-out infinite;flex-shrink:0;}
+@keyframes ldot{0%,100%{opacity:.35;transform:scale(.75);}50%{opacity:1;transform:scale(1.2);}}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.nt{padding:.35rem .85rem;border:none;background:none;color:var(--txt2);font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nt:hover{color:var(--txt);}
+.nt.on{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.2);}
+.nav-actions{display:flex;gap:.5rem;align-items:center;flex-shrink:0;}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:var(--txt2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:1rem;}
+.icon-btn:hover{color:var(--cyan);border-color:rgba(56,189,248,.3);}
+[data-theme=light] .icon-btn{background:rgba(0,0,0,.04);}
+
+/* ── PAGES ── */
+.page{display:none;position:relative;z-index:1;min-height:100vh;padding-top:56px;}
+.page.on{display:block;}
+main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pop{0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}60%{transform:translateX(5px);}}
+
+/* ── TOAST ── */
+#toast{position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-12px);padding:.55rem 1.4rem;border-radius:999px;font-size:.8rem;font-weight:600;opacity:0;transition:all .35s cubic-bezier(.16,1,.3,1);z-index:999;pointer-events:none;white-space:nowrap;backdrop-filter:blur(16px);background:rgba(11,15,26,.92);border:1px solid var(--border2);}
+[data-theme=light] #toast{background:rgba(240,244,248,.95);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.ok{border-color:rgba(52,211,153,.5);color:var(--mint);}
+#toast.info{border-color:rgba(56,189,248,.4);color:var(--cyan);}
+#toast.bad{border-color:rgba(248,113,113,.4);color:var(--rose);}
+
+/* ══════════════════════════════════════════
+   HOME
+══════════════════════════════════════════ */
+.hero{text-align:center;padding:5rem 1.5rem 3rem;position:relative;}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;padding:.35rem 1rem;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.18);border-radius:999px;font-size:.73rem;font-weight:600;color:var(--cyan);margin-bottom:1.75rem;letter-spacing:.07em;}
+.hero h1{font-size:clamp(2.4rem,6.5vw,4.6rem);font-weight:700;letter-spacing:-.04em;line-height:1.05;margin-bottom:1.25rem;}
+.hero h1 .grad{background:linear-gradient(120deg,var(--cyan),var(--mint) 50%,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{color:var(--txt2);font-size:clamp(.95rem,2vw,1.15rem);max-width:500px;margin:0 auto 2.25rem;line-height:1.75;}
+.hero-btns{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;margin-bottom:3rem;}
+.btn-prime{padding:.75rem 1.85rem;background:linear-gradient(135deg,var(--cyan),#0ea5e9);color:#04121f;font-weight:700;font-size:.9rem;border:none;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .25s;box-shadow:0 0 28px rgba(56,189,248,.28);}
+.btn-prime:hover{transform:translateY(-2px);box-shadow:0 0 44px rgba(56,189,248,.48);}
+.btn-ghost{padding:.75rem 1.85rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--txt);font-size:.9rem;border-radius:999px;cursor:pointer;font-family:inherit;transition:all .25s;}
+.btn-ghost:hover{background:rgba(255,255,255,.07);transform:translateY(-2px);}
+[data-theme=light] .btn-ghost{background:rgba(0,0,0,.04);}
+.morse-strip{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:2.5rem;}
+.mss{height:5px;border-radius:99px;background:var(--cyan);animation:msb 3.5s ease-in-out infinite;}
+.mss.dot{width:5px;}.mss.dash{width:16px;}
+.mss:nth-child(1){animation-delay:0s;}.mss:nth-child(2){animation-delay:.28s;}.mss:nth-child(3){animation-delay:.56s;}.mss:nth-child(4){animation-delay:.84s;}.mss:nth-child(5){animation-delay:1.12s;}.mss:nth-child(6){animation-delay:1.4s;}.mss:nth-child(7){animation-delay:1.68s;}.mss:nth-child(8){animation-delay:1.96s;}
+@keyframes msb{0%,100%{opacity:.1;}50%{opacity:.7;}}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.85rem;max-width:1000px;margin:0 auto;padding:0 1.25rem 4rem;}
+.feat{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.4rem;cursor:pointer;transition:all .28s;position:relative;overflow:hidden;text-align:left;}
+.feat::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--acc,var(--cyan)),transparent);opacity:0;transition:opacity .3s;}
+.feat:hover{border-color:rgba(56,189,248,.22);transform:translateY(-3px);}
+.feat:hover::before{opacity:1;}
+.feat-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1rem;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.16);}
+.feat h3{font-size:.92rem;font-weight:600;margin-bottom:.35rem;}
+.feat p{color:var(--txt2);font-size:.8rem;line-height:1.6;}
+.feat-tag{display:inline-block;margin-top:.75rem;padding:.15rem .55rem;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.15);border-radius:999px;font-size:.65rem;color:var(--cyan);font-weight:700;letter-spacing:.06em;}
+
+/* ══════════════════════════════════════════
+   LEARN — 7 LEVELS + SRS
+══════════════════════════════════════════ */
+.level-track{display:flex;gap:3px;margin-bottom:1rem;}
+.lt{flex:1;height:4px;border-radius:99px;background:var(--border2);transition:background .4s;}
+.lt.done{background:var(--mint);}
+.lt.cur{background:var(--cyan);animation:ltpulse 1.8s ease-in-out infinite;}
+@keyframes ltpulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+.level-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+.lm-title{font-size:1rem;font-weight:700;}
+.lm-sub{font-size:.77rem;color:var(--txt2);margin-top:2px;}
+.lm-badge{padding:.28rem .75rem;border-radius:999px;font-size:.68rem;font-weight:700;letter-spacing:.07em;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.22);color:var(--cyan);}
+
+/* Level grid */
+.level-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.75rem;animation:fadeUp .4s ease both;}
+.lv{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1rem 1.1rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.lv:hover:not(.locked){border-color:rgba(56,189,248,.3);transform:translateY(-2px);}
+.lv.locked{opacity:.5;cursor:not-allowed;}
+.lv.done{border-color:rgba(52,211,153,.3);}
+.lv-num{font-size:1.4rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:.2rem;}
+.lv-name{font-size:.8rem;font-weight:600;margin-bottom:.35rem;}
+.lv-chars{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt2);letter-spacing:.07em;}
+.lv-chars.heb{font-family:'Frank Ruhl Libre',serif;font-size:.85rem;letter-spacing:.04em;}
+.lv-star{position:absolute;top:.65rem;right:.8rem;font-size:.85rem;}
+.lv-bar{height:3px;border-radius:99px;background:var(--border2);margin-top:.75rem;}
+.lv-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cyan),var(--mint));transition:width .5s;}
+
+/* Lesson card */
+.learn-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;animation:fadeUp .35s ease both;}
+.lc-head{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.phase-pill{font-size:.63rem;font-weight:700;letter-spacing:.13em;padding:.22rem .65rem;border-radius:999px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:var(--cyan);}
+.step-info{font-size:.65rem;color:var(--txt2);font-weight:600;}
+.lstage{min-height:300px;padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .22s;}
+.lstage.fade{opacity:0;}
+.lc-foot{padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.6rem;}
+.lbtn{flex:1;padding:.82rem;border:none;border-radius:12px;font-family:inherit;font-size:.87rem;font-weight:700;cursor:pointer;transition:all .22s;}
+.lbtn:disabled{opacity:.4;cursor:default;}
+.lbtn.prime{background:linear-gradient(135deg,var(--cyan),#0ea5e9);color:#04121f;box-shadow:0 5px 20px rgba(56,189,248,.22);}
+.lbtn.prime:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(56,189,248,.38);}
+.lbtn.ghost{background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--txt2);}
+.lbtn.ghost:hover{color:var(--txt);}
+[data-theme=light] .lbtn.ghost{background:rgba(0,0,0,.04);}
+
+/* SRS panel */
+.srs-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.4rem;margin-top:.85rem;animation:fadeUp .4s .1s ease both;}
+.srs-title{font-size:.63rem;font-weight:700;letter-spacing:.12em;color:var(--txt2);text-transform:uppercase;margin-bottom:.65rem;}
+.srs-chips{display:flex;flex-wrap:wrap;gap:.35rem;}
+.chip{padding:.22rem .55rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;border:1px solid var(--border);display:flex;align-items:center;gap:3px;}
+.chip.strong{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.28);color:var(--mint);}
+.chip.weak{background:rgba(251,186,24,.07);border-color:rgba(251,186,24,.28);color:var(--gold);}
+.chip.new{background:rgba(56,189,248,.07);border-color:rgba(56,189,248,.18);color:var(--cyan);}
+.chip.heb{font-family:'Frank Ruhl Libre',serif;font-size:.9rem;}
+
+/* Flashcard */
+.fc-wrap{perspective:900px;cursor:pointer;margin:.75rem 0;}
+.fc{width:200px;height:150px;position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);}
+.fc.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;}
+.fc-front{background:var(--bg3);border:1px solid var(--border2);}
+.fc-back{background:var(--bg4);border:1px solid rgba(56,189,248,.3);transform:rotateY(180deg);}
+.fc-letter{font-size:3.8rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;}
+.fc-letter.heb{font-family:'Frank Ruhl Libre',serif;}
+.fc-hint{font-size:.7rem;color:var(--txt3);}
+.fc-syms{display:flex;gap:5px;align-items:center;}
+.fc-sym.dot{width:10px;height:10px;border-radius:50%;background:var(--dot-col);}
+.fc-sym.dash{width:26px;height:10px;border-radius:5px;background:var(--dash-col);}
+.fc-code{font-family:'JetBrains Mono',monospace;font-size:.95rem;letter-spacing:.18em;color:var(--cyan);}
+
+/* Quiz elements */
+.q-prompt{font-size:.88rem;color:var(--txt2);margin-bottom:1rem;text-align:center;}
+.q-syms{display:flex;gap:7px;align-items:center;justify-content:center;margin-bottom:.9rem;}
+.q-sym.dot{width:13px;height:13px;border-radius:50%;background:var(--dot-col);}
+.q-sym.dash{width:34px;height:13px;border-radius:6px;background:var(--dash-col);}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;width:100%;max-width:320px;}
+.opt{padding:.85rem 1rem;border:1px solid var(--border2);border-radius:12px;background:rgba(255,255,255,.03);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;cursor:pointer;transition:all .18s;text-align:center;}
+.opt.heb{font-family:'Frank Ruhl Libre',serif;}
+.opt:hover:not(:disabled){border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.07);}
+.opt.correct{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.55);color:var(--mint);}
+.opt.wrong{background:rgba(248,113,113,.1);border-color:rgba(248,113,113,.4);color:var(--rose);animation:shake .35s ease;}
+[data-theme=light] .opt{background:rgba(0,0,0,.02);}
+
+/* Type input */
+.type-wrap{width:100%;max-width:300px;display:flex;flex-direction:column;align-items:center;gap:.65rem;}
+.type-inp{width:100%;padding:.9rem;text-align:center;font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:700;background:rgba(0,0,0,.25);border:1.5px solid var(--border2);border-radius:12px;color:var(--txt);outline:none;transition:border-color .2s;-webkit-appearance:none;}
+[data-theme=light] .type-inp{background:rgba(0,0,0,.04);}
+.type-inp:focus{border-color:rgba(56,189,248,.5);box-shadow:0 0 0 3px rgba(56,189,248,.12);}
+.type-inp.heb{font-family:'Frank Ruhl Libre',serif;font-size:2.5rem;}
+.type-inp.ok{border-color:var(--mint);color:var(--mint);}
+.type-inp.bad{border-color:var(--rose);color:var(--rose);animation:shake .35s ease;}
+
+/* Feedback strip */
+.lfb{margin-top:.75rem;padding:.65rem 1.1rem;border-radius:11px;font-size:.86rem;font-weight:600;opacity:0;transition:opacity .25s;text-align:center;width:100%;max-width:320px;}
+.lfb.show{opacity:1;}
+.lfb.ok{background:rgba(52,211,153,.09);border:1px solid rgba(52,211,153,.28);color:var(--mint);}
+.lfb.bad{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.24);color:var(--rose);}
+
+/* Play button (small, inline) */
+.play-btn{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem 1.15rem;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.25);border-radius:999px;color:var(--cyan);font-family:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;margin:.35rem 0;}
+.play-btn:hover{background:rgba(56,189,248,.17);}
+.play-btn svg{width:10px;height:10px;fill:currentColor;}
+
+/* Complete screen */
+.complete-wrap{text-align:center;padding:.5rem;}
+.complete-icon{font-size:3.2rem;margin-bottom:.85rem;}
+.complete-title{font-size:1.4rem;font-weight:700;margin-bottom:.45rem;}
+.complete-sub{color:var(--txt2);font-size:.88rem;line-height:1.65;margin-bottom:1.25rem;}
+.xp-row{display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;}
+.xp{padding:.55rem 1rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:11px;text-align:center;}
+.xp-v{font-size:1.2rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan);}
+.xp-l{font-size:.65rem;color:var(--txt2);margin-top:1px;}
+
+/* Intro stage */
+.intro-wrap{text-align:center;}
+.intro-lnum{font-size:.68rem;font-weight:700;letter-spacing:.15em;color:var(--cyan);margin-bottom:.45rem;}
+.intro-title{font-size:1.4rem;font-weight:700;margin-bottom:.45rem;}
+.intro-sub{color:var(--txt2);font-size:.86rem;line-height:1.65;margin-bottom:1.25rem;}
+.intro-chips{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;}
+.ichip{padding:.35rem .8rem;background:rgba(56,189,248,.07);border:1px solid rgba(56,189,248,.18);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.84rem;font-weight:700;display:flex;align-items:center;gap:6px;}
+.ichip .icode{font-size:.65rem;color:var(--txt2);letter-spacing:.1em;}
+.ichip.heb{font-family:'Frank Ruhl Libre',serif;font-size:1rem;}
+
+/* ══════════════════════════════════════════
+   TELEGRAPH TAP
+══════════════════════════════════════════ */
+.tap-layout{display:flex;flex-direction:column;align-items:center;gap:1.25rem;padding:.5rem 0;}
+.tap-target-card{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:1.4rem 1.6rem;display:flex;align-items:center;gap:1.25rem;}
+.tap-letter{font-size:4rem;font-weight:700;font-family:'JetBrains Mono',monospace;line-height:1;min-width:56px;text-align:center;}
+.tap-letter.heb{font-family:'Frank Ruhl Libre',serif;}
+.tap-right{flex:1;}
+.tap-code{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:var(--txt2);letter-spacing:.22em;margin-bottom:.5rem;}
+.tap-prog{display:flex;gap:5px;align-items:center;min-height:18px;}
+.tp{border-radius:4px;transition:all .12s;}
+.tp.dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--txt3);}
+.tp.dash{width:30px;height:11px;border-radius:5px;border:2px solid var(--txt3);}
+.tp.on.dot{background:var(--dot-col);border-color:var(--dot-col);}
+.tp.on.dash{background:var(--dash-col);border-color:var(--dash-col);}
+.tap-fb{font-size:.88rem;font-weight:600;min-height:22px;margin-top:.45rem;transition:all .2s;}
+.tap-fb.ok{color:var(--mint);}
+.tap-fb.bad{color:var(--rose);}
+
+/* Telegraph SVG key */
+.key-wrap{display:flex;flex-direction:column;align-items:center;gap:.6rem;}
+.key-svg-container{width:280px;cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:none;}
+.key-arm-g{transform-origin:75px 135px;transition:transform .05s ease-out;}
+.key-arm-g.pressed{transform:rotate(7deg);}
+.key-hint{font-size:.73rem;color:var(--txt3);display:flex;align-items:center;gap:.45rem;}
+.key-hint kbd{padding:.12rem .4rem;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-bottom:2px solid var(--border2);border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--txt2);}
+[data-theme=light] .key-hint kbd{background:rgba(0,0,0,.05);}
+
+.tap-wpm{display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:3px;}
+[data-theme=light] .tap-wpm{background:rgba(0,0,0,.04);}
+.wpm-btn{padding:.3rem .8rem;border:none;background:none;color:var(--txt2);font-size:.75rem;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;transition:all .2s;}
+.wpm-btn.on{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.2);}
+
+.tap-scores{display:flex;gap:.65rem;width:100%;max-width:480px;}
+.tscore{flex:1;padding:.75rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;text-align:center;}
+.tscore-v{font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--cyan);}
+.tscore-l{font-size:.62rem;color:var(--txt2);margin-top:2px;text-transform:uppercase;letter-spacing:.08em;}
+.tap-btns{display:flex;gap:.6rem;width:100%;max-width:480px;}
+.tap-btn{flex:1;padding:.75rem;border:none;border-radius:12px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.tap-btn.prime{background:linear-gradient(135deg,var(--cyan),#0ea5e9);color:#04121f;}
+.tap-btn.ghost{background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--txt2);}
+.tap-btn.ghost:hover{color:var(--txt);}
+[data-theme=light] .tap-btn.ghost{background:rgba(0,0,0,.04);}
+
+/* Decode live display */
+.tap-decode{width:100%;max-width:480px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:.9rem 1.2rem;min-height:60px;}
+.td-label{font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt3);margin-bottom:.35rem;}
+.td-content{font-family:'JetBrains Mono',monospace;font-size:1.1rem;letter-spacing:.22em;color:var(--txt2);}
+.td-word{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--txt);margin-top:.3rem;min-height:28px;}
+
+/* ══════════════════════════════════════════
+   PRACTICE
+══════════════════════════════════════════ */
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.1rem;}
+.hud-cell{padding:.7rem .9rem;background:var(--bg2);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;gap:.6rem;}
+.hud-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem;}
+.hud-cell.c .hud-icon{background:rgba(52,211,153,.1);color:var(--mint);}
+.hud-cell.s .hud-icon{background:rgba(251,186,24,.1);color:var(--gold);}
+.hud-cell.w .hud-icon{background:rgba(248,113,113,.1);color:var(--rose);}
+.hud-label{font-size:.6rem;color:var(--txt2);text-transform:uppercase;letter-spacing:.09em;font-weight:600;}
+.hud-val{font-size:1.2rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
+
+.pcard{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.pcard-head{padding:.9rem 1.4rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:.55rem;justify-content:space-between;align-items:center;}
+.rnd-meta{display:flex;flex-direction:column;}
+.rnd-lbl{font-size:.6rem;color:var(--txt2);text-transform:uppercase;letter-spacing:.09em;font-weight:600;}
+.rnd-num{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;color:var(--cyan);}
+.segs{display:flex;gap:.4rem;flex-wrap:wrap;}
+.seg{display:flex;gap:2px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:2px;}
+[data-theme=light] .seg{background:rgba(0,0,0,.04);}
+.sbtn{padding:.28rem .62rem;border:none;background:none;color:var(--txt2);font-size:.72rem;font-weight:600;font-family:inherit;cursor:pointer;border-radius:7px;transition:all .18s;white-space:nowrap;}
+.sbtn.on{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.2);}
+.pstage{padding:1.75rem 1.5rem 1rem;display:flex;flex-direction:column;align-items:center;}
+.stg-lbl{font-size:.68rem;color:var(--txt2);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.1rem;}
+.morse-vis{display:flex;gap:7px;align-items:center;margin-bottom:.75rem;min-height:18px;}
+.mv-s.dot{width:13px;height:13px;border-radius:50%;background:var(--dot-col);}
+.mv-s.dash{width:34px;height:13px;border-radius:6px;background:var(--dash-col);}
+.morse-txt{font-family:'JetBrains Mono',monospace;font-size:.9rem;letter-spacing:.2em;color:var(--txt3);margin-bottom:1.25rem;}
+.pplay-btn{display:flex;align-items:center;gap:.55rem;padding:.62rem 1.6rem;background:rgba(56,189,248,.09);border:1.5px solid rgba(56,189,248,.28);border-radius:999px;color:var(--cyan);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.pplay-btn:hover{background:rgba(56,189,248,.17);}
+.pplay-btn svg{width:11px;height:11px;fill:currentColor;transition:opacity .2s;}
+.input-sec{padding:1.1rem 1.4rem;}
+.inp-hd{display:flex;justify-content:space-between;margin-bottom:.45rem;font-size:.66rem;color:var(--txt2);}
+.ans-inp{width:100%;padding:.85rem;text-align:center;font-family:'JetBrains Mono',monospace;font-size:2.4rem;font-weight:700;background:rgba(0,0,0,.22);border:1.5px solid var(--border2);border-radius:12px;color:var(--txt);outline:none;transition:border-color .2s;text-transform:uppercase;-webkit-appearance:none;}
+[data-theme=light] .ans-inp{background:rgba(0,0,0,.04);}
+.ans-inp:focus{border-color:rgba(56,189,248,.48);box-shadow:0 0 0 3px rgba(56,189,248,.11);}
+.ans-inp.ok{border-color:var(--mint);color:var(--mint);}
+.ans-inp.bad{border-color:var(--rose);color:var(--rose);animation:shake .35s ease;}
+.ans-inp.heb{font-family:'Frank Ruhl Libre',serif;font-size:2.8rem;}
+.pfb{margin:0 1.4rem;padding:0;max-height:0;overflow:hidden;border-radius:12px;opacity:0;transition:all .32s cubic-bezier(.16,1,.3,1);}
+.pfb.show{max-height:70px;padding:.75rem 1rem;opacity:1;}
+.pfb.ok{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.22);}
+.pfb.bad{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);}
+.pfb-inner{display:flex;align-items:center;gap:.65rem;}
+.pfb-ic{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.8rem;}
+.pfb.ok .pfb-ic{background:rgba(52,211,153,.2);}
+.pfb.bad .pfb-ic{background:rgba(248,113,113,.2);}
+.pfb-title{font-size:.86rem;font-weight:700;}
+.pfb.ok .pfb-title{color:var(--mint);}
+.pfb.bad .pfb-title{color:var(--rose);}
+.pfb-sub{font-size:.73rem;color:var(--txt2);margin-top:1px;}
+.pfb-sub b{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-weight:700;}
+.pctrl{padding:.9rem 1.4rem 1.4rem;display:flex;gap:.55rem;border-top:1px solid var(--border);margin-top:.75rem;}
+.pbtn{flex:1;padding:.82rem;border:none;border-radius:12px;font-family:inherit;font-size:.86rem;font-weight:700;cursor:pointer;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:.4rem;}
+.pbtn-check{background:linear-gradient(135deg,var(--cyan),#0ea5e9);color:#04121f;box-shadow:0 5px 20px rgba(56,189,248,.2);}
+.pbtn-check:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(56,189,248,.35);}
+.pbtn-next{background:linear-gradient(135deg,var(--mint),#10b981);color:#04121f;box-shadow:0 5px 20px rgba(52,211,153,.2);}
+.pbtn-next:hover{transform:translateY(-1px);}
+.pbtn-skip{flex:0 0 auto;padding:.82rem 1.1rem;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--txt2);font-size:.8rem;}
+.pbtn-skip:hover{color:var(--rose);border-color:rgba(248,113,113,.3);}
+[data-theme=light] .pbtn-skip{background:rgba(0,0,0,.03);}
+
+/* ══════════════════════════════════════════
+   DICTIONARY
+══════════════════════════════════════════ */
+.dict-tabs{display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:11px;padding:3px;width:fit-content;margin-bottom:1.25rem;}
+[data-theme=light] .dict-tabs{background:rgba(0,0,0,.04);}
+.dtab{padding:.32rem .85rem;border:none;background:none;color:var(--txt2);font-size:.76rem;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;transition:all .2s;}
+.dtab.on{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.2);}
+.dict-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem;animation:fadeUp .35s ease both;}
+.di{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:.8rem .65rem;text-align:center;cursor:pointer;transition:all .2s;}
+.di:hover{border-color:rgba(56,189,248,.3);transform:translateY(-2px);}
+.di.playing{border-color:rgba(56,189,248,.55);background:rgba(56,189,248,.06);animation:pop .2s ease;}
+.di-ch{font-size:1.4rem;font-weight:700;font-family:'JetBrains Mono',monospace;margin-bottom:.25rem;}
+.di-ch.heb{font-family:'Frank Ruhl Libre',serif;font-size:1.6rem;}
+.di-syms{display:flex;gap:4px;align-items:center;justify-content:center;margin-bottom:.25rem;min-height:9px;}
+.di-s.dot{width:6px;height:6px;border-radius:50%;background:var(--dot-col);}
+.di-s.dash{width:17px;height:6px;border-radius:3px;background:var(--dash-col);}
+.di-code{font-family:'JetBrains Mono',monospace;font-size:.64rem;color:var(--txt2);letter-spacing:.1em;}
+
+/* Responsive */
+@media(max-width:600px){
+  .feat-grid,.level-grid,.tap-scores,.hud{grid-template-columns:repeat(2,1fr);}
+  .hud{grid-template-columns:repeat(3,1fr);}
+  .dict-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr));}
+  .opts{gap:.4rem;}
+  .tap-target-card{flex-direction:column;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="starCanvas"></canvas>
+<div class="glow a"></div>
+<div class="glow b"></div>
+<div id="toast"></div>
+
+<!-- ─── NAV ─── -->
+<nav>
+  <button class="logo" onclick="goPage('home')">
+    <span class="logo-dot"></span>MorseWave
+  </button>
+  <div class="nav-tabs">
+    <button class="nt" onclick="goPage('home')">Home</button>
+    <button class="nt" onclick="goPage('learn')">Learn</button>
+    <button class="nt" onclick="goPage('tap')">Telegraph</button>
+    <button class="nt" onclick="goPage('practice')">Practice</button>
+    <button class="nt" onclick="goPage('dict')">Dictionary</button>
+  </div>
+  <div class="nav-actions">
+    <button class="icon-btn" onclick="toggleLang()" title="Toggle language / החלף שפה">🌐</button>
+    <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</button>
+  </div>
+</nav>
+
+<!-- ─── HOME ─── -->
+<div id="page-home" class="page on">
+  <div class="hero">
+    <div class="hero-badge">✦ MORSE WAVE 2.0 — UPGRADED</div>
+    <h1>Learn Morse Code<br><span class="grad">the right way.</span></h1>
+    <p class="hero-sub">7-level curriculum · Spaced repetition · Hebrew & English · Telegraph tap key · Pure Web Audio API</p>
+    <div class="hero-btns">
+      <button class="btn-prime" onclick="goPage('learn')">Start Learning →</button>
+      <button class="btn-ghost" onclick="goPage('tap')">⚡ Try Telegraph</button>
+    </div>
+    <div class="morse-strip">
+      <div class="mss dot"></div><div class="mss dash"></div><div class="mss dot"></div>
+      <div class="mss dot"></div><div class="mss dot"></div><div class="mss dash"></div>
+      <div class="mss dot"></div><div class="mss dash"></div><div class="mss dash"></div><div class="mss dot"></div>
+    </div>
+  </div>
+  <div class="feat-grid">
+    <div class="feat" onclick="goPage('learn')">
+      <div class="feat-icon">📚</div>
+      <h3>7-Level Progression</h3>
+      <p>Guided curriculum from E&T to full Hebrew. Unlock levels as you master each stage.</p>
+      <span class="feat-tag">STRUCTURED COURSE</span>
+    </div>
+    <div class="feat" onclick="goPage('learn')" style="--acc:var(--mint)">
+      <div class="feat-icon" style="background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.15)">🧠</div>
+      <h3>Spaced Repetition</h3>
+      <p>Tracks weak letters and surfaces them more often — science-backed memory system.</p>
+      <span class="feat-tag" style="background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.15);color:var(--mint)">SRS ENGINE</span>
+    </div>
+    <div class="feat" onclick="goPage('tap')" style="--acc:var(--gold)">
+      <div class="feat-icon" style="background:rgba(251,186,24,.08);border-color:rgba(251,186,24,.15)">⚡</div>
+      <h3>Telegraph Tap Key</h3>
+      <p>Real interactive key — click or press Space. Decodes 1.2s after your last tap.</p>
+      <span class="feat-tag" style="background:rgba(251,186,24,.07);border-color:rgba(251,186,24,.15);color:var(--gold)">TAP TO SEND</span>
+    </div>
+    <div class="feat" onclick="goPage('dict')" style="--acc:var(--violet)">
+      <div class="feat-icon" style="background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.15)">🔤</div>
+      <h3>Full Dictionary</h3>
+      <p>Hebrew, English A–Z, 0–9, and punctuation — click any character to hear it.</p>
+      <span class="feat-tag" style="background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.15);color:var(--violet)">עברית / EN</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── LEARN ─── -->
+<div id="page-learn" class="page">
+  <main>
+    <div class="level-track" id="levelTrack"></div>
+    <div class="level-meta">
+      <div><div class="lm-title" id="lmTitle">Choose a Level</div><div class="lm-sub" id="lmSub">Select below to begin</div></div>
+      <div class="lm-badge" id="lmBadge">7 LEVELS</div>
+    </div>
+    <div id="levelSelector">
+      <div class="level-grid" id="levelGrid"></div>
+    </div>
+    <div id="lessonArea" style="display:none">
+      <div class="learn-card">
+        <div class="lc-head">
+          <span class="phase-pill" id="phasePill">INTRO</span>
+          <span class="step-info" id="stepInfo">Step 1 / 1</span>
+        </div>
+        <div class="lstage" id="lstage"></div>
+        <div class="lc-foot">
+          <button class="lbtn ghost" id="lBackBtn" onclick="lBack()">← Back</button>
+          <button class="lbtn prime" id="lNextBtn" onclick="lNext()" disabled>Continue →</button>
+        </div>
+      </div>
+      <div class="srs-box">
+        <div class="srs-title">🧠 Spaced Repetition — Your Progress</div>
+        <div class="srs-chips" id="srsChips"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ─── TELEGRAPH ─── -->
+<div id="page-tap" class="page">
+  <main>
+    <h2 style="font-size:1.4rem;font-weight:700;margin-bottom:.3rem">Telegraph Tap Key</h2>
+    <p style="color:var(--txt2);font-size:.86rem;margin-bottom:1.5rem">Short press = dot · Long press = dash · Auto-decodes after 1.2s silence</p>
+    <div class="tap-layout">
+
+      <div class="tap-target-card">
+        <div class="tap-letter" id="tapLetter">E</div>
+        <div class="tap-right">
+          <div class="tap-code" id="tapCode">·</div>
+          <div class="tap-prog" id="tapProg"></div>
+          <div class="tap-fb" id="tapFb"></div>
+        </div>
+      </div>
+
+      <div class="key-wrap">
+        <div class="key-svg-container" id="telegraph">
+          <svg viewBox="0 0 280 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="22" y="145" width="236" height="26" rx="7" fill="#162035" stroke="rgba(56,189,248,.2)" stroke-width="1.2"/>
+            <rect x="120" y="105" width="22" height="45" rx="3" fill="#1c2e4a" stroke="rgba(56,189,248,.18)" stroke-width="1"/>
+            <rect x="50" y="112" width="15" height="36" rx="3" fill="#1c2e4a" stroke="rgba(56,189,248,.18)" stroke-width="1"/>
+            <circle cx="57" cy="112" r="5" fill="#38bdf8" opacity=".75"/>
+            <g class="key-arm-g" id="keyArm">
+              <rect x="42" y="126" width="196" height="11" rx="5.5" fill="#243550" stroke="rgba(100,180,255,.2)" stroke-width="1.2"/>
+              <circle cx="224" cy="131" r="15" fill="#1a3055" stroke="rgba(56,189,248,.38)" stroke-width="1.8"/>
+              <circle cx="224" cy="131" r="9" fill="#243550"/>
+              <circle cx="224" cy="131" r="4.5" fill="#38bdf8" opacity=".65"/>
+              <line x1="95" y1="126" x2="95" y2="116" stroke="rgba(56,189,248,.28)" stroke-width="1.8" stroke-dasharray="3,2"/>
+            </g>
+            <circle cx="57" cy="135" r="5.5" fill="#38bdf8" opacity="0" id="contactGlow"/>
+            <text x="141" y="175" text-anchor="middle" fill="rgba(100,180,255,.3)" font-size="8.5" font-family="JetBrains Mono, monospace" letter-spacing="1">MORSE TELEGRAPH</text>
+          </svg>
+        </div>
+        <div class="key-hint">Press &amp; hold: <kbd>Space</kbd> or <kbd>K</kbd> · Or tap the key above</div>
+      </div>
+
+      <div class="tap-wpm" id="tapWpmSeg">
+        <button class="wpm-btn on" data-wpm="8" onclick="setTapWpm(this)">Slow</button>
+        <button class="wpm-btn" data-wpm="14" onclick="setTapWpm(this)">Medium</button>
+        <button class="wpm-btn" data-wpm="22" onclick="setTapWpm(this)">Fast</button>
+      </div>
+
+      <!-- Free-decode display -->
+      <div class="tap-decode">
+        <div class="td-label">Live decode (free-tap mode)</div>
+        <div class="td-content" id="tdSymbols">—</div>
+        <div class="td-word" id="tdWord"></div>
+      </div>
+
+      <div class="tap-scores">
+        <div class="tscore"><div class="tscore-v" id="tapC">0</div><div class="tscore-l">Correct</div></div>
+        <div class="tscore"><div class="tscore-v" id="tapStr">0</div><div class="tscore-l">Streak</div></div>
+        <div class="tscore"><div class="tscore-v" id="tapTot">0</div><div class="tscore-l">Total</div></div>
+      </div>
+      <div class="tap-btns">
+        <button class="tap-btn ghost" onclick="tapSkip()">Skip</button>
+        <button class="tap-btn prime" onclick="tapPlayTarget()">▶ Play Target</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ─── PRACTICE ─── -->
+<div id="page-practice" class="page">
+  <main>
+    <div class="hud">
+      <div class="hud-cell c">
+        <div class="hud-icon">✓</div>
+        <div><div class="hud-label">Correct</div><div class="hud-val" id="hudC">0</div></div>
+      </div>
+      <div class="hud-cell s">
+        <div class="hud-icon">🔥</div>
+        <div><div class="hud-label">Streak</div><div class="hud-val" id="hudS">0</div></div>
+      </div>
+      <div class="hud-cell w">
+        <div class="hud-icon">✗</div>
+        <div><div class="hud-label">Wrong</div><div class="hud-val" id="hudW">0</div></div>
+      </div>
+    </div>
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="rnd-meta"><div class="rnd-lbl">Question</div><div class="rnd-num" id="pRound">#001</div></div>
+        <div class="segs">
+          <div class="seg" id="modeSeg">
+            <button class="sbtn on" data-mode="letters" onclick="setPMode(this)">A–Z</button>
+            <button class="sbtn" data-mode="numbers" onclick="setPMode(this)">0–9</button>
+            <button class="sbtn" data-mode="heb" onclick="setPMode(this)">אבג</button>
+            <button class="sbtn" data-mode="mixed" onclick="setPMode(this)">Mix</button>
+          </div>
+          <div class="seg" id="speedSeg">
+            <button class="sbtn on" data-wpm="8" onclick="setPWpm(this)">Slow</button>
+            <button class="sbtn" data-wpm="14" onclick="setPWpm(this)">Med</button>
+            <button class="sbtn" data-wpm="22" onclick="setPWpm(this)">Fast</button>
+          </div>
+        </div>
+      </div>
+      <div class="pstage">
+        <div class="stg-lbl">Listen and decode</div>
+        <div class="morse-vis" id="pVis"></div>
+        <div class="morse-txt" id="pMorseTxt">· · · ·</div>
+        <button class="pplay-btn" id="pPlayBtn" onclick="pPlay()">
+          <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg>
+          <span id="pPlayTxt">Play Signal</span>
+        </button>
+      </div>
+      <div class="input-sec">
+        <div class="inp-hd">
+          <span>Your answer</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.66rem">Enter to check</span>
+        </div>
+        <input type="text" id="pAns" class="ans-inp" placeholder="?" maxlength="2"
+          autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      </div>
+      <div class="pfb" id="pFb">
+        <div class="pfb-inner">
+          <div class="pfb-ic" id="pFbIc"></div>
+          <div><div class="pfb-title" id="pFbTitle"></div><div class="pfb-sub" id="pFbSub"></div></div>
+        </div>
+      </div>
+      <div class="pctrl">
+        <button class="pbtn pbtn-check" id="pCheckBtn" onclick="pCheck()">✓ Check</button>
+        <button class="pbtn pbtn-next" id="pNextBtn" style="display:none" onclick="pNext()">Next →</button>
+        <button class="pbtn pbtn-skip" onclick="pSkip()">Skip</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ─── DICTIONARY ─── -->
+<div id="page-dict" class="page">
+  <main>
+    <h2 style="font-size:1.45rem;font-weight:700;margin-bottom:.35rem">Morse Dictionary</h2>
+    <p style="color:var(--txt2);font-size:.85rem;margin-bottom:1.1rem">Tap any character to hear it played.</p>
+    <div class="dict-tabs">
+      <button class="dtab on" onclick="dictTab(this,'en')">English A–Z + 0–9</button>
+      <button class="dtab" onclick="dictTab(this,'heb')">Hebrew אבג</button>
+      <button class="dtab" onclick="dictTab(this,'punc')">Punctuation</button>
+    </div>
+    <div class="dict-grid" id="dictGrid"></div>
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── MORSE DATA ──
+const MORSE_EN = {
+  A:'.-', B:'-...', C:'-.-.', D:'-..', E:'.', F:'..-.', G:'--.', H:'....', I:'..', J:'.---',
+  K:'-.-', L:'.-..', M:'--', N:'-.', O:'---', P:'.--.', Q:'--.-', R:'.-.', S:'...', T:'-',
+  U:'..-', V:'...-', W:'.--', X:'-..-', Y:'-.--', Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.'
+};
+
+const MORSE_HEB = {
+  'א':'.-','ב':'-...','ג':'--.','ד':'-..','ה':'---','ו':'.','ז':'--..','ח':'....','ט':'..-','י':'..',
+  'כ':'-.-','ל':'.-..','מ':'--','נ':'-.','ס':'-.-.','ע':'.---','פ':'.--.','צ':'.--',
+  'ק':'--.-','ר':'.-.','ש':'...','ת':'-'
+};
+
+const MORSE_PUNC = {
+  '.':'.-.-.-', ',':'--..--', '?':'..--..', '!':'-.-.--', '/':'-..-.', '(':'-.--.',
+  ')':'-.--.-', '&':'.-...', ':':'---...', ';':'-.-.-.', '=':'-...-', '+':'.-.-.',
+  '-':'-....-', '_':'..--.-', '"':'.-..-.', '$':'...-..-', '@':'.--.-.',
+};
+
+const MORSE_ALL = Object.assign({}, MORSE_EN, MORSE_HEB, MORSE_PUNC);
+
+function getMorse(ch) {
+  return MORSE_ALL[ch] || MORSE_ALL[ch.toUpperCase()] || null;
+}
+function fmtCode(code) {
+  return code.split('').map(s => s === '.' ? '·' : '−').join(' ');
+}
+
+// ── REVERSE LOOKUP ──
+const MORSE_REV = {};
+for (const [ch, code] of Object.entries(MORSE_ALL)) MORSE_REV[code] = ch;
+function decodeCode(code) { return MORSE_REV[code] || '?'; }
+
+// ── THEME ──
+function toggleTheme() {
+  const light = document.body.getAttribute('data-theme') === 'light';
+  document.body.setAttribute('data-theme', light ? '' : 'light');
+  document.getElementById('themeBtn').textContent = light ? '🌙' : '☀️';
+  localStorage.setItem('mw_theme', light ? '' : 'light');
+}
+(function applyTheme() {
+  const t = localStorage.getItem('mw_theme');
+  if (t === 'light') { document.body.setAttribute('data-theme','light'); document.getElementById('themeBtn').textContent='☀️'; }
+})();
+
+// ── LANGUAGE ──
+let currentLang = localStorage.getItem('mw_lang') || 'en';
+function toggleLang() {
+  currentLang = currentLang === 'en' ? 'heb' : 'en';
+  localStorage.setItem('mw_lang', currentLang);
+  toast(currentLang === 'heb' ? '🇮🇱 מצב עברית' : '🇺🇸 English mode', 'info');
+  if (currentPage === 'practice') { P.mode = currentLang === 'heb' ? 'heb' : 'letters'; pNext(); }
+}
+
+// ── NAVIGATION ──
+let currentPage = 'home';
+const pageInits = {};
+function goPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.getElementById('page-' + id).classList.add('on');
+  document.querySelectorAll('.nt').forEach(t => {
+    const map = {home:'Home',learn:'Learn',tap:'Telegraph',practice:'Practice',dict:'Dictionary'};
+    t.classList.toggle('on', t.textContent.trim() === map[id]);
+  });
+  currentPage = id;
+  if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); }
+}
+
+// ── TOAST ──
+let _toastTimer;
+function toast(msg, type='ok', dur=2000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.className = 'toast', dur);
+}
+
+// ── INPUT GUARD — key event block when input is focused ──
+// Central helper — returns true if a real input/textarea has focus
+function inputHasFocus() {
+  const tag = document.activeElement && document.activeElement.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+// ── SRS DATA ──
+let srs = JSON.parse(localStorage.getItem('mw_srs') || '{}');
+function srsScore(ch) { return srs[ch] || 0; }
+function srsRecord(ch, correct) {
+  srs[ch] = Math.max(-8, Math.min(12, (srs[ch] || 0) + (correct ? 1 : -2)));
+  localStorage.setItem('mw_srs', JSON.stringify(srs));
+}
+
+// ── AUDIO ENGINE ──
+let _actx = null;
+// Strictly manage oscillators to prevent WebAudio memory leaks
+const _activeOscs = new Set();
+function getACtx() {
+  if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_actx.state === 'suspended') _actx.resume();
+  return _actx;
+}
+function beep(freq, dur, vol=0.35) {
+  return new Promise(res => {
+    const ctx = getACtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    _activeOscs.add(o);
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = freq;
+    const t = ctx.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.008);
+    g.gain.setValueAtTime(vol, t + Math.max(dur - 0.01, 0.005));
+    g.gain.linearRampToValueAtTime(0, t + dur);
+    o.start(t); o.stop(t + dur + 0.025);
+    o.onended = () => { _activeOscs.delete(o); res(); };
+  });
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function wuMs(wpm) { return 1200 / wpm; }
+function stopAllOscs() {
+  for (const o of _activeOscs) { try { o.stop(); } catch(e){} }
+  _activeOscs.clear();
+}
+
+let _isPlaying = false;
+async function playCode(code, wpm=14, freq=680) {
+  stopAllOscs();
+  _isPlaying = true;
+  const u = wuMs(wpm);
+  for (let i = 0; i < code.length; i++) {
+    if (!_isPlaying) break;
+    await beep(freq, (code[i]==='.'?1:3)*u/1000);
+    if (!_isPlaying) break;
+    if (i < code.length - 1) await sleep(u);
+  }
+  _isPlaying = false;
+}
+
+// ── STARS ──
+(function () {
+  const c = document.getElementById('starCanvas');
+  const ctx = c.getContext('2d');
+  let stars = [];
+  function resize() { c.width = innerWidth; c.height = innerHeight; }
+  window.addEventListener('resize', resize);
+  resize();
+  stars = Array.from({length:130}, () => ({
+    x: Math.random()*c.width, y: Math.random()*c.height,
+    r: Math.random()*1.1+0.2, o: Math.random(), s: Math.random()*0.003+0.001
+  }));
+  (function draw() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    stars.forEach(s => {
+      s.o += s.s; if (s.o>1||s.o<0) s.s*=-1;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(150,210,255,${s.o*0.55})`; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  })();
+})();
+
+/* ══════════════════════════════════════════
+   LEARN
+══════════════════════════════════════════ */
+const LEVELS = [
+  {num:1, name:'First Signals',   sub:'E and T — one symbol each.',                               chars:['E','T']},
+  {num:2, name:'Building Blocks', sub:'I, A, N, M — two-symbol codes built on E and T.',          chars:['I','A','N','M']},
+  {num:3, name:'Three & Four',    sub:'S, U, R, D, K, G, W — longer patterns.',                   chars:['S','U','R','D','K','G','W']},
+  {num:4, name:'Full Alphabet',   sub:'B C F H J L P Q V X Y Z — completing A–Z.',                chars:['B','C','F','H','J','L','P','Q','V','X','Y','Z']},
+  {num:5, name:'Numbers 0–9',     sub:'Every digit is exactly five symbols.',                      chars:['0','1','2','3','4','5','6','7','8','9']},
+  {num:6, name:'Hebrew א–מ',      sub:'Alef through Mem — first half of the Hebrew alphabet.',     chars:['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ל','מ'], heb:true},
+  {num:7, name:'Hebrew נ–ת',      sub:'Nun through Tav — complete the Hebrew Morse alphabet.',     chars:['נ','ס','ע','פ','צ','ק','ר','ש','ת'], heb:true},
+];
+
+let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false };
+let lvlDone = JSON.parse(localStorage.getItem('mw_lvls') || '{}');
+
+function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem('mw_lvls', JSON.stringify(lvlDone)); }
+
+function buildSteps(lv) {
+  const s = [];
+  s.push({type:'intro'});
+  lv.chars.forEach(ch => {
+    s.push({type:'flash', ch});
+    s.push({type:'recog', ch});
+    s.push({type:'recall', ch});
+  });
+  // SRS weak review
+  const weak = lv.chars.filter(ch => srsScore(ch) < 0);
+  weak.forEach(ch => s.push({type:'srs', ch}));
+  s.push({type:'done'});
+  return s;
+}
+
+function initLearn() {
+  renderTrack();
+  renderLevelGrid();
+}
+
+function renderTrack() {
+  const el = document.getElementById('levelTrack');
+  el.innerHTML = LEVELS.map((_, i) => `<div class="lt${lvlDone[i]?' done':i===LP.lvlIdx?' cur':''}" id="lt${i}"></div>`).join('');
+}
+
+function renderLevelGrid() {
+  document.getElementById('levelSelector').style.display = 'block';
+  document.getElementById('lessonArea').style.display = 'none';
+  document.getElementById('lmTitle').textContent = 'Choose a Level';
+  document.getElementById('lmSub').textContent = 'Pick up where you left off';
+  document.getElementById('lmBadge').textContent = '7 LEVELS';
+  const g = document.getElementById('levelGrid');
+  g.innerHTML = LEVELS.map((lv, i) => {
+    const done = !!lvlDone[i];
+    const locked = i > 0 && !lvlDone[i-1] && !done;
+    const isHeb = !!lv.heb;
+    return `<div class="lv${done?' done':''}${locked?' locked':''}"
+      onclick="${locked?'toast(\'Complete Level '+(i)+' first\',\'info\')':'startLevel('+i+')'}"
+    >
+      <div class="lv-num">L${lv.num}</div>
+      <div class="lv-name">${lv.name}</div>
+      <div class="lv-chars${isHeb?' heb':''}">${lv.chars.join(' ')}</div>
+      <div class="lv-star">${done?'✦':locked?'🔒':''}</div>
+      <div class="lv-bar"><div class="lv-fill" style="width:${done?100:0}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function startLevel(i) {
+  LP.lvlIdx = i; LP.stepIdx = 0; LP.steps = buildSteps(LEVELS[i]); LP.answered = false;
+  document.getElementById('levelSelector').style.display = 'none';
+  document.getElementById('lessonArea').style.display = 'block';
+  const lv = LEVELS[i];
+  document.getElementById('lmTitle').textContent = `Level ${lv.num}: ${lv.name}`;
+  document.getElementById('lmSub').textContent = lv.sub;
+  document.getElementById('lmBadge').textContent = `LEVEL ${lv.num} / 7`;
+  renderTrack();
+  renderSrsChips();
+  renderStep();
+}
+
+function renderSrsChips() {
+  const lv = LEVELS[LP.lvlIdx];
+  document.getElementById('srsChips').innerHTML = lv.chars.map(ch => {
+    const sc = srsScore(ch);
+    const cls = sc >= 3 ? 'strong' : sc < 0 ? 'weak' : 'new';
+    const icon = sc >= 3 ? '✓' : sc < 0 ? '↩' : '·';
+    return `<span class="chip ${cls}${lv.heb?' heb':''}">${icon} ${ch}</span>`;
+  }).join('');
+}
+
+function renderStep() {
+  const step = LP.steps[LP.stepIdx];
+  document.getElementById('stepInfo').textContent = `Step ${LP.stepIdx+1} / ${LP.steps.length}`;
+  document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type).toUpperCase();
+  document.getElementById('lNextBtn').disabled = true;
+  document.getElementById('lBackBtn').style.visibility = LP.stepIdx > 0 ? 'visible' : 'hidden';
+  const st = document.getElementById('lstage');
+  LP.answered = false;
+  st.classList.add('fade');
+  setTimeout(() => {
+    st.classList.remove('fade');
+    switch (step.type) {
+      case 'intro':  renderIntro(); break;
+      case 'flash':  renderFlash(step.ch); break;
+      case 'recog':  renderRecog(step.ch); break;
+      case 'recall': renderRecall(step.ch); break;
+      case 'srs':    renderSRS(step.ch); break;
+      case 'done':   renderDone(); break;
+    }
+  }, 230);
+}
+
+function renderIntro() {
+  const lv = LEVELS[LP.lvlIdx];
+  document.getElementById('lstage').innerHTML = `<div class="intro-wrap">
+    <div class="intro-lnum">LEVEL ${lv.num} OF 7</div>
+    <div class="intro-title">${lv.name}</div>
+    <div class="intro-sub">${lv.sub}</div>
+    <div class="intro-chips">
+      ${lv.chars.map(ch => `<span class="ichip${lv.heb?' heb':''}">${ch}<span class="icode">${fmtCode(getMorse(ch))}</span></span>`).join('')}
+    </div>
+  </div>`;
+  document.getElementById('lNextBtn').disabled = false;
+}
+
+function renderFlash(ch) {
+  const code = getMorse(ch);
+  const isHeb = LEVELS[LP.lvlIdx].heb;
+  const syms = code.split('').map(s=>`<div class="fc-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
+  document.getElementById('lstage').innerHTML = `<div style="text-align:center">
+    <div style="font-size:.78rem;color:var(--txt2);margin-bottom:.85rem">Tap the card to flip — then listen</div>
+    <div class="fc-wrap"><div class="fc" id="lfc">
+      <div class="fc-face fc-front">
+        <div class="fc-letter${isHeb?' heb':''}">${ch}</div>
+        <div class="fc-hint">tap to flip</div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-syms">${syms}</div>
+        <div class="fc-code">${fmtCode(code)}</div>
+        <div class="fc-letter${isHeb?' heb':''}" style="font-size:1.5rem;opacity:.5">${ch}</div>
+      </div>
+    </div></div>
+    <button class="play-btn" onclick="playCode('${code}')">
+      <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Hear it
+    </button>
+  </div>`;
+  document.getElementById('lfc').addEventListener('click', () => {
+    const fc = document.getElementById('lfc');
+    fc.classList.toggle('flipped');
+    if (fc.classList.contains('flipped')) { document.getElementById('lNextBtn').disabled=false; playCode(code); }
+  });
+}
+
+function buildOptPool(ch) {
+  const lv = LEVELS[LP.lvlIdx];
+  let pool = [...lv.chars];
+  if (pool.length < 4) {
+    for (let li = LP.lvlIdx-1; li >= 0 && pool.length < 8; li--) pool = pool.concat(LEVELS[li].chars);
+  }
+  const opts = [ch];
+  const shuffled = pool.filter(c=>c!==ch).sort(()=>Math.random()-.5);
+  for (const c of shuffled) { if (opts.length >= 4) break; opts.push(c); }
+  return opts.sort(()=>Math.random()-.5);
+}
+
+function renderRecog(ch) {
+  const code = getMorse(ch);
+  const isHeb = LEVELS[LP.lvlIdx].heb;
+  const syms = code.split('').map(s=>`<div class="q-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
+  const opts = buildOptPool(ch);
+  document.getElementById('lstage').innerHTML = `<div style="text-align:center;width:100%">
+    <div class="q-prompt">What letter is this Morse code?</div>
+    <div class="q-syms">${syms}</div>
+    <button class="play-btn" onclick="playCode('${code}')">
+      <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Play
+    </button>
+    <div class="opts" id="lOpts">
+      ${opts.map(o=>`<button class="opt${isHeb?' heb':''}" data-ch="${o}" onclick="recogAns('${ch}',this)">${o}</button>`).join('')}
+    </div>
+    <div class="lfb" id="lFb"></div>
+  </div>`;
+  setTimeout(() => playCode(code), 350);
+}
+
+function recogAns(correct, btn) {
+  if (LP.answered) return; LP.answered = true;
+  const ok = btn.dataset.ch === correct;
+  document.querySelectorAll('#lOpts .opt').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.ch === correct) b.classList.add('correct');
+    else if (b === btn && !ok) b.classList.add('wrong');
+  });
+  showLFb(ok, correct);
+  srsRecord(correct, ok); renderSrsChips();
+  document.getElementById('lNextBtn').disabled = false;
+  if (ok) playCode(getMorse(correct));
+}
+
+function renderRecall(ch) {
+  const code = getMorse(ch);
+  const isHeb = LEVELS[LP.lvlIdx].heb;
+  const syms = code.split('').map(s=>`<div class="q-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
+  document.getElementById('lstage').innerHTML = `<div style="text-align:center;width:100%">
+    <div class="q-prompt">Type the letter for this Morse code</div>
+    <div class="q-syms">${syms}</div>
+    <button class="play-btn" onclick="playCode('${code}')">
+      <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Play
+    </button>
+    <div class="type-wrap">
+      <input type="text" id="lTypeInp" class="type-inp${isHeb?' heb':''}" maxlength="2"
+        autocomplete="off" autocorrect="off" spellcheck="false"
+        autocapitalize="${isHeb?'off':'characters'}" placeholder="?">
+    </div>
+    <div class="lfb" id="lFb"></div>
+  </div>`;
+  const inp = document.getElementById('lTypeInp');
+  if (!isHeb) inp.addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,1); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); checkRecall(ch); } });
+  setTimeout(() => { inp.focus(); playCode(code); }, 280);
+}
+
+function checkRecall(correct) {
+  if (LP.answered) return;
+  const inp = document.getElementById('lTypeInp');
+  const val = inp.value.trim();
+  if (!val) return;
+  LP.answered = true;
+  const isHeb = LEVELS[LP.lvlIdx].heb;
+  const ok = isHeb ? val === correct : val.toUpperCase() === correct.toUpperCase();
+  inp.disabled = true; inp.className = `type-inp${LEVELS[LP.lvlIdx].heb?' heb':''} ${ok?'ok':'bad'}`;
+  showLFb(ok, correct);
+  srsRecord(correct, ok); renderSrsChips();
+  document.getElementById('lNextBtn').disabled = false;
+  if (ok) playCode(getMorse(correct));
+}
+
+function renderSRS(ch) {
+  renderRecall(ch); // same UI, phase pill already says REVIEW
+}
+
+function showLFb(ok, ch) {
+  const fb = document.getElementById('lFb');
+  if (!fb) return;
+  fb.className = 'lfb show ' + (ok?'ok':'bad');
+  fb.textContent = ok ? `✓ Correct! ${ch} = ${fmtCode(getMorse(ch))}` : `✗ Answer: ${ch} = ${fmtCode(getMorse(ch))}`;
+}
+
+function renderDone() {
+  const lv = LEVELS[LP.lvlIdx];
+  saveLvl(LP.lvlIdx, true);
+  const strong = lv.chars.filter(ch => srsScore(ch) >= 3).length;
+  document.getElementById('lstage').innerHTML = `<div class="complete-wrap">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">Level ${lv.num} Complete!</div>
+    <div class="complete-sub">Learned: <strong>${lv.chars.join(', ')}</strong></div>
+    <div class="xp-row">
+      <div class="xp"><div class="xp-v">${lv.chars.length}</div><div class="xp-l">New chars</div></div>
+      <div class="xp"><div class="xp-v">${strong}</div><div class="xp-l">Strong</div></div>
+      <div class="xp"><div class="xp-v">${lv.chars.length-strong}</div><div class="xp-l">Review more</div></div>
+    </div>
+  </div>`;
+  const nb = document.getElementById('lNextBtn');
+  nb.disabled = false;
+  nb.textContent = LP.lvlIdx < LEVELS.length-1 ? 'Next Level →' : '🏆 All Done!';
+}
+
+function lNext() {
+  const step = LP.steps[LP.stepIdx];
+  if (step.type === 'done') {
+    if (LP.lvlIdx < LEVELS.length-1) startLevel(LP.lvlIdx+1);
+    else renderLevelGrid();
+    renderTrack();
+    return;
+  }
+  LP.stepIdx = Math.min(LP.stepIdx+1, LP.steps.length-1);
+  renderStep();
+}
+
+function lBack() {
+  if (LP.stepIdx > 0) { LP.stepIdx--; renderStep(); }
+  else renderLevelGrid();
+}
+
+/* ══════════════════════════════════════════
+   TELEGRAPH
+══════════════════════════════════════════ */
+const TAP = {
+  wpm: 8,
+  pressed: false, pressStart: 0,
+  tapped: [],
+  target: 'E', targetCode: '.',
+  correct: 0, streak: 0, total: 0,
+  // live decode state
+  liveSymbols: '',
+  liveDecodeTimer: null,
+  liveWord: '',
+  // oscillator for live tone
+  _osc: null, _gain: null,
+  // challenge mode flag
+  mode: 'challenge' // 'challenge' | 'free'
+};
+
+function initTap() {
+  tapNextTarget();
+  updateTapScores();
+}
+
+function tapPool() {
+  if (currentLang === 'heb') return Object.keys(MORSE_HEB);
+  return Object.keys(MORSE_EN).filter(k => /[A-Z]/.test(k));
+}
+
+function tapNextTarget() {
+  const pool = tapPool();
+  const weak = pool.filter(ch => srsScore(ch) < 0);
+  const src = weak.length > 0 && Math.random() < 0.38 ? weak : pool;
+  TAP.target = src[Math.floor(Math.random()*src.length)];
+  TAP.targetCode = getMorse(TAP.target) || '.';
+  TAP.tapped = [];
+  const isHeb = /[\u05D0-\u05EA]/.test(TAP.target);
+  const el = document.getElementById('tapLetter');
+  el.className = 'tap-letter' + (isHeb?' heb':'');
+  el.textContent = TAP.target;
+  document.getElementById('tapCode').textContent = fmtCode(TAP.targetCode);
+  document.getElementById('tapFb').textContent = '';
+  document.getElementById('tapFb').className = 'tap-fb';
+  renderTapProg();
+}
+
+function renderTapProg() {
+  document.getElementById('tapProg').innerHTML = TAP.targetCode.split('').map((s, i) => {
+    const on = i < TAP.tapped.length ? ' on' : '';
+    return `<div class="tp ${s==='.'?'dot':'dash'}${on}"></div>`;
+  }).join('');
+}
+
+function tapPressStart() {
+  if (TAP.pressed) return;
+  TAP.pressed = true;
+  TAP.pressStart = Date.now();
+  document.getElementById('keyArm').classList.add('pressed');
+  startKeyTone();
+}
+
+function tapPressEnd() {
+  if (!TAP.pressed) return;
+  TAP.pressed = false;
+  document.getElementById('keyArm').classList.remove('pressed');
+  stopKeyTone();
+  const dur = Date.now() - TAP.pressStart;
+  const threshold = wuMs(TAP.wpm) * 1.8;
+  const sym = dur < threshold ? '.' : '-';
+  // Register in challenge
+  registerTapSym(sym);
+  // Register in free decode
+  registerLiveSym(sym);
+}
+
+function startKeyTone() {
+  const ctx = getACtx();
+  stopKeyTone();
+  TAP._osc = ctx.createOscillator();
+  TAP._gain = ctx.createGain();
+  TAP._osc.connect(TAP._gain); TAP._gain.connect(ctx.destination);
+  TAP._osc.type = 'sine'; TAP._osc.frequency.value = 680;
+  TAP._gain.gain.setValueAtTime(0, ctx.currentTime);
+  TAP._gain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.008);
+  TAP._osc.start();
+}
+
+function stopKeyTone() {
+  if (TAP._osc) {
+    try {
+      const ctx = getACtx();
+      TAP._gain.gain.setValueAtTime(TAP._gain.gain.value, ctx.currentTime);
+      TAP._gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.012);
+      const o = TAP._osc; setTimeout(() => { try{ o.stop(); }catch(e){} }, 20);
+    } catch(e){}
+    TAP._osc = null; TAP._gain = null;
+  }
+}
+
+function registerTapSym(sym) {
+  // flash contact
+  const g = document.getElementById('contactGlow');
+  g.setAttribute('opacity','0.9');
+  setTimeout(() => g.setAttribute('opacity','0'), sym==='.'?70:190);
+  TAP.tapped.push(sym);
+  renderTapProg();
+  if (TAP.tapped.length >= TAP.targetCode.length) {
+    setTimeout(evalTap, 220);
+  }
+}
+
+function evalTap() {
+  const entered = TAP.tapped.join('');
+  const ok = entered === TAP.targetCode;
+  TAP.total++;
+  const fb = document.getElementById('tapFb');
+  if (ok) {
+    TAP.correct++; TAP.streak++;
+    srsRecord(TAP.target, true);
+    fb.className = 'tap-fb ok'; fb.textContent = `✓ ${TAP.target} — correct!`;
+  } else {
+    TAP.streak = 0;
+    srsRecord(TAP.target, false);
+    fb.className = 'tap-fb bad'; fb.textContent = `✗ ${TAP.target} = ${fmtCode(TAP.targetCode)}`;
+  }
+  updateTapScores();
+  setTimeout(tapNextTarget, 1100);
+}
+
+function updateTapScores() {
+  document.getElementById('tapC').textContent = TAP.correct;
+  document.getElementById('tapStr').textContent = TAP.streak;
+  document.getElementById('tapTot').textContent = TAP.total;
+}
+
+// Free decode (live display)
+function registerLiveSym(sym) {
+  clearTimeout(TAP.liveDecodeTimer);
+  TAP.liveSymbols += sym;
+  document.getElementById('tdSymbols').textContent = fmtCode(TAP.liveSymbols);
+  // After 1.2s silence: decode
+  TAP.liveDecodeTimer = setTimeout(() => {
+    const decoded = decodeCode(TAP.liveSymbols);
+    TAP.liveWord += decoded;
+    document.getElementById('tdWord').textContent = TAP.liveWord;
+    TAP.liveSymbols = '';
+    document.getElementById('tdSymbols').textContent = '—';
+  }, 1200);
+}
+
+function setTapWpm(btn) {
+  TAP.wpm = parseInt(btn.dataset.wpm);
+  document.querySelectorAll('#tapWpmSeg .wpm-btn').forEach(b => b.classList.toggle('on', b===btn));
+}
+
+function tapSkip() { TAP.tapped = []; tapNextTarget(); }
+function tapPlayTarget() { playCode(TAP.targetCode, TAP.wpm); }
+
+// Telegraph key DOM events
+const telegraph = document.getElementById('telegraph');
+telegraph.addEventListener('mousedown', e => { e.preventDefault(); tapPressStart(); });
+telegraph.addEventListener('touchstart', e => { e.preventDefault(); tapPressStart(); }, {passive:false});
+document.addEventListener('mouseup', () => { if (TAP.pressed) tapPressEnd(); });
+document.addEventListener('touchend', () => { if (TAP.pressed) tapPressEnd(); });
+
+// ── GLOBAL KEYBOARD for telegraph — GUARD against input focus ──
+document.addEventListener('keydown', e => {
+  if (inputHasFocus()) return; // ← KEY FIX: don't intercept when typing
+  if ((e.code === 'Space' || e.key === 'k' || e.key === 'K') && currentPage === 'tap') {
+    e.preventDefault();
+    tapPressStart();
+  }
+});
+document.addEventListener('keyup', e => {
+  if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+    if (TAP.pressed) tapPressEnd();
+  }
+});
+
+/* ══════════════════════════════════════════
+   PRACTICE
+══════════════════════════════════════════ */
+const P = {
+  mode:'letters', wpm:8, correct:0, wrong:0, streak:0, round:1,
+  current: null, answered: false, _init: false
+};
+
+function getPool(mode) {
+  if (mode==='letters') return Object.keys(MORSE_EN).filter(k=>/[A-Z]/.test(k));
+  if (mode==='numbers') return Object.keys(MORSE_EN).filter(k=>/[0-9]/.test(k));
+  if (mode==='heb') return Object.keys(MORSE_HEB);
+  return [...Object.keys(MORSE_EN).filter(k=>/[A-Z]/.test(k)), ...Object.keys(MORSE_EN).filter(k=>/[0-9]/.test(k))];
+}
+
+function initPractice() {
+  if (P._init) return; P._init = true;
+  const inp = document.getElementById('pAns');
+  // Enter to check — only when input has focus (safe, no conflict)
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); pCheck(); }
+  });
+  // Auto-uppercase for non-Hebrew
+  inp.addEventListener('input', e => {
+    if (P.mode !== 'heb') e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,1);
+  });
+  pNext();
+}
+
+function pickChar() {
+  const pool = getPool(P.mode);
+  const weak = pool.filter(ch => srsScore(ch) < 0);
+  const src = weak.length > 0 && Math.random() < 0.4 ? weak : pool;
+  return src[Math.floor(Math.random()*src.length)];
+}
+
+function pNext() {
+  P.current = pickChar(); P.answered = false;
+  const code = getMorse(P.current);
+  document.getElementById('pVis').innerHTML = code.split('').map(s=>`<div class="mv-s ${s==='.'?'dot':'dash'}"></div>`).join('');
+  document.getElementById('pMorseTxt').textContent = fmtCode(code);
+  document.getElementById('pRound').textContent = '#' + String(P.round++).padStart(3,'0');
+  const inp = document.getElementById('pAns');
+  inp.value = '';
+  inp.className = 'ans-inp' + (P.mode==='heb'?' heb':'');
+  inp.disabled = false;
+  document.getElementById('pFb').className = 'pfb';
+  document.getElementById('pCheckBtn').style.display = 'flex';
+  document.getElementById('pNextBtn').style.display = 'none';
+  setTimeout(() => { inp.focus(); playCode(code, P.wpm); }, 250);
+}
+
+function pPlay() {
+  const code = getMorse(P.current);
+  if (!code) return;
+  playCode(code, P.wpm);
+}
+
+function pCheck() {
+  if (P.answered) return;
+  const inp = document.getElementById('pAns');
+  const val = inp.value.trim();
+  if (!val) return;
+  P.answered = true;
+  const isHeb = P.mode === 'heb';
+  const ok = isHeb ? val === P.current : val.toUpperCase() === P.current;
+  inp.disabled = true;
+  inp.className = 'ans-inp' + (isHeb?' heb':'') + ' ' + (ok?'ok':'bad');
+  if (ok) { P.correct++; P.streak++; }
+  else { P.wrong++; P.streak = 0; }
+  srsRecord(P.current, ok);
+  document.getElementById('hudC').textContent = P.correct;
+  document.getElementById('hudS').textContent = P.streak;
+  document.getElementById('hudW').textContent = P.wrong;
+  const code = getMorse(P.current);
+  const fb = document.getElementById('pFb');
+  fb.className = 'pfb show ' + (ok?'ok':'bad');
+  document.getElementById('pFbIc').textContent = ok ? '✓' : '✗';
+  document.getElementById('pFbTitle').textContent = ok ? 'Correct!' : 'Wrong!';
+  document.getElementById('pFbSub').innerHTML = ok
+    ? `${P.current} = <b>${fmtCode(code)}</b>  ·  Streak: ${P.streak}`
+    : `Answer: <b>${P.current}</b> = <b>${fmtCode(code)}</b>`;
+  document.getElementById('pCheckBtn').style.display = 'none';
+  document.getElementById('pNextBtn').style.display = 'flex';
+  if (ok) playCode(code, P.wpm);
+}
+
+function pSkip() {
+  P.answered = true; P.streak = 0;
+  document.getElementById('hudS').textContent = P.streak;
+  pNext();
+}
+
+function setPMode(btn) {
+  P.mode = btn.dataset.mode;
+  document.querySelectorAll('#modeSeg .sbtn').forEach(b => b.classList.toggle('on', b===btn));
+  // Reset input class for Hebrew
+  document.getElementById('pAns').className = 'ans-inp' + (P.mode==='heb'?' heb':'');
+  pNext();
+}
+
+function setPWpm(btn) {
+  P.wpm = parseInt(btn.dataset.wpm);
+  document.querySelectorAll('#speedSeg .sbtn').forEach(b => b.classList.toggle('on', b===btn));
+}
+
+/* ══════════════════════════════════════════
+   DICTIONARY
+══════════════════════════════════════════ */
+function dictTab(btn, tab) {
+  document.querySelectorAll('.dtab').forEach(b => b.classList.toggle('on', b===btn));
+  let entries;
+  if (tab==='en') entries = [...Object.entries(MORSE_EN).filter(([k])=>/[A-Z]/.test(k)), ...Object.entries(MORSE_EN).filter(([k])=>/[0-9]/.test(k))];
+  else if (tab==='heb') entries = Object.entries(MORSE_HEB);
+  else entries = Object.entries(MORSE_PUNC);
+  const isHeb = tab==='heb';
+  document.getElementById('dictGrid').innerHTML = entries.map(([ch, code]) => `
+    <div class="di" onclick="dictPlay('${ch.replace(/'/g,'\\\'')}')" title="${fmtCode(code)}">
+      <div class="di-ch${isHeb?' heb':''}">${ch}</div>
+      <div class="di-syms">${code.split('').map(s=>`<div class="di-s ${s==='.'?'dot':'dash'}"></div>`).join('')}</div>
+      <div class="di-code">${fmtCode(code)}</div>
+    </div>`).join('');
+}
+
+function dictPlay(ch) {
+  const code = getMorse(ch); if (!code) return;
+  document.querySelectorAll('.di').forEach(d => d.classList.remove('playing'));
+  // Find by text content
+  for (const d of document.querySelectorAll('.di')) {
+    if (d.querySelector('.di-ch').textContent.trim() === ch) { d.classList.add('playing'); break; }
+  }
+  playCode(code, 14).then(() => document.querySelectorAll('.di').forEach(d => d.classList.remove('playing')));
+}
+
+/* ══════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════ */
+goPage('home');
+// Init dict on first visit
+dictTab(document.querySelector('.dtab.on'), 'en');
+</script>
+</body>
+</html>
