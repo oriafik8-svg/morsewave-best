@@ -812,6 +812,98 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .lv.locked{position:relative;}
 .lv.locked .lv-jump{pointer-events:auto;}
 
+/* ── LANGUAGE LOADING + 3D JUGGLING BEAR ── */
+.lang-load-overlay{position:fixed;inset:0;z-index:600;background:rgba(11,15,26,.96);backdrop-filter:blur(8px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;}
+[data-theme=light] .lang-load-overlay{background:rgba(240,244,248,.97);}
+.lang-load-overlay.show{display:flex;animation:fadeIn .2s ease;}
+.bear-scene{position:relative;width:240px;height:240px;perspective:700px;}
+
+/* Bear body group with subtle bob */
+.bear{position:absolute;bottom:18px;left:50%;width:130px;height:150px;transform:translateX(-50%);transform-style:preserve-3d;animation:bearBob 1.2s ease-in-out infinite;}
+@keyframes bearBob{0%,100%{transform:translateX(-50%) translateY(0) rotateX(4deg);}50%{transform:translateX(-50%) translateY(-6px) rotateX(0deg);}}
+
+.bear-shadow{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);width:96px;height:20px;background:radial-gradient(ellipse,rgba(0,0,0,.45),transparent 70%);border-radius:50%;animation:shadowPulse 1.2s ease-in-out infinite;}
+@keyframes shadowPulse{0%,100%{transform:translateX(-50%) scale(1);opacity:.5;}50%{transform:translateX(-50%) scale(.88);opacity:.35;}}
+
+/* Body — layered radial gradients for 3D roundness */
+.bear-body{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:104px;height:96px;
+  background:radial-gradient(circle at 38% 30%, #c89b6e 0%, #a87b52 38%, #7d5836 78%, #5e4026 100%);
+  border-radius:50% 50% 46% 46%;box-shadow:inset -10px -12px 22px rgba(0,0,0,.35),inset 8px 8px 18px rgba(255,220,180,.25),0 8px 20px rgba(0,0,0,.4);}
+.bear-belly{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);width:58px;height:60px;
+  background:radial-gradient(circle at 45% 35%, #e4c8a4, #cda77e 70%, #bb9268);border-radius:50%;box-shadow:inset -4px -6px 12px rgba(0,0,0,.18);}
+
+/* Head — big rounded 3D sphere */
+.bear-head{position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:88px;height:80px;
+  background:radial-gradient(circle at 38% 28%, #c89b6e 0%, #a87b52 42%, #7d5836 82%, #5e4026 100%);
+  border-radius:50%;z-index:3;box-shadow:inset -8px -10px 20px rgba(0,0,0,.32),inset 6px 6px 16px rgba(255,220,180,.28),0 6px 16px rgba(0,0,0,.35);}
+.bear-ear{position:absolute;top:-6px;width:34px;height:34px;
+  background:radial-gradient(circle at 40% 35%, #a87b52,#6e4d2e);border-radius:50%;box-shadow:inset -3px -3px 8px rgba(0,0,0,.4);}
+.bear-ear.left{left:-6px;}
+.bear-ear.right{right:-6px;}
+.bear-ear span{position:absolute;top:9px;left:9px;width:16px;height:16px;background:#d8b48a;border-radius:50%;box-shadow:inset 1px 1px 3px rgba(0,0,0,.25);}
+.bear-face{position:absolute;inset:0;}
+.bear-eyes{position:absolute;top:26px;left:50%;transform:translateX(-50%);width:46px;display:flex;justify-content:space-between;}
+.bear-eyes span{width:11px;height:13px;background:radial-gradient(circle at 35% 30%,#3a2616,#150d06);border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.2),inset 1px 1px 2px rgba(255,255,255,.5);animation:bearBlink 3.2s infinite;}
+@keyframes bearBlink{0%,93%,100%{transform:scaleY(1);}96%{transform:scaleY(.1);}}
+.bear-snout{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:42px;height:32px;
+  background:radial-gradient(circle at 45% 30%,#e4c8a4,#cda77e 75%,#b88f64);border-radius:50%;display:flex;flex-direction:column;align-items:center;box-shadow:inset -2px -3px 8px rgba(0,0,0,.18);}
+.bear-nose{width:16px;height:11px;background:radial-gradient(circle at 40% 30%,#3a2616,#120a04);border-radius:50%;margin-top:5px;box-shadow:inset 1px 1px 2px rgba(255,255,255,.3);}
+.bear-mouth{width:14px;height:7px;border:2px solid #5e4026;border-top:none;border-radius:0 0 12px 12px;margin-top:1px;}
+
+/* Arms — anchored at shoulders, swing up to "catch/throw" in sync with balls */
+.bear-arm{position:absolute;top:64px;width:24px;height:52px;z-index:4;
+  background:radial-gradient(circle at 40% 30%,#b5895f,#7d5836 75%,#5e4026);border-radius:14px;box-shadow:inset -3px -3px 8px rgba(0,0,0,.3);}
+.bear-arm.left{left:6px;transform-origin:top center;animation:armLeft 1.2s ease-in-out infinite;}
+.bear-arm.right{right:6px;transform-origin:top center;animation:armRight 1.2s ease-in-out infinite;}
+.bear-paw{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:26px;height:22px;
+  background:radial-gradient(circle at 40% 30%,#c89b6e,#8a6440);border-radius:50%;box-shadow:inset -2px -2px 6px rgba(0,0,0,.3);}
+@keyframes armLeft{0%{transform:rotate(34deg);}33%{transform:rotate(48deg);}66%{transform:rotate(20deg);}100%{transform:rotate(34deg);}}
+@keyframes armRight{0%{transform:rotate(-48deg);}33%{transform:rotate(-20deg);}66%{transform:rotate(-34deg);}100%{transform:rotate(-48deg);}}
+
+/* Legs */
+.bear-leg{position:absolute;bottom:-6px;width:30px;height:26px;background:radial-gradient(circle at 40% 30%,#a87b52,#6e4d2e);border-radius:50% 50% 45% 45%;box-shadow:inset -2px -2px 6px rgba(0,0,0,.3);}
+.bear-leg.left{left:16px;}
+.bear-leg.right{right:16px;}
+
+/* Juggled dots/dashes — figure-8 cascade above the paws, with 3D shading */
+.juggle{position:absolute;top:0;left:50%;transform:translateX(-50%);width:160px;height:200px;z-index:5;}
+.juggle .j{position:absolute;left:50%;top:0;font-family:'JetBrains Mono',monospace;font-weight:900;font-size:2.1rem;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));will-change:transform;}
+/* True 3-ball cascade: one shared path, three balls offset by 1/3 cycle */
+.juggle .j{animation:cascade 1.2s linear infinite;}
+.juggle .j1{color:var(--cyan);animation-delay:0s;}
+.juggle .j2{color:var(--gold);animation-delay:-0.4s;}
+.juggle .j3{color:var(--cyan);animation-delay:-0.8s;}
+@keyframes cascade{
+  /* Throw from RIGHT paw, arc high-left, caught by LEFT paw, carried back under */
+  0%   {transform:translate(38px,118px)  scale(.78);}
+  8%   {transform:translate(30px,70px)   scale(.9);}
+  20%  {transform:translate(2px,6px)     scale(1.08);}   /* peak (crossing center) */
+  33%  {transform:translate(-44px,118px) scale(.78);}    /* land in left paw */
+  40%  {transform:translate(-30px,124px) scale(.74);}    /* carried under */
+  60%  {transform:translate(38px,124px)  scale(.74);}    /* back to right paw */
+  100% {transform:translate(38px,118px)  scale(.78);}
+}
+
+.lang-load-text{font-size:1rem;font-weight:700;color:var(--txt);letter-spacing:.02em;}
+.lang-load-bar{width:200px;height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.lang-load-fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));border-radius:99px;transition:width .3s ease;}
+
+
+
+/* ── TRANSLATION BOX (30 symbols) ── */
+.tb-wrap{width:100%;text-align:center;}
+.tb-display{display:flex;flex-wrap:wrap;gap:.4rem .5rem;justify-content:center;align-items:center;padding:1rem;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:14px;margin:.85rem 0;max-height:180px;overflow-y:auto;}
+[data-theme=light] .tb-display{background:rgba(0,0,0,.04);}
+.tb-code{font-family:'JetBrains Mono',monospace;font-size:.95rem;letter-spacing:.1em;color:var(--cyan);}
+.tb-sep{color:var(--txt3);opacity:.5;}
+.tb-letter{font-size:1.15rem;font-weight:700;color:var(--txt);}
+.tb-letter.heb{font-family:inherit;}
+.tb-input{width:100%;min-height:80px;padding:.8rem 1rem;background:rgba(0,0,0,.22);border:1.5px solid var(--border2);border-radius:12px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:1rem;line-height:1.7;outline:none;resize:vertical;margin-top:.5rem;}
+[data-theme=light] .tb-input{background:rgba(0,0,0,.04);}
+.tb-input:focus{border-color:rgba(56,189,248,.5);}
+.tb-input.heb{font-family:inherit;direction:rtl;text-align:right;}
+
 </style>
 </head>
 <body>
@@ -837,7 +929,6 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <button class="nt" onclick="goPage('settings')">⚙ Settings</button>
   </div>
   <div class="nav-actions">
-    <button class="icon-btn" onclick="openLangPicker()" title="Choose language / בחר שפה">🌐</button>
     <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</button>
   </div>
 </nav>
@@ -846,7 +937,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 <div id="langPickerOverlay" class="lang-picker-overlay" onclick="if(event.target===this)closeLangPicker()">
   <div class="lang-picker">
     <div class="lang-picker-head">
-      <h3>Choose Language / בחר שפה</h3>
+      <h3>Change letter conversion from Morse to…</h3>
       <button class="lang-picker-close" onclick="closeLangPicker()">✕</button>
     </div>
     <input type="text" id="langSearch" class="lang-search" placeholder="🔍 Search language…" oninput="filterLangs()" autocomplete="off">
@@ -865,6 +956,38 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <div id="xlangMorse" style="text-align:center;padding:.5rem 1rem 0;font-family:'JetBrains Mono',monospace;font-size:1.3rem;letter-spacing:.2em;color:var(--cyan);"></div>
     <div class="lang-list" id="xlangList" style="padding-top:.5rem;"></div>
   </div>
+</div>
+
+
+<!-- ─── LANGUAGE LOADING OVERLAY ─── -->
+<div id="langLoadOverlay" class="lang-load-overlay">
+  <div class="bear-scene">
+    <div class="juggle">
+      <span class="j j1">·</span>
+      <span class="j j2">−</span>
+      <span class="j j3">·</span>
+    </div>
+    <div class="bear">
+      <div class="bear-shadow"></div>
+      <div class="bear-body">
+        <div class="bear-belly"></div>
+      </div>
+      <div class="bear-arm left"><div class="bear-paw"></div></div>
+      <div class="bear-arm right"><div class="bear-paw"></div></div>
+      <div class="bear-head">
+        <div class="bear-ear left"><span></span></div>
+        <div class="bear-ear right"><span></span></div>
+        <div class="bear-face">
+          <div class="bear-eyes"><span></span><span></span></div>
+          <div class="bear-snout"><div class="bear-nose"></div><div class="bear-mouth"></div></div>
+        </div>
+      </div>
+      <div class="bear-leg left"></div>
+      <div class="bear-leg right"></div>
+    </div>
+  </div>
+  <div class="lang-load-text" id="langLoadText">Loading letters…</div>
+  <div class="lang-load-bar"><div class="lang-load-fill" id="langLoadFill"></div></div>
 </div>
 
 <!-- ─── DAILY STREAK BADGE ─── -->
@@ -913,7 +1036,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <div class="feat" onclick="goPage('dict')" style="--acc:var(--violet)">
       <div class="feat-icon" style="background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.15)">🔤</div>
       <h3>Full Dictionary</h3>
-      <p>Hebrew, English A–Z, 0–9, and punctuation — click any character to hear it.</p>
+      <p>Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse, or 🌍 to see it across the world's alphabets.</p>
       <span class="feat-tag" style="background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.15);color:var(--violet)">עברית / EN</span>
     </div>
   </div>
@@ -1685,6 +1808,24 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
         </div>
       </div>
 
+      <!-- ── Interface / Letter-conversion Language ── -->
+      <div class="sgroup">
+        <div class="sgroup-header" onclick="toggleLangGroup(this)">
+          <span class="sgroup-title">Interface Language</span>
+          <span class="sgroup-arrow" id="settingsLangArrow">▶</span>
+        </div>
+        <div class="sgroup-body" id="langGroupBody">
+          <div class="srow" style="border:none;cursor:default;padding-bottom:.5rem">
+            <div class="srow-left">
+              <span class="srow-label">Change letter conversion from Morse to…</span>
+              <span class="srow-sub" id="settingsLangCurrent">Currently: English</span>
+            </div>
+          </div>
+          <input type="text" id="settingsLangSearch" class="lang-search" style="margin:.4rem 0 .6rem;width:100%;box-sizing:border-box" placeholder="🔍 Search language…" oninput="filterSettingsLangs()" autocomplete="off">
+          <div class="lang-list" id="settingsLangList" style="max-height:300px"></div>
+        </div>
+      </div>
+
     </div><!-- /settings-list -->
   </main>
 </div>
@@ -1771,20 +1912,26 @@ function isHebLang() {
 // Pool of letter-characters for the active language (excludes space/digits/punctuation)
 function getLangLetters(langCode) {
   const lang = LANG_MORSE[langCode] || LANG_MORSE.en;
-  const out = [];
+  const all = [];
   const seen = new Set();
   for (const ch of Object.keys(lang.table)) {
     if (ch === ' ') continue;
     if (/[0-9]/.test(ch)) continue;
-    // skip punctuation
     if (/[.,?!:;'"()\/@&=+\-]/.test(ch) && ch.length === 1) continue;
-    // For Latin langs, keep only uppercase to avoid dupes
     const up = ch.toUpperCase();
     if (seen.has(up)) continue;
     seen.add(up);
-    out.push(ch);
+    all.push(ch);
   }
-  return out;
+  // Count ASCII (Latin A–Z) vs non-ASCII letters
+  const isAscii = ch => /^[A-Za-z]$/.test(ch);
+  const asciiCount = all.filter(isAscii).length;
+  const nonAsciiCount = all.length - asciiCount;
+  // Non-Latin language (e.g. Hebrew, Russian): drop the Latin fallback letters
+  if (nonAsciiCount >= asciiCount && nonAsciiCount > 0) {
+    return all.filter(ch => !isAscii(ch));
+  }
+  return all;
 }
 
 let _langPickerReturnPage = 'home';
@@ -1820,32 +1967,69 @@ function filterLangs() {
   buildLangList(document.getElementById('langSearch').value);
 }
 function selectLang(code) {
+  const prevLang = currentLang;
   currentLang = code;
   localStorage.setItem('mw_lang', code);
   closeLangPicker();
   const l = LANG_MORSE[code];
-  toast((l.name) + ' ✓', 'ok');
   const ret = _langPickerReturnPage;
+
+  // Show the juggling-bear loading screen while we "rebuild" all lessons in the new language
+  const overlay = document.getElementById('langLoadOverlay');
+  const fill = document.getElementById('langLoadFill');
+  const txt = document.getElementById('langLoadText');
+  txt.textContent = 'Loading ' + l.name + '…';
+  fill.style.width = '0';
+  overlay.classList.add('show');
+
+  // Animate the progress bar over ~1.4s, then apply
+  let pct = 0;
+  const steps = ['Loading letters…','Tuning the signals…','Almost ready…'];
+  let si = 0;
+  const iv = setInterval(() => {
+    pct = Math.min(100, pct + 14 + Math.random()*10);
+    fill.style.width = pct + '%';
+    if (pct > 33 && si===0){ si=1; txt.textContent = steps[1]; }
+    if (pct > 70 && si===1){ si=2; txt.textContent = steps[2]; }
+    if (pct >= 100) {
+      clearInterval(iv);
+      applyLangChange(code, ret, l);
+      setTimeout(() => overlay.classList.remove('show'), 250);
+    }
+  }, 180);
+}
+
+function applyLangChange(code, ret, l) {
+  // Update the settings "current language" label
+  const sc = document.getElementById('settingsLangCurrent');
+  if (sc) sc.textContent = 'Currently: ' + l.name;
+  // Rebuild the entire Learn curriculum for this language + load its progress
+  try {
+    LEVELS = buildLevelsForLang(code);
+    lvlDone = loadLvlDone(code);
+    LP.session = 'level'; LP.lvlIdx = null;
+  } catch(e){}
   // Update dictionary language tab label
   const dtab = document.getElementById('dictLangTab');
   if (dtab) dtab.textContent = (code!=='en') ? l.name : 'Hebrew';
   // Set practice default mode for the new language
   if (typeof P !== 'undefined') P.mode = (code==='en'?'letters':(code==='he'?'heb':'lang'));
+  // Clear cached reverse lookups so cross-ref + decode use new tables
+  if (typeof _xlangRevCache !== 'undefined') { for (const k in _xlangRevCache) delete _xlangRevCache[k]; }
   // Go to the page we were on, then force a full live refresh of that page's content
   goPage(ret);
-  // Live refresh based on which page we're on now
+  toast(l.name + ' ✓', 'ok');
   if (ret === 'practice') {
     refreshPracticeUI();
-    pNext(); // new question in the new language
+    pNext();
   } else if (ret === 'dict') {
-    // Re-render whichever dictionary tab is active so letters switch language
     const onTab = document.querySelector('.dtab.on');
     const which = onTab ? (onTab.id==='dictLangTab' ? 'heb' : (onTab.textContent.includes('A')||onTab.textContent.includes('1') ? 'en' : 'punc')) : 'en';
     dictTab(onTab || document.querySelector('.dtab'), which);
   } else if (ret === 'tap') {
     if (typeof tapNextTarget === 'function') tapNextTarget();
   } else if (ret === 'learn') {
-    if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector').style.display !== 'none') renderLevelGrid();
+    if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector') && document.getElementById('levelSelector').style.display !== 'none') renderLevelGrid();
   }
 }
 
@@ -1902,7 +2086,11 @@ const LANG_EN_NAMES = {
   zh:'Chinese', mn:'Mongolian', ne:'Nepali', ta:'Tamil', te:'Telugu', am:'Amharic',
   yi:'Yiddish', ps:'Pashto', tg:'Tajik', tt:'Tatar', ha:'Hausa', yo:'Yoruba',
   zu:'Zulu', so:'Somali', ht:'Haitian Creole', lb:'Luxembourgish', fo:'Faroese',
-  gd:'Scottish Gaelic', br:'Breton'
+  gd:'Scottish Gaelic', br:'Breton',
+  kn:'Kannada', ml:'Malayalam', gu:'Gujarati',
+  pa:'Punjabi', si:'Sinhala', my:'Burmese', km:'Khmer', lo:'Lao', bo:'Tibetan',
+  ti:'Tigrinya', dv:'Dhivehi', ckb:'Kurdish', ug:'Uyghur', ny:'Chichewa',
+  st:'Sesotho', mg:'Malagasy', sm:'Samoan'
 };
 
 // ── NAVIGATION ──
@@ -1918,7 +2106,8 @@ function goPage(id) {
  currentPage = id;
  if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
  if (id==='dict' && pageInits['dict']) { const dt=document.getElementById('dictLangTab'); if(dt){ const lc=(currentLang&&currentLang!=='en')?currentLang:'he'; dt.textContent=(currentLang!=='en')?(LANG_MORSE[lc].name):'Hebrew'; } }
- if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } if (id==='speed') { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; } } }
+ if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; }
+ if (id==='settings') { const sc=document.getElementById('settingsLangCurrent'); if(sc&&typeof LANG_MORSE!=='undefined'){ sc.textContent='Currently: '+((LANG_MORSE[currentLang]||LANG_MORSE.en).name); } } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } if (id==='speed') { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; } } }
 }
 
 // ── TOAST ──
@@ -2017,7 +2206,7 @@ async function playCode(code, wpm=14, freq=680) {
 /* ══════════════════════════════════════════
   LEARN
 ══════════════════════════════════════════ */
-const LEVELS = [
+const ORIG_LEVELS = [
   {num:1, name:'First Signals',  sub:'E and T — one symbol each.',                              chars:['E','T']},
   {num:2, name:'Building Blocks', sub:'I, A, N, M — two-symbol codes built on E and T.',         chars:['I','A','N','M']},
   {num:3, name:'Three & Four',   sub:'S, U, R, D, K, G, W — longer patterns.',                  chars:['S','U','R','D','K','G','W']},
@@ -2027,10 +2216,52 @@ const LEVELS = [
   {num:7, name:'Hebrew נ–ת',     sub:'Nun through Tav — complete the Hebrew Morse alphabet.',    chars:['נ','ס','ע','פ','צ','ק','ר','ש','ת'], heb:true},
 ];
 
-let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false, session:'level', sessionChars:[], nextLvlIdx:null, placeTarget:null, score:0, total:0 };
-let lvlDone = JSON.parse(localStorage.getItem('mw_lvls') || '{}');
+// Generate a sensible level curriculum for ANY language
+function buildLevelsForLang(code) {
+  if (code === 'en') return ORIG_LEVELS;
+  const lang = LANG_MORSE[code] || LANG_MORSE.en;
+  const isHeb = lang.dir === 'rtl';
+  // Sort letters EASY → HARD: shorter Morse codes first, then by pattern.
+  // Mirrors the English curriculum (E,T → I,A,N,M → longer) so foreign
+  // languages aren't harder to learn just because of Unicode ordering.
+  const letters = getLangLetters(code).slice().sort((a, b) => {
+    const ca = (lang.table[a] || lang.table[a.toUpperCase()] || ''),
+          cb = (lang.table[b] || lang.table[b.toUpperCase()] || '');
+    if (ca.length !== cb.length) return ca.length - cb.length;
+    return ca.localeCompare(cb);
+  });
+  const levels = [];
+  let num = 1;
+  // Chunk sizes that ramp up gently
+  const chunks = [2, 4, 6];
+  let idx = 0;
+  // First few small chunks
+  for (const sz of chunks) {
+    if (idx >= letters.length) break;
+    const part = letters.slice(idx, idx+sz);
+    idx += sz;
+    levels.push({num:num++, name:'Letters '+(levels.length+1), sub:part.join(' '), chars:part, heb:isHeb});
+  }
+  // Remaining letters in chunks of 8
+  while (idx < letters.length) {
+    const part = letters.slice(idx, idx+8);
+    idx += 8;
+    levels.push({num:num++, name:'Letters '+(levels.length+1), sub:part.join(' '), chars:part, heb:isHeb});
+  }
+  // Numbers level (digits are universal Morse)
+  levels.push({num:num++, name:'Numbers 0–9', sub:'Every digit is five symbols.', chars:['0','1','2','3','4','5','6','7','8','9']});
+  return levels;
+}
 
-function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem('mw_lvls', JSON.stringify(lvlDone)); }
+let LEVELS = ORIG_LEVELS;
+// Per-language completion state
+function lvlKey(code){ return 'mw_lvls_' + (code||'en'); }
+function loadLvlDone(code){ const d = JSON.parse(localStorage.getItem(lvlKey(code)) || '{}'); return d; }
+
+let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false, session:'level', sessionChars:[], nextLvlIdx:null, placeTarget:null, score:0, total:0 };
+let lvlDone = JSON.parse(localStorage.getItem('mw_lvls_en') || localStorage.getItem('mw_lvls') || '{}');
+
+function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem(lvlKey(currentLang), JSON.stringify(lvlDone)); }
 
 function buildSteps(lv) {
  const s = [];
@@ -2051,21 +2282,31 @@ function buildSteps(lv) {
 function isHebChar(ch) { return /[\u05D0-\u05EA]/.test(ch); }
 function charsUpTo(lvlIdx) {
  let arr = [];
- for (let i = 0; i < lvlIdx; i++) arr = arr.concat(LEVELS[i].chars);
+ for (let i = 0; i < lvlIdx && i < LEVELS.length; i++) if (LEVELS[i]) arr = arr.concat(LEVELS[i].chars);
  return arr;
 }
 // Build a cumulative review session (mix of recog + recall, shuffled)
+// Review focuses MAINLY on weak chars (low SRS), but still touches everything
 function buildReviewSteps(chars) {
  const s = [{type:'reviewIntro'}];
  const items = [];
- chars.forEach(ch => { items.push({type:'recog', ch}); items.push({type:'recall', ch}); });
- // shuffle
- for (let i = items.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+ chars.forEach(ch => {
+   const sc = srsScore(ch);
+   // Everyone gets one recog + one recall
+   items.push({type:'recog', ch});
+   items.push({type:'recall', ch});
+   // Weak chars (struggling) get extra repetitions
+   if (sc < 0) { items.push({type:'recall', ch}); items.push({type:'recog', ch}); }
+   else if (sc < 2) { items.push({type:'recog', ch}); }
+ });
+ _shuffle(items);
  s.push(...items);
  s.push({type:'reviewDone'});
  return s;
 }
-// Build a long, accurate placement test: 3 questions per char, mixed, shuffled
+function _shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// Long, accurate placement test: 3 questions/char + 30-symbol translation box(es), shuffled
 function buildPlacementSteps(chars) {
  const s = [{type:'placeIntro'}];
  const items = [];
@@ -2074,8 +2315,29 @@ function buildPlacementSteps(chars) {
    items.push({type:'recall', ch});
    items.push({type:'recog', ch});
  });
- for (let i = items.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
- s.push(...items);
+ _shuffle(items);
+ // Decide translation-box mode(s) by how far we're jumping
+ const tgt = LP.placeTarget != null ? LP.placeTarget : 1;
+ const boxes = [];
+ if (tgt <= 3) {
+   boxes.push({type:'transBox', mode:'decode'});           // morse → letters
+ } else if (tgt <= 5) {
+   boxes.push({type:'transBox', mode:'decode'});
+   boxes.push({type:'transBox', mode:'encode'});           // letters → morse
+ } else {
+   boxes.push({type:'transBox', mode:'decode'});
+   boxes.push({type:'transBox', mode:'mixed'});            // both
+ }
+ // Insert boxes spread through the test
+ const out = [];
+ const gap = Math.floor(items.length / (boxes.length+1)) || 1;
+ let bi = 0;
+ for (let i=0;i<items.length;i++){
+   out.push(items[i]);
+   if (bi < boxes.length && (i+1) % gap === 0) { out.push(boxes[bi++]); }
+ }
+ while (bi < boxes.length) out.push(boxes[bi++]);
+ s.push(...out);
  s.push({type:'placeDone'});
  return s;
 }
@@ -2098,6 +2360,7 @@ function startReview(chars, nextLvlIdx) {
 
 // Start a placement test to "jump" to a level
 function startPlacement(targetIdx) {
+ if (targetIdx==null || targetIdx<0 || targetIdx>=LEVELS.length || !LEVELS[targetIdx]) { renderLevelGrid(); return; }
  const chars = charsUpTo(targetIdx);
  if (chars.length === 0) { startLevel(0); return; }
  LP.session = 'placement';
@@ -2151,6 +2414,7 @@ function renderLevelGrid() {
 }
 
 function startLevel(i) {
+ if (i==null || i<0 || i>=LEVELS.length || !LEVELS[i]) { renderLevelGrid(); renderTrack(); return; }
  LP.session='level'; LP.lvlIdx = i; LP.stepIdx = 0; LP.steps = buildSteps(LEVELS[i]); LP.answered = false;
  document.getElementById('levelSelector').style.display = 'none';
  document.getElementById('lessonArea').style.display = 'block';
@@ -2177,7 +2441,7 @@ function renderSrsChips() {
 function renderStep() {
  const step = LP.steps[LP.stepIdx];
  document.getElementById('stepInfo').textContent = `Step ${LP.stepIdx+1} / ${LP.steps.length}`;
- document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type==='reviewIntro'||step.type==='reviewDone'?'REVIEW':step.type==='placeIntro'||step.type==='placeDone'?'TEST':step.type).toUpperCase();
+ document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type==='reviewIntro'||step.type==='reviewDone'?'REVIEW':step.type==='placeIntro'||step.type==='placeDone'?'TEST':step.type==='transBox'?'TRANSLATE':step.type).toUpperCase();
  document.getElementById('lNextBtn').disabled = true;
  document.getElementById('lBackBtn').style.visibility = LP.stepIdx > 0 ? 'visible' : 'hidden';
  const st = document.getElementById('lstage');
@@ -2196,12 +2460,13 @@ function renderStep() {
      case 'reviewDone':  renderReviewDone(); break;
      case 'placeIntro':  renderPlaceIntro(); break;
      case 'placeDone':   renderPlaceDone(); break;
+     case 'transBox':    renderTransBox(step); break;
     }
   }, 230);
 }
 
 function renderIntro() {
- const lv = LEVELS[LP.lvlIdx];
+ const lv = LEVELS[LP.lvlIdx]; if (!lv) { renderLevelGrid(); return; }
  document.getElementById('lstage').innerHTML = `<div class="intro-wrap">
     <div class="intro-lnum">LEVEL ${lv.num} OF 7</div>
     <div class="intro-title">${lv.name}</div>
@@ -2408,8 +2673,90 @@ function renderPlaceDone() {
  nb.textContent = passed ? 'Start Level '+tgt.num+' →' : 'Back to Levels';
 }
 
+function _boxChars(n) {
+ const pool = (LP.sessionChars && LP.sessionChars.length) ? LP.sessionChars : charsUpTo((LP.placeTarget!=null?LP.placeTarget:1));
+ const out = [];
+ for (let i=0;i<n;i++) out.push(pool[Math.floor(Math.random()*pool.length)]);
+ return out;
+}
+function renderTransBox(step) {
+ const N = 30;
+ // For 'mixed', randomly pick decode/encode for this box
+ const mode = step.mode === 'mixed' ? (Math.random()<0.5?'decode':'encode') : step.mode;
+ const chars = _boxChars(N);
+ LP._box = { chars, mode };
+ const langName = (LANG_MORSE[currentLang]||LANG_MORSE.en).name;
+
+ let promptHtml, displayHtml, inputPlaceholder;
+ if (mode === 'decode') {
+   // Show Morse → user types the letters in the selected language
+   promptHtml = `Translate this Morse into <strong>${langName}</strong> letters (type them in order)`;
+   displayHtml = chars.map(ch => `<span class="tb-code">${fmtCode(getMorse(ch))}</span>`).join('<span class="tb-sep">/</span>');
+   inputPlaceholder = 'Type the ' + N + ' letters…';
+ } else {
+   // Show letters → user types the Morse
+   promptHtml = `Write the <strong>Morse code</strong> for these ${langName} letters (separate each with a space)`;
+   displayHtml = chars.map(ch => `<span class="tb-letter${isHebChar(ch)?' heb':''}">${ch}</span>`).join(' ');
+   inputPlaceholder = 'e.g.  .- -... -.-. …';
+ }
+
+ document.getElementById('lstage').innerHTML = `<div class="tb-wrap">
+   <div class="q-prompt">${promptHtml}</div>
+   <div class="tb-display ${mode}">${displayHtml}</div>
+   <button class="play-btn" onclick="playBoxSeq()"><svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Play all</button>
+   <textarea id="tbInput" class="tb-input${(mode==='decode'&&isHebLang())?' heb':''}" placeholder="${inputPlaceholder}" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+   <div class="lfb" id="lFb"></div>
+ </div>`;
+ const nb = document.getElementById('lNextBtn');
+ nb.disabled = true;
+ // Provide a check button via Enter or auto: enable Next only after check
+ const ta = document.getElementById('tbInput');
+ ta.addEventListener('input', () => { /* allow */ });
+ // Add a check action: pressing the Next button checks first
+ LP._boxChecked = false;
+ nb.disabled = false;
+ nb.textContent = 'Check ✓';
+}
+function playBoxSeq() {
+ if (!LP._box) return;
+ const codes = LP._box.chars.map(ch => getMorse(ch));
+ let i = 0;
+ (function next(){
+   if (i >= codes.length) return;
+   playCode(codes[i], 16).then(() => { i++; setTimeout(next, 180); });
+ })();
+}
+function checkTransBox() {
+ const box = LP._box; if (!box) return true;
+ const val = (document.getElementById('tbInput').value || '').trim();
+ let correct = 0;
+ const N = box.chars.length;
+ if (box.mode === 'decode') {
+   // Compare typed letters to expected (ignore spaces)
+   const typed = val.replace(/\s+/g,'');
+   box.chars.forEach((ch, i) => {
+     const t = typed[i] || '';
+     if (isHebChar(ch)) { if (t === ch) correct++; }
+     else { if (t.toUpperCase() === ch.toUpperCase()) correct++; }
+   });
+ } else {
+   // Compare typed morse tokens
+   const tokens = val.replace(/[·]/g,'.').replace(/[−–]/g,'-').split(/\s+/).filter(Boolean);
+   box.chars.forEach((ch, i) => { if ((tokens[i]||'') === getMorse(ch)) correct++; });
+ }
+ LP.score += correct; LP.total += N;
+ const fb = document.getElementById('lFb');
+ if (fb) {
+   const pct = Math.round(correct/N*100);
+   fb.className = 'lfb show ' + (pct>=70?'ok':'bad');
+   fb.textContent = (pct>=70?'✓ ':'✗ ') + correct + '/' + N + ' correct (' + pct + '%)';
+ }
+ const ta = document.getElementById('tbInput'); if (ta) ta.disabled = true;
+ return true;
+}
+
 function renderDone() {
- const lv = LEVELS[LP.lvlIdx];
+ const lv = LEVELS[LP.lvlIdx]; if (!lv) { renderLevelGrid(); renderTrack(); return; }
  saveLvl(LP.lvlIdx, true);
  const strong = lv.chars.filter(ch => srsScore(ch) >= 3).length;
  document.getElementById('lstage').innerHTML = `<div class="complete-wrap">
@@ -2458,6 +2805,14 @@ function lNext() {
    else { LP.session='level'; renderLevelGrid(); renderTrack(); }
    return;
   }
+ // Translation box: first Next press = check, second = advance
+ if (step.type === 'transBox' && !LP._boxChecked) {
+   LP._boxChecked = true;
+   checkTransBox();
+   const nb = document.getElementById('lNextBtn');
+   nb.textContent = 'Next →';
+   return;
+ }
  LP.stepIdx = Math.min(LP.stepIdx+1, LP.steps.length-1);
  renderStep();
 }
@@ -2848,6 +3203,47 @@ function applySettingsUI() {
  if (CFG.delayMode === 'custom') {
    document.getElementById('inpCustomDelay').value = CFG.delay;
   }
+}
+
+function toggleLangGroup(header) {
+  const arrow = header.querySelector('.sgroup-arrow');
+  const body = header.nextElementSibling;
+  const open = body.classList.toggle('open');
+  arrow.classList.toggle('open', open);
+  if (open) {
+    _langPickerReturnPage = 'settings';
+    buildSettingsLangList('');
+    const s = document.getElementById('settingsLangSearch');
+    if (s) { s.value=''; setTimeout(()=>s.focus(), 200); }
+  }
+}
+function buildSettingsLangList(filter) {
+  const list = document.getElementById('settingsLangList');
+  if (!list) return;
+  const f = (filter||'').toLowerCase().trim();
+  const entries = Object.entries(LANG_MORSE).filter(([code, l]) => {
+    if (!f) return true;
+    return l.name.toLowerCase().includes(f) || code.includes(f) || (LANG_EN_NAMES[code]||'').toLowerCase().includes(f);
+  });
+  if (!entries.length) { list.innerHTML = '<div class="lang-empty">No language found</div>'; return; }
+  list.innerHTML = entries.map(([code, l]) => `
+    <div class="lang-item${code===currentLang?' active':''}" onclick="selectLangFromSettings('${code}')">
+      <span class="lang-item-name">${LANG_EN_NAMES[code]||l.name}</span>
+      <span class="lang-item-native">${l.name}</span>
+      <span class="lang-item-check">✓</span>
+    </div>`).join('');
+}
+function filterSettingsLangs() {
+  buildSettingsLangList(document.getElementById('settingsLangSearch').value);
+}
+function selectLangFromSettings(code) {
+  // Collapse the accordion, then run the normal language change (loading screen etc.)
+  const body = document.getElementById('langGroupBody');
+  const arrow = document.getElementById('settingsLangArrow');
+  if (body) body.classList.remove('open');
+  if (arrow) arrow.classList.remove('open');
+  _langPickerReturnPage = 'settings';
+  selectLang(code);
 }
 
 function toggleSGroup(header) {
@@ -3594,6 +3990,40 @@ const LANG_MORSE = {
     table: Object.assign({},MORSE_EN,MORSE_PUNC,{'À':'.--.-','È':'.-..-','Ì':'..','Ò':'---.','Ù':'..--','à':'.--.-','è':'.-..-','ì':'..','ò':'---.','ù':'..--'}) },
   br: { name:'Brezhoneg', flag:'', dir:'ltr',
     table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ñ':'--.--','ñ':'--.--','Ch':'----','Cʼh':'-.-.','ch':'----'}) },
+  kn: { name:'ಕನ್ನಡ', flag:'', dir:'ltr',
+    table: {'ಅ':'.-','ಆ':'.--.-','ಇ':'..','ಈ':'..-','ಉ':'..-','ಎ':'.','ಏ':'-.--','ಕ':'-.-','ಖ':'-.-','ಗ':'--.','ಚ':'-.-.','ಜ':'.---','ಟ':'-','ಡ':'-..','ಣ':'.---','ತ':'-','ದ':'-..','ನ':'-.','ಪ':'.--.','ಬ':'-...','ಮ':'--','ಯ':'-.--','ರ':'.-.','ಲ':'.-..','ವ':'.--','ಶ':'...-','ಸ':'...','ಹ':'....','ಳ':'.-..',' ':' '} },
+  ml: { name:'മലയാളം', flag:'', dir:'ltr',
+    table: {'അ':'.-','ആ':'.--.-','ഇ':'..','ഈ':'..-','ഉ':'..-','എ':'.','ഏ':'-.--','ക':'-.-','ഖ':'-.-','ഗ':'--.','ച':'-.-.','ജ':'.---','ട':'-','ഡ':'-..','ണ':'.---','ത':'-','ദ':'-..','ന':'-.','പ':'.--.','ബ':'-...','മ':'--','യ':'-.--','ര':'.-.','ല':'.-..','വ':'.--','ശ':'...-','സ':'...','ഹ':'....','ള':'.-..',' ':' '} },
+  gu: { name:'ગુજરાતી', flag:'', dir:'ltr',
+    table: {'અ':'.-','આ':'.--.-','ઇ':'..','ઉ':'..-','એ':'.','ઓ':'---','ક':'-.-','ખ':'-.-','ગ':'--.','ચ':'-.-.','જ':'.---','ટ':'-','ડ':'-..','ણ':'.---','ત':'-','દ':'-..','ન':'-.','પ':'.--.','બ':'-...','મ':'--','ય':'-.--','ર':'.-.','લ':'.-..','વ':'.--','શ':'...-','સ':'...','હ':'....','ળ':'.-..',' ':' '} },
+  pa: { name:'ਪੰਜਾਬੀ', flag:'', dir:'ltr',
+    table: {'ਅ':'.-','ਆ':'.--.-','ਇ':'..','ਉ':'..-','ਏ':'.','ਓ':'---','ਕ':'-.-','ਖ':'-.-','ਗ':'--.','ਚ':'-.-.','ਜ':'.---','ਟ':'-','ਡ':'-..','ਣ':'.---','ਤ':'-','ਦ':'-..','ਨ':'-.','ਪ':'.--.','ਬ':'-...','ਮ':'--','ਯ':'-.--','ਰ':'.-.','ਲ':'.-..','ਵ':'.--','ਸ':'...','ਹ':'....','ਸ਼':'...-',' ':' '} },
+  si: { name:'සිංහල', flag:'', dir:'ltr',
+    table: {'අ':'.-','ආ':'.--.-','ඉ':'..','උ':'..-','එ':'.','ඔ':'---','ක':'-.-','ග':'--.','ච':'-.-.','ජ':'.---','ට':'-','ඩ':'-..','ණ':'.---','ත':'-','ද':'-..','න':'-.','ප':'.--.','බ':'-...','ම':'--','ය':'-.--','ර':'.-.','ල':'.-..','ව':'.--','ස':'...','හ':'....','ළ':'.-..',' ':' '} },
+  my: { name:'မြန်မာ', flag:'', dir:'ltr',
+    table: {'က':'-.-','ခ':'-.-','ဂ':'--.','စ':'-.-.','ဆ':'-.-.','ဇ':'--..','ည':'--.--','ဋ':'-','ဏ':'.---','တ':'-','ထ':'-','ဒ':'-..','န':'-.','ပ':'.--.','ဖ':'..-.','ဗ':'-...','မ':'--','ယ':'-.--','ရ':'.-.','လ':'.-..','ဝ':'.--','သ':'...','ဟ':'....','အ':'.-',' ':' '} },
+  km: { name:'ខ្មែរ', flag:'', dir:'ltr',
+    table: {'ក':'-.-','ខ':'-.-','គ':'--.','ច':'-.-.','ឆ':'-.-.','ជ':'.---','ញ':'--.--','ដ':'-..','ត':'-','ថ':'-','ទ':'-..','ន':'-.','ប':'-...','ផ':'.--.','ព':'.--.','ម':'--','យ':'-.--','រ':'.-.','ល':'.-..','វ':'.--','ស':'...','ហ':'....','អ':'.-',' ':' '} },
+  lo: { name:'ລາວ', flag:'', dir:'ltr',
+    table: {'ກ':'-.-','ຂ':'-.-','ຄ':'--.','ງ':'--.-','ຈ':'-.-.','ຊ':'--..','ຍ':'-.--','ດ':'-..','ຕ':'-','ຖ':'-','ທ':'-..','ນ':'-.','ບ':'-...','ປ':'.--.','ຜ':'.--.','ຝ':'..-.','ພ':'.--.','ຟ':'..-.','ມ':'--','ຢ':'-.--','ຣ':'.-.','ລ':'.-..','ວ':'.--','ສ':'...','ຫ':'....','ອ':'.-',' ':' '} },
+  bo: { name:'བོད་ཡིག', flag:'', dir:'ltr',
+    table: {'ཀ':'-.-','ཁ':'-.-','ག':'--.','ང':'--.-','ཅ':'-.-.','ཆ':'-.-.','ཇ':'.---','ཉ':'--.--','ཏ':'-','ཐ':'-','ད':'-..','ན':'-.','པ':'.--.','ཕ':'.--.','བ':'-...','མ':'--','ཙ':'-.-.','ཚ':'-.-.','ཛ':'--..','ཝ':'.--','ཞ':'--..','ཟ':'...','འ':'.-','ཡ':'-.--','ར':'.-.','ལ':'.-..','ཤ':'...-','ས':'...','ཧ':'....','ཨ':'.-',' ':' '} },
+  ti: { name:'ትግርኛ', flag:'', dir:'ltr',
+    table: {'ሀ':'....','ለ':'.-..','ሐ':'....','መ':'--','ረ':'.-.','ሰ':'...','ሸ':'----','ቀ':'--.-','በ':'-...','ተ':'-','ቸ':'---.','ነ':'-.','አ':'.-','ከ':'-.-','ወ':'.--','ዘ':'--..','የ':'.---','ደ':'-..','ገ':'--.','ጠ':'-','ጨ':'-.-.','ጰ':'.--.','ጸ':'-..-','ፈ':'..-.','ፐ':'.--.',' ':' '} },
+  dv: { name:'ދިވެހި', flag:'', dir:'rtl',
+    table: {'ހ':'....','ށ':'----','ނ':'-.','ރ':'.-.','ބ':'-...','ޅ':'.-..','ކ':'-.-','އ':'.-','ވ':'.--','މ':'--','ފ':'..-.','ދ':'-..','ތ':'-','ލ':'.-..','ގ':'--.','ޏ':'--.--','ސ':'...','ޑ':'-..','ޒ':'--..','ޓ':'-','ޔ':'-.--','ޕ':'.--.','ޖ':'.---','ޗ':'-.-.',' ':' '} },
+  ckb: { name:'کوردی', flag:'', dir:'rtl',
+    table: {'ا':'.-','ب':'-...','پ':'.--.','ت':'-','ج':'.---','چ':'---.','ح':'....','خ':'---','د':'-..','ر':'.-.','ز':'--..','ژ':'--..','س':'...','ش':'----','ع':'.-.-','غ':'--.','ف':'..-.','ق':'--.-','ک':'-.-','گ':'--.','ل':'.-..','م':'--','ن':'-.','و':'.--','ھ':'.....','ی':'..',' ':' '} },
+  ug: { name:'ئۇيغۇرچە', flag:'', dir:'rtl',
+    table: {'ا':'.-','ب':'-...','پ':'.--.','ت':'-','ج':'.---','چ':'---.','خ':'---','د':'-..','ر':'.-.','ز':'--..','ژ':'--..','س':'...','ش':'----','غ':'--.','ف':'..-.','ق':'--.-','ك':'-.-','گ':'--.','ل':'.-..','م':'--','ن':'-.','ھ':'....','و':'.--','ۋ':'...-','ي':'..',' ':' '} },
+  ny: { name:'Chichewa', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  st: { name:'Sesotho', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  mg: { name:'Malagasy', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  sm: { name:'Gagana Samoa', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
  vi: { name:'Tiếng Việt', flag:'', dir:'ltr',
    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ă':'.-...','Â':'..-.','Đ':'-..-.','Ê':'..-.','Ô':'-....','Ơ':'.--.','Ư':'..-.-','ă':'.-...','â':'..-.','đ':'-..-.','ê':'..-.','ô':'-....','ơ':'.--.','ư':'..-.-'}) },
 };
@@ -3956,6 +4386,54 @@ function trPrintMorse() {
 .lv.locked{position:relative;}
 .lv.locked .lv-jump{pointer-events:auto;}
 
+/* ── LANGUAGE LOADING + JUGGLING BEAR ── */
+.lang-load-overlay{position:fixed;inset:0;z-index:600;background:rgba(11,15,26,.96);backdrop-filter:blur(8px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;}
+[data-theme=light] .lang-load-overlay{background:rgba(240,244,248,.97);}
+.lang-load-overlay.show{display:flex;animation:fadeIn .2s ease;}
+.bear-scene{position:relative;width:160px;height:180px;}
+.bear{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:90px;height:110px;}
+.bear-body{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:74px;height:66px;background:linear-gradient(160deg,#a87b52,#8a6440);border-radius:38px 38px 32px 32px;}
+.bear-head{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:62px;height:56px;background:linear-gradient(160deg,#b5895f,#8a6440);border-radius:50%;z-index:2;}
+.bear-ears{position:absolute;top:0;left:50%;transform:translateX(-50%);width:62px;z-index:1;}
+.bear-ears span{position:absolute;top:-6px;width:24px;height:24px;background:#8a6440;border-radius:50%;}
+.bear-ears span:first-child{left:-4px;}
+.bear-ears span:last-child{right:-4px;}
+.bear-eyes{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:36px;display:flex;justify-content:space-between;}
+.bear-eyes span{width:7px;height:7px;background:#2a1a0e;border-radius:50%;animation:bearBlink 3s infinite;}
+@keyframes bearBlink{0%,92%,100%{transform:scaleY(1);}96%{transform:scaleY(.1);}}
+.bear-snout{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:30px;height:22px;background:#d8b48a;border-radius:50%;display:flex;align-items:flex-start;justify-content:center;}
+.bear-nose{width:11px;height:8px;background:#2a1a0e;border-radius:50%;margin-top:3px;}
+.bear-arm{position:absolute;top:54px;width:18px;height:40px;background:#8a6440;border-radius:12px;z-index:3;}
+.bear-arm.left{left:2px;transform-origin:top center;animation:armL 1.2s ease-in-out infinite;}
+.bear-arm.right{right:2px;transform-origin:top center;animation:armR 1.2s ease-in-out infinite;}
+@keyframes armL{0%,100%{transform:rotate(28deg);}50%{transform:rotate(8deg);}}
+@keyframes armR{0%,100%{transform:rotate(-28deg);}50%{transform:rotate(-8deg);}}
+.juggle{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:120px;}
+.juggle .j{position:absolute;left:50%;font-size:1.8rem;font-weight:800;font-family:'JetBrains Mono',monospace;}
+.juggle .j1{color:var(--cyan);animation:jug1 1.2s ease-in-out infinite;}
+.juggle .j2{color:var(--gold);animation:jug2 1.2s ease-in-out infinite;}
+.juggle .j3{color:var(--cyan);animation:jug3 1.2s ease-in-out infinite;}
+@keyframes jug1{0%{transform:translate(-34px,60px);}25%{transform:translate(-34px,-10px);}50%{transform:translate(10px,60px);}}
+@keyframes jug2{0%{transform:translate(10px,60px);}25%{transform:translate(34px,-10px);}50%{transform:translate(34px,60px);}}
+@keyframes jug3{0%{transform:translate(34px,60px);}25%{transform:translate(0px,-20px);}50%{transform:translate(-34px,60px);}75%{transform:translate(0px,-20px);}100%{transform:translate(34px,60px);}}
+.lang-load-text{font-size:1rem;font-weight:700;color:var(--txt);letter-spacing:.02em;}
+.lang-load-bar{width:200px;height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.lang-load-fill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));border-radius:99px;transition:width .3s ease;}
+
+
+/* ── TRANSLATION BOX (30 symbols) ── */
+.tb-wrap{width:100%;text-align:center;}
+.tb-display{display:flex;flex-wrap:wrap;gap:.4rem .5rem;justify-content:center;align-items:center;padding:1rem;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:14px;margin:.85rem 0;max-height:180px;overflow-y:auto;}
+[data-theme=light] .tb-display{background:rgba(0,0,0,.04);}
+.tb-code{font-family:'JetBrains Mono',monospace;font-size:.95rem;letter-spacing:.1em;color:var(--cyan);}
+.tb-sep{color:var(--txt3);opacity:.5;}
+.tb-letter{font-size:1.15rem;font-weight:700;color:var(--txt);}
+.tb-letter.heb{font-family:inherit;}
+.tb-input{width:100%;min-height:80px;padding:.8rem 1rem;background:rgba(0,0,0,.22);border:1.5px solid var(--border2);border-radius:12px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:1rem;line-height:1.7;outline:none;resize:vertical;margin-top:.5rem;}
+[data-theme=light] .tb-input{background:rgba(0,0,0,.04);}
+.tb-input:focus{border-color:rgba(56,189,248,.5);}
+.tb-input.heb{font-family:inherit;direction:rtl;text-align:right;}
+
 </style></head><body>
   <h2>Morse Code — ${lang.name}</h2>
   <small>Generated by MorseWave Universal Translator · ${new Date().toLocaleString()}</small>
@@ -4122,6 +4600,8 @@ function closeXlang() {
 /* ══════════════════════════════════════════
   BOOT
 ══════════════════════════════════════════ */
+// Build curriculum for the saved language (LANG_MORSE is defined by now)
+try { LEVELS = buildLevelsForLang(currentLang); lvlDone = loadLvlDone(currentLang); } catch(e){}
 goPage('home');
 // Init dict on first visit
 dictTab(document.querySelector('.dtab.on'), 'en');
