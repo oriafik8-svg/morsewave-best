@@ -1262,4 +1262,2686 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
             <div class="kmb-icon">🔊</div>
             <div class="kmb-label">Morse sound</div>
             <div class="kmb-sub">1st click plays sound, 2nd click types letter</div>
-            <div
+            <div class="kmb-preview">
+              <span class="kp dash"></span><span class="kp dot"></span><span class="kp dot"></span>
+            </div>
+          </button>
+
+          <button class="kbd-mode-btn" data-mode="letter-sound">
+            <div class="kmb-icon">🎵</div>
+            <div class="kmb-label">Letter + sound</div>
+            <div class="kmb-sub">Click types & plays Morse simultaneously</div>
+          </button>
+
+        </div>
+      </div>
+      <button class="w-settings-close" id="wSettingsClose">Done</button>
+    </div>
+  </div>
+    <div class="keyboard" id="wkeyboard"></div>
+  </main>
+  <div class="woverlay" id="helpOverlay">
+    <div class="wmodal">
+      <div class="modal-title">How to play</div>
+      <div class="help-content">
+        <p><span>Guess the hidden</span> <strong style="color:var(--cyan)">5-letter word</strong> <span>in 6 tries.</span></p>
+        <p>After each guess, tiles flip and the word plays in Morse audio.</p>
+        <h3>Tile colors</h3>
+        <div class="help-example"><div class="help-tile c">M</div><div class="help-tile n">O</div><div class="help-tile n">R</div><div class="help-tile n">S</div><div class="help-tile n">E</div></div>
+        <p><strong style="color:var(--mint)">Green</strong> <span>— right letter, right spot.</span></p>
+        <div class="help-example"><div class="help-tile n">W</div><div class="help-tile p">A</div><div class="help-tile n">V</div><div class="help-tile n">E</div><div class="help-tile n">S</div></div>
+        <p><strong style="color:var(--gold)">Gold</strong> <span>— letter exists but wrong spot.</span></p>
+        <div class="help-example"><div class="help-tile n">R</div><div class="help-tile n">A</div><div class="help-tile a">D</div><div class="help-tile n">I</div><div class="help-tile n">O</div></div>
+        <p><strong style="color:var(--txt2)">Gray</strong> <span>— letter not in word.</span></p>
+      </div>
+      <div class="modal-btns" style="margin-top:1.5rem"><button class="modal-btn primary" id="helpCloseBtn">Got it</button></div>
+    </div>
+  </div>
+  <div class="woverlay" id="wendOverlay">
+    <div class="wmodal" id="wendModal">
+      <div class="modal-icon" id="wendIcon">🏆</div>
+      <div class="modal-title" id="wendTitle">Solved!</div>
+      <div class="modal-sub" id="wendSub">Nicely decoded.</div>
+      <div class="modal-answer"><div class="modal-answer-w" id="wendWord">MORSE</div><div class="modal-answer-m" id="wendMorse">-- --- .-. ... .</div></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><div class="modal-stat-l">Played</div><div class="modal-stat-v" id="wstatPlayed">0</div></div>
+        <div class="modal-stat"><div class="modal-stat-l">Win %</div><div class="modal-stat-v" id="wstatWinPct">0%</div></div>
+        <div class="modal-stat"><div class="modal-stat-l">Streak</div><div class="modal-stat-v" id="wstatStreak">0</div></div>
+        <div class="modal-stat"><div class="modal-stat-l">Best</div><div class="modal-stat-v" id="wstatBest">0</div></div>
+      </div>
+      <div class="modal-btns"><button class="modal-btn primary" id="wendNewBtn">New Word</button><button class="modal-btn ghost" onclick="goPage('games')">More Games</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SPEED DECODE ─── -->
+<div id="page-speed" class="page">
+  <main>
+    <div class="speed-header">
+      <h2 style="font-size:1.45rem;font-weight:700;margin-bottom:.3rem">Speed Decode</h2>
+      <p style="color:var(--txt2);font-size:.85rem">60 seconds. Decode as many signals as you can.</p>
+    </div>
+
+    <div id="speedTimerWrap" class="speed-timer-ring">
+      <svg class="speed-timer-svg" width="120" height="120" viewBox="0 0 120 120">
+        <circle class="speed-timer-track" cx="60" cy="60" r="54"/>
+        <circle class="speed-timer-fill" id="speedTimerFill" cx="60" cy="60" r="54"/>
+      </svg>
+      <div class="speed-timer-label" id="speedTimerLabel">60</div>
+    </div>
+
+    <div class="speed-hud" id="speedHud">
+      <div class="speed-hud-cell">
+        <div class="speed-hud-v" id="speedScore" style="color:var(--mint)">0</div>
+        <div class="speed-hud-l">Correct</div>
+      </div>
+      <div class="speed-hud-cell">
+        <div class="speed-hud-v" id="speedStreak" style="color:var(--gold)">0</div>
+        <div class="speed-hud-l">Streak</div>
+      </div>
+      <div class="speed-hud-cell">
+        <div class="speed-hud-v" id="speedMissed" style="color:var(--rose)">0</div>
+        <div class="speed-hud-l">Missed</div>
+      </div>
+    </div>
+
+    <div id="speedGameCard" class="speed-card" style="display:none">
+      <div class="speed-signal">
+        <div class="speed-morse-vis" id="speedVis"></div>
+        <div class="speed-morse-txt" id="speedMorseTxt"></div>
+        <button class="speed-play-btn" id="speedPlayBtn" onclick="speedPlay()">
+          <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg>
+         Play Signal
+        </button>
+      </div>
+      <div class="speed-inp-wrap">
+        <input type="text" id="speedInp" class="speed-inp" placeholder="?" maxlength="2"
+         autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      </div>
+    </div>
+
+    <div id="speedResult" class="speed-result" style="display:none">
+      <div class="speed-result-score" id="speedFinalScore">0</div>
+      <div class="speed-result-label">correct answers in 60 seconds</div>
+      <div class="speed-result-stats">
+        <div class="srs-stat"><div class="srs-stat-l">Best</div><div class="srs-stat-v" id="speedBest">0</div></div>
+        <div class="srs-stat"><div class="srs-stat-l">Missed</div><div class="srs-stat-v" id="speedFinalMissed" style="color:var(--rose)">0</div></div>
+        <div class="srs-stat"><div class="srs-stat-l">Accuracy</div><div class="srs-stat-v" id="speedAcc">0%</div></div>
+      </div>
+      <button class="speed-start-btn" onclick="speedStart()">Play Again</button>
+    </div>
+
+    <button class="speed-start-btn" id="speedStartBtn" onclick="speedStart()">▶ Start Game</button>
+  </main>
+</div>
+
+<!-- ─── UNIVERSAL TRANSLATOR ─── -->
+<div id="page-translate" class="page">
+  <main>
+    <div class="tr-hero">
+      <h2>Universal Morse Translator</h2>
+      <p>Translate text, images, or speech into Morse code in any language</p>
+    </div>
+
+    <!-- Input tabs -->
+    <div class="tr-tabs">
+      <button class="tr-tab on" onclick="trTab(this,'text')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h8"/></svg>Text
+      </button>
+      <button class="tr-tab" onclick="trTab(this,'image')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Image
+      </button>
+      <button class="tr-tab" onclick="trTab(this,'audio')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>Audio
+      </button>
+      <button class="tr-tab" onclick="trTab(this,'video')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Video
+      </button>
+    </div>
+
+    <!-- Text panel -->
+    <div class="tr-panel on" id="trPanelText">
+      <textarea class="tr-textarea" id="trTextInput" placeholder="Type or paste text here in any language…" oninput="trClearOutput()"></textarea>
+    </div>
+
+    <!-- Image panel -->
+    <div class="tr-panel" id="trPanelImage">
+      <div class="tr-dropzone" id="trImageDrop"
+       ondragover="event.preventDefault();this.classList.add('drag-over')"
+       ondragleave="this.classList.remove('drag-over')"
+       ondrop="trDropImage(event)">
+        <input type="file" accept="image/*" onchange="trImageFile(this)" capture="environment">
+        <div class="tr-dropzone-icon">🖼</div>
+        <div class="tr-dropzone-title">Drop image here or tap to upload</div>
+        <div class="tr-dropzone-sub">Supports JPG, PNG, GIF, WEBP — AI will extract the text</div>
+      </div>
+      <div class="tr-file-preview" id="trImagePreview">
+        <img class="tr-file-thumb" id="trImageThumb" src="" alt="">
+        <div class="tr-file-info">
+          <div class="tr-file-name" id="trImageName"></div>
+          <div class="tr-file-size" id="trImageSize"></div>
+        </div>
+        <button class="tr-file-clear" onclick="trClearImage()">✕</button>
+      </div>
+    </div>
+
+    <!-- Audio panel -->
+    <div class="tr-panel" id="trPanelAudio">
+      <button class="tr-rec-btn" id="trRecBtn" onclick="trToggleRec()">
+        <div class="tr-rec-dot"></div>
+        <span id="trRecLabel">Hold to record</span>
+      </button>
+      <div class="tr-rec-status" id="trRecStatus">Tap to start speech recognition</div>
+      <textarea class="tr-rec-text" id="trRecText" placeholder="Recognized text will appear here…" oninput="trClearOutput()"></textarea>
+    </div>
+
+    <!-- Video panel -->
+    <div class="tr-panel" id="trPanelVideo">
+      <div class="tr-video-wrap">
+        <video class="tr-video-el" id="trVideoEl" autoplay muted playsinline></video>
+        <div class="tr-vid-live-badge" id="trLiveBadge" style="display:none">● LIVE</div>
+      </div>
+      <div class="tr-video-controls">
+        <button class="tr-vid-btn" id="trVidStart" onclick="trStartVideo()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>Start Camera
+        </button>
+        <button class="tr-vid-btn" id="trVidCapture" onclick="trCaptureFrame()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>Capture & Translate
+        </button>
+        <button class="tr-vid-btn" id="trVidLive" onclick="trToggleLive()" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Auto (2s)
+        </button>
+      </div>
+    </div>
+
+    <!-- Language row -->
+    <div class="tr-lang-row">
+      <select class="tr-lang-sel" id="trLangSel" onchange="trClearOutput()">
+        <option value="en">English</option>
+        <option value="he">עברית (Hebrew)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="fr">Français (French)</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="it">Italiano (Italian)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="nl">Nederlands (Dutch)</option>
+        <option value="sv">Svenska (Swedish)</option>
+        <option value="no">Norsk (Norwegian)</option>
+        <option value="da">Dansk (Danish)</option>
+        <option value="fi">Suomi (Finnish)</option>
+        <option value="pl">Polski (Polish)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+        <option value="cs">Čeština (Czech)</option>
+        <option value="ro">Română (Romanian)</option>
+        <option value="hu">Magyar (Hungarian)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="el">Ελληνικά (Greek)</option>
+        <option value="uk">Українська (Ukrainian)</option>
+        <option value="bg">Български (Bulgarian)</option>
+        <option value="sr">Српски (Serbian)</option>
+        <option value="hr">Hrvatski (Croatian)</option>
+        <option value="sk">Slovenčina (Slovak)</option>
+        <option value="sl">Slovenščina (Slovenian)</option>
+        <option value="et">Eesti (Estonian)</option>
+        <option value="lv">Latviešu (Latvian)</option>
+        <option value="lt">Lietuvių (Lithuanian)</option>
+        <option value="sq">Shqip (Albanian)</option>
+        <option value="mk">Македонски (Macedonian)</option>
+        <option value="ca">Català (Catalan)</option>
+        <option value="cy">Cymraeg (Welsh)</option>
+        <option value="is">Íslenska (Icelandic)</option>
+        <option value="mt">Malti (Maltese)</option>
+        <option value="eo">Esperanto</option>
+        <option value="ja">日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+        <option value="ka">ქართული (Georgian)</option>
+        <option value="vi">Tiếng Việt (Vietnamese)</option>
+        <option value="be">Беларуская (Belarusian)</option>
+        <option value="az">Azərbaycan (Azerbaijani)</option>
+        <option value="kk">Қазақша (Kazakh)</option>
+        <option value="hy">Հայերեն (Armenian)</option>
+        <option value="fa">فارسی (Persian)</option>
+        <option value="ur">اردو (Urdu)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="bn">বাংলা (Bengali)</option>
+        <option value="th">ภาษาไทย (Thai)</option>
+        <option value="sw">Kiswahili (Swahili)</option>
+        <option value="af">Afrikaans</option>
+        <option value="id">Bahasa Indonesia</option>
+        <option value="ms">Bahasa Melayu (Malay)</option>
+        <option value="tl">Filipino (Tagalog)</option>
+        <option value="la">Latina (Latin)</option>
+        <option value="ga">Gaeilge (Irish)</option>
+        <option value="eu">Euskara (Basque)</option>
+        <option value="gl">Galego (Galician)</option>
+        <option value="uz">Oʻzbekcha (Uzbek)</option>
+        <option value="tk">Türkmençe (Turkmen)</option>
+        <option value="ky">Кыргызча (Kyrgyz)</option>
+        <option value="zh">中文 Pinyin (Chinese)</option>
+        <option value="mn">Монгол (Mongolian)</option>
+        <option value="ne">नेपाली (Nepali)</option>
+        <option value="ta">தமிழ் (Tamil)</option>
+        <option value="te">తెలుగు (Telugu)</option>
+        <option value="am">አማርኛ (Amharic)</option>
+        <option value="yi">ייִדיש (Yiddish)</option>
+        <option value="ps">پښتو (Pashto)</option>
+        <option value="tg">Тоҷикӣ (Tajik)</option>
+        <option value="tt">Татарча (Tatar)</option>
+        <option value="ha">Hausa</option>
+        <option value="yo">Yorùbá (Yoruba)</option>
+        <option value="zu">isiZulu (Zulu)</option>
+        <option value="so">Soomaali (Somali)</option>
+        <option value="ht">Kreyòl (Haitian Creole)</option>
+        <option value="lb">Lëtzebuergesch (Luxembourgish)</option>
+        <option value="fo">Føroyskt (Faroese)</option>
+        <option value="gd">Gàidhlig (Scottish Gaelic)</option>
+        <option value="br">Brezhoneg (Breton)</option>
+      </select>
+      <button class="tr-swap-btn" id="trSwapBtn" title="Swap direction" onclick="trSwap()">⇄</button>
+      <div id="trDirLabel" style="padding:.45rem .85rem;border:1.5px solid var(--border2);border-radius:10px;font-size:.8rem;font-weight:700;color:var(--txt2);white-space:nowrap;">→ Morse</div>
+    </div>
+
+    <!-- Morse decode input (hidden by default) -->
+    <div id="trMorseInputWrap" style="display:none;margin-bottom:.75rem;">
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.4rem;">Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)</div>
+      <textarea id="trMorseInput" class="tr-textarea" placeholder="e.g.  .- -... -.-. / .... ..  →  ABC HI" style="font-family:'JetBrains Mono',monospace;font-size:.95rem;letter-spacing:.12em;"></textarea>
+    </div>
+
+    <!-- Translate button -->
+    <button class="tr-btn" id="trBtn" onclick="trTranslate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+     Translate to Morse
+    </button>
+
+    <!-- Loading -->
+    <div class="tr-loading" id="trLoading" style="display:none">
+      <div class="tr-spinner"></div>
+      <span id="trLoadingText">Translating…</span>
+    </div>
+
+    <!-- Output -->
+    <div class="tr-output" id="trOutput" style="display:none">
+
+      <!-- Morse text -->
+      <div class="tr-out-card">
+        <div class="tr-out-head">
+          <span class="tr-out-label">📡 Morse Code</span>
+          <div class="tr-out-actions">
+            <button class="tr-act-btn" onclick="trCopyMorse()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy
+            </button>
+            <button class="tr-act-btn" onclick="trPrintMorse()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print
+            </button>
+          </div>
+        </div>
+        <div class="tr-out-body">
+          <div class="tr-morse-text" id="trMorseOut"></div>
+        </div>
+      </div>
+
+      <!-- Audio -->
+      <div class="tr-out-card">
+        <div class="tr-out-head">
+          <span class="tr-out-label">🔊 Audio Playback</span>
+          <div class="tr-out-actions">
+            <button class="tr-act-btn" onclick="trDownloadWav()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download WAV
+            </button>
+          </div>
+        </div>
+        <div class="tr-out-body">
+          <div class="tr-audio-player">
+            <button class="tr-play-btn" id="trPlayBtn" onclick="trPlayMorse()">
+              <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg>Play Morse
+            </button>
+            <select class="tr-wpm-sel" id="trWpmSel">
+              <option value="8">Slow (8 WPM)</option>
+              <option value="14" selected>Medium (14 WPM)</option>
+              <option value="22">Fast (22 WPM)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image output -->
+      <div class="tr-out-card">
+        <div class="tr-out-head">
+          <span class="tr-out-label">🖼 Morse Image</span>
+          <div class="tr-out-actions">
+            <button class="tr-act-btn" onclick="trDownloadImg()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PNG
+            </button>
+          </div>
+        </div>
+        <div class="tr-out-body">
+          <canvas id="trMorseCanvas" class="tr-img-canvas"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+
+<!-- ─── SETTINGS ─── -->
+<div id="page-settings" class="page">
+  <main>
+    <h2 style="font-size:1.45rem;font-weight:700;margin-bottom:.35rem">Settings</h2>
+    <p style="color:var(--txt2);font-size:.85rem;margin-bottom:1.25rem">Customize your MorseWave experience.</p>
+    <div class="settings-list">
+
+      <!-- ── Correct Answers ── -->
+      <div class="sgroup">
+        <div class="sgroup-header" onclick="toggleSGroup(this)">
+          <span class="sgroup-title">✓ Correct Answers</span>
+          <span class="sgroup-arrow">▶</span>
+        </div>
+        <div class="sgroup-body">
+          <!-- Auto-advance toggle -->
+          <div class="srow">
+            <div class="srow-left">
+              <span class="srow-label">Auto-advance</span>
+              <span class="srow-sub">Automatically move to the next question</span>
+            </div>
+            <label class="sw">
+              <input type="checkbox" id="swAutoAdvance" checked onchange="onAutoAdvanceChange()">
+              <span class="sw-track"></span>
+            </label>
+          </div>
+          <!-- Sub-settings: trigger + delay -->
+          <div class="ssub" id="autoAdvanceSub">
+            <div class="ssub-row">
+              <span>Switch after</span>
+              <select class="mini-sel" id="selTrigger" onchange="saveSettings()">
+                <option value="correct" selected>✓ Correct</option>
+                <option value="wrong">✗ Wrong</option>
+                <option value="both">Both</option>
+              </select>
+              <span>answer, after</span>
+              <select class="mini-sel" id="selDelay" onchange="onDelayChange()">
+                <option value="0.2">0.2s</option>
+                <option value="0.5" selected>0.5s</option>
+                <option value="1">1s</option>
+                <option value="3">3s</option>
+                <option value="custom">Custom…</option>
+              </select>
+            </div>
+            <div class="ssub-row" id="customDelayRow" style="display:none">
+              <span>Custom delay:</span>
+              <input type="number" class="mini-num" id="inpCustomDelay"
+               min="0.001" max="3" step="0.001" placeholder="0.0"
+               oninput="clampDelay(this)" onchange="saveSettings()">
+              <span>seconds (0.001 – 3)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /settings-list -->
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════
+    JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── MORSE DATA ──
+const MORSE_EN = {
+ A:'.-', B:'-...', C:'-.-.', D:'-..', E:'.', F:'..-.', G:'--.', H:'....', I:'..', J:'.---',
+ K:'-.-', L:'.-..', M:'--', N:'-.', O:'---', P:'.--.', Q:'--.-', R:'.-.', S:'...', T:'-',
+ U:'..-', V:'...-', W:'.--', X:'-..-', Y:'-.--', Z:'--..',
+  '0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+  '6':'-....','7':'--...','8':'---..','9':'----.'
+};
+
+const MORSE_HEB = {
+  'א':'.-','ב':'-...','ג':'--.','ד':'-..','ה':'---','ו':'.','ז':'--..','ח':'....','ט':'..-','י':'..',
+  'כ':'-.-','ל':'.-..','מ':'--','נ':'-.','ס':'-.-.','ע':'.---','פ':'.--.','צ':'.--',
+  'ק':'--.-','ר':'.-.','ש':'...','ת':'-'
+};
+
+const MORSE_PUNC = {
+  '.':'.-.-.-', ',':'--..--', '?':'..--..', '!':'-.-.--', '/':'-..-.', '(':'-.--.',
+  ')':'-.--.-', '&':'.-...', ':':'---...', ';':'-.-.-.', '=':'-...-', '+':'.-.-.',
+  '-':'-....-', '_':'..--.-', '"':'.-..-.', '$':'...-..-', '@':'.--.-.',
+};
+
+const MORSE_ALL = Object.assign({}, MORSE_EN, MORSE_HEB, MORSE_PUNC);
+
+function getMorse(ch) {
+ // Check active language first, then global table
+ if (typeof LANG_MORSE !== 'undefined' && typeof currentLang !== 'undefined') {
+   const lt = (LANG_MORSE[currentLang] && LANG_MORSE[currentLang].table) || null;
+   if (lt && (lt[ch] || lt[ch.toUpperCase()])) return lt[ch] || lt[ch.toUpperCase()];
+ }
+ return MORSE_ALL[ch] || MORSE_ALL[ch.toUpperCase()] || null;
+}
+function fmtCode(code) {
+ return code.split('').map(s => s === '.' ? '·' : '−').join(' ');
+}
+
+// ── REVERSE LOOKUP ──
+const MORSE_REV = {};
+for (const [ch, code] of Object.entries(MORSE_ALL)) MORSE_REV[code] = ch;
+function decodeCode(code) { return MORSE_REV[code] || '?'; }
+
+// ── GAME COMPAT SHIMS ──
+const MORSE = Object.assign({}, MORSE_EN, MORSE_HEB, MORSE_PUNC);
+function fmt(code) { return code ? code.split('').map(s => s==='.'?'·':'−').join(' ') : ''; }
+async function ensureAudio() { getACtx(); }
+let crosswordInited = false, wordleInited = false;
+
+
+// ── THEME ──
+function toggleTheme() {
+ const light = document.body.getAttribute('data-theme') === 'light';
+ document.body.setAttribute('data-theme', light ? '' : 'light');
+ document.getElementById('themeBtn').textContent = light ? '🌙' : '☀️';
+ localStorage.setItem('mw_theme', light ? '' : 'light');
+}
+(function applyTheme() {
+ const t = localStorage.getItem('mw_theme');
+ if (t === 'light') { document.body.setAttribute('data-theme','light'); document.getElementById('themeBtn').textContent='☀️'; }
+})();
+
+// ── LANGUAGE ──
+let currentLang = localStorage.getItem('mw_lang') || 'en';
+// ── LANGUAGE PICKER SYSTEM ──
+// currentLang holds a LANG_MORSE key (e.g. 'en','he','de'...). Legacy 'heb' maps to 'he'.
+if (currentLang === 'heb') currentLang = 'he';
+
+function getActiveLangTable() {
+  const lang = LANG_MORSE[currentLang] || LANG_MORSE.en;
+  return lang.table;
+}
+function isHebLang() {
+  const lang = LANG_MORSE[currentLang];
+  return lang && lang.dir === 'rtl';
+}
+// Pool of letter-characters for the active language (excludes space/digits/punctuation)
+function getLangLetters(langCode) {
+  const lang = LANG_MORSE[langCode] || LANG_MORSE.en;
+  const out = [];
+  const seen = new Set();
+  for (const ch of Object.keys(lang.table)) {
+    if (ch === ' ') continue;
+    if (/[0-9]/.test(ch)) continue;
+    // skip punctuation
+    if (/[.,?!:;'"()\/@&=+\-]/.test(ch) && ch.length === 1) continue;
+    // For Latin langs, keep only uppercase to avoid dupes
+    const up = ch.toUpperCase();
+    if (seen.has(up)) continue;
+    seen.add(up);
+    out.push(ch);
+  }
+  return out;
+}
+
+let _langPickerReturnPage = 'home';
+function openLangPicker() {
+  _langPickerReturnPage = currentPage; // remember where we were
+  buildLangList();
+  document.getElementById('langSearch').value = '';
+  document.getElementById('langPickerOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('langSearch').focus(), 100);
+}
+function closeLangPicker() {
+  document.getElementById('langPickerOverlay').classList.remove('show');
+}
+function buildLangList(filter='') {
+  const list = document.getElementById('langList');
+  const f = filter.toLowerCase().trim();
+  const entries = Object.entries(LANG_MORSE).filter(([code, l]) => {
+    if (!f) return true;
+    return l.name.toLowerCase().includes(f) || code.includes(f) || (LANG_EN_NAMES[code]||'').toLowerCase().includes(f);
+  });
+  if (entries.length === 0) {
+    list.innerHTML = '<div class="lang-empty">No language found</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([code, l]) => `
+    <div class="lang-item${code===currentLang?' active':''}" onclick="selectLang('${code}')">
+      <span class="lang-item-name">${LANG_EN_NAMES[code]||l.name}</span>
+      <span class="lang-item-native">${l.name}</span>
+      <span class="lang-item-check">✓</span>
+    </div>`).join('');
+}
+function filterLangs() {
+  buildLangList(document.getElementById('langSearch').value);
+}
+function selectLang(code) {
+  currentLang = code;
+  localStorage.setItem('mw_lang', code);
+  closeLangPicker();
+  const l = LANG_MORSE[code];
+  toast((l.name) + ' ✓', 'ok');
+  // Update dictionary language tab label
+  const dtab = document.getElementById('dictLangTab');
+  if (dtab) dtab.textContent = (code!=='en') ? l.name : 'Hebrew';
+  // Rebuild dictionary if showing the language tab
+  const activeDtab = document.querySelector('.dtab.on');
+  if (activeDtab === dtab) dictTab(dtab, 'heb');
+  // Refresh practice mode buttons + current question
+  refreshPracticeUI();
+  if (currentPage === 'practice') { P.mode = (code==='en'?'letters':(code==='he'?'heb':'lang')); pNext(); }
+  // Refresh Telegraph target if active
+  if (currentPage === 'tap' && typeof tapNextTarget === 'function') tapNextTarget();
+  // Return to the page we were on (NOT always home)
+  goPage(_langPickerReturnPage);
+}
+
+// Update practice mode buttons to reflect the active language
+function refreshPracticeUI() {
+  const seg = document.getElementById('modeSeg');
+  if (!seg) return;
+  const lang = LANG_MORSE[currentLang] || LANG_MORSE.en;
+  const letterBtn = seg.querySelector('[data-mode="letters"]');
+  const langBtn = seg.querySelector('[data-mode="lang"]');
+  const hebBtn = seg.querySelector('[data-mode="heb"]');
+
+  if (currentLang === 'en') {
+    // Default English: show A–Z, hide the dedicated lang button, hide אבג
+    if (letterBtn) { letterBtn.textContent = 'A–Z'; letterBtn.style.display=''; }
+    if (langBtn) langBtn.style.display = 'none';
+    if (hebBtn) hebBtn.style.display = 'none';
+  } else if (currentLang === 'he') {
+    if (letterBtn) letterBtn.style.display = 'none';
+    if (langBtn) langBtn.style.display = 'none';
+    if (hebBtn) { hebBtn.style.display=''; hebBtn.classList.add('on'); }
+  } else {
+    // Other language: letters button shows the language's own script
+    if (letterBtn) letterBtn.style.display = 'none';
+    if (hebBtn) hebBtn.style.display = 'none';
+    if (langBtn) {
+      langBtn.style.display = '';
+      // Show a short sample of the script as the label (first 3 letters)
+      const sample = getLangLetters(currentLang).slice(0,3).join('');
+      langBtn.textContent = sample || lang.name;
+    }
+  }
+  // Set the active (.on) button to match current default mode
+  const wantMode = (currentLang==='en') ? 'letters' : (currentLang==='he' ? 'heb' : 'lang');
+  seg.querySelectorAll('.sbtn').forEach(b => b.classList.toggle('on', b.dataset.mode === wantMode || (b.classList.contains('on') && b.dataset.mode==='numbers'===false && false)));
+  seg.querySelectorAll('.sbtn').forEach(b => b.classList.toggle('on', b.dataset.mode === wantMode));
+  // Update input direction for RTL
+  const ansInp = document.getElementById('pAns');
+  if (ansInp) ansInp.className = 'ans-inp' + (isHebLang() ? ' heb' : '');
+}
+
+// English display names for search/clarity
+const LANG_EN_NAMES = {
+  en:'English', he:'Hebrew', de:'German', fr:'French', es:'Spanish', it:'Italian',
+  pt:'Portuguese', nl:'Dutch', sv:'Swedish', no:'Norwegian', da:'Danish', fi:'Finnish',
+  pl:'Polish', tr:'Turkish', cs:'Czech', ro:'Romanian', hu:'Hungarian', ru:'Russian',
+  ar:'Arabic', el:'Greek', uk:'Ukrainian', bg:'Bulgarian', sr:'Serbian', hr:'Croatian',
+  sk:'Slovak', sl:'Slovenian', et:'Estonian', lv:'Latvian', lt:'Lithuanian', sq:'Albanian',
+  mk:'Macedonian', ca:'Catalan', cy:'Welsh', is:'Icelandic', mt:'Maltese', eo:'Esperanto',
+  ja:'Japanese', ko:'Korean', ka:'Georgian', vi:'Vietnamese', be:'Belarusian', az:'Azerbaijani',
+  kk:'Kazakh', hy:'Armenian', fa:'Persian', ur:'Urdu', hi:'Hindi', sw:'Swahili',
+  af:'Afrikaans', id:'Indonesian', ms:'Malay', tl:'Filipino', la:'Latin', ga:'Irish',
+  eu:'Basque', gl:'Galician', uz:'Uzbek', tk:'Turkmen', ky:'Kyrgyz',
+  zh:'Chinese', mn:'Mongolian', ne:'Nepali', ta:'Tamil', te:'Telugu', am:'Amharic',
+  yi:'Yiddish', ps:'Pashto', tg:'Tajik', tt:'Tatar', ha:'Hausa', yo:'Yoruba',
+  zu:'Zulu', so:'Somali', ht:'Haitian Creole', lb:'Luxembourgish', fo:'Faroese',
+  gd:'Scottish Gaelic', br:'Breton'
+};
+
+// ── NAVIGATION ──
+let currentPage = 'home';
+const pageInits = {};
+function goPage(id) {
+ document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+ document.getElementById('page-' + id).classList.add('on');
+ document.querySelectorAll('.nt').forEach(t => {
+   const map = {home:'Home',learn:'Learn',tap:'Telegraph',practice:'Practice',dict:'Dictionary',translate:'Translate',games:'Games',settings:'⚙ Settings',crossword:'Crossword',wordle:'Wordle',speed:'Speed Decode'};
+   t.classList.toggle('on', t.textContent.trim() === map[id]);
+  });
+ currentPage = id;
+ if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
+ if (id==='dict' && pageInits['dict']) { const dt=document.getElementById('dictLangTab'); if(dt){ const lc=(currentLang&&currentLang!=='en')?currentLang:'he'; dt.textContent=(currentLang!=='en')?(LANG_MORSE[lc].name):'Hebrew'; } }
+ if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } if (id==='speed') { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; } } }
+}
+
+// ── TOAST ──
+let _toastTimer;
+function toast(msg, type='ok', dur=2000) {
+ const el = document.getElementById('toast');
+ el.textContent = msg; el.className = 'toast show ' + type;
+ clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.className = 'toast', dur);
+}
+
+// ── INPUT GUARD — key event block when input is focused ──
+// Central helper — returns true if a real input/textarea has focus
+function inputHasFocus() {
+ const tag = document.activeElement && document.activeElement.tagName;
+ return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
+// ── SRS DATA ──
+let srs = JSON.parse(localStorage.getItem('mw_srs') || '{}');
+function srsScore(ch) { return srs[ch] || 0; }
+function srsRecord(ch, correct) {
+ srs[ch] = Math.max(-8, Math.min(12, (srs[ch] || 0) + (correct ? 1 : -2)));
+ localStorage.setItem('mw_srs', JSON.stringify(srs));
+}
+
+// ── AUDIO ENGINE ──
+let _actx = null;
+// Strictly manage oscillators to prevent WebAudio memory leaks
+const _activeOscs = new Set();
+function getACtx() {
+ if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+ if (_actx.state === 'suspended') _actx.resume();
+ return _actx;
+}
+function beep(freq, dur, vol=0.35) {
+ return new Promise(res => {
+   const ctx = getACtx();
+   const o = ctx.createOscillator(), g = ctx.createGain();
+    _activeOscs.add(o);
+   o.connect(g); g.connect(ctx.destination);
+   o.type = 'sine'; o.frequency.value = freq;
+   const t = ctx.currentTime;
+   g.gain.setValueAtTime(0, t);
+   g.gain.linearRampToValueAtTime(vol, t + 0.008);
+   g.gain.setValueAtTime(vol, t + Math.max(dur - 0.01, 0.005));
+   g.gain.linearRampToValueAtTime(0, t + dur);
+   o.start(t); o.stop(t + dur + 0.025);
+   o.onended = () => { _activeOscs.delete(o); res(); };
+  });
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function wuMs(wpm) { return 1200 / wpm; }
+function stopAllOscs() {
+ for (const o of _activeOscs) { try { o.stop(); } catch(e){} }
+  _activeOscs.clear();
+}
+
+let _isPlaying = false;
+async function playCode(code, wpm=14, freq=680) {
+ stopAllOscs();
+  _isPlaying = true;
+ const u = wuMs(wpm);
+ for (let i = 0; i < code.length; i++) {
+   if (!_isPlaying) break;
+   await beep(freq, (code[i]==='.'?1:3)*u/1000);
+   if (!_isPlaying) break;
+   if (i < code.length - 1) await sleep(u);
+  }
+  _isPlaying = false;
+}
+
+// ── STARS ──
+(function () {
+ const c = document.getElementById('starCanvas');
+ const ctx = c.getContext("2d");
+ let stars = [];
+ function resize() { c.width = innerWidth; c.height = innerHeight; }
+ window.addEventListener('resize', resize);
+ resize();
+ stars = Array.from({length:130}, () => ({
+   x: Math.random()*c.width, y: Math.random()*c.height,
+   r: Math.random()*1.1+0.2, o: Math.random(), s: Math.random()*0.003+0.001
+  }));
+  (function draw() {
+   ctx.clearRect(0, 0, c.width, c.height);
+   stars.forEach(s => {
+     s.o += s.s; if (s.o>1||s.o<0) s.s*=-1;
+     ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+     ctx.fillStyle = `rgba(150,210,255,${s.o*0.55})`; ctx.fill();
+    });
+   requestAnimationFrame(draw);
+  })();
+})();
+
+/* ══════════════════════════════════════════
+  LEARN
+══════════════════════════════════════════ */
+const LEVELS = [
+  {num:1, name:'First Signals',  sub:'E and T — one symbol each.',                              chars:['E','T']},
+  {num:2, name:'Building Blocks', sub:'I, A, N, M — two-symbol codes built on E and T.',         chars:['I','A','N','M']},
+  {num:3, name:'Three & Four',   sub:'S, U, R, D, K, G, W — longer patterns.',                  chars:['S','U','R','D','K','G','W']},
+  {num:4, name:'Full Alphabet',  sub:'B C F H J L P Q V X Y Z — completing A–Z.',               chars:['B','C','F','H','J','L','P','Q','V','X','Y','Z']},
+  {num:5, name:'Numbers 0–9',    sub:'Every digit is exactly five symbols.',                     chars:['0','1','2','3','4','5','6','7','8','9']},
+  {num:6, name:'Hebrew א–מ',     sub:'Alef through Mem — first half of the Hebrew alphabet.',    chars:['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ל','מ'], heb:true},
+  {num:7, name:'Hebrew נ–ת',     sub:'Nun through Tav — complete the Hebrew Morse alphabet.',    chars:['נ','ס','ע','פ','צ','ק','ר','ש','ת'], heb:true},
+];
+
+let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false };
+let lvlDone = JSON.parse(localStorage.getItem('mw_lvls') || '{}');
+
+function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem('mw_lvls', JSON.stringify(lvlDone)); }
+
+function buildSteps(lv) {
+ const s = [];
+ s.push({type:'intro'});
+ lv.chars.forEach(ch => {
+   s.push({type:'flash', ch});
+   s.push({type:'recog', ch});
+   s.push({type:'recall', ch});
+  });
+  // SRS weak review
+ const weak = lv.chars.filter(ch => srsScore(ch) < 0);
+ weak.forEach(ch => s.push({type:'srs', ch}));
+ s.push({type:'done'});
+ return s;
+}
+
+function initLearn() {
+ renderTrack();
+ renderLevelGrid();
+}
+
+function renderTrack() {
+ const el = document.getElementById('levelTrack');
+ el.innerHTML = LEVELS.map((_, i) => `<div class="lt${lvlDone[i]?' done':i===LP.lvlIdx?' cur':''}" id="lt${i}"></div>`).join('');
+}
+
+function renderLevelGrid() {
+ document.getElementById('levelSelector').style.display = 'block';
+ document.getElementById('lessonArea').style.display = 'none';
+ document.getElementById('lmTitle').textContent = 'Choose a Level';
+ document.getElementById('lmSub').textContent = 'Pick up where you left off';
+ document.getElementById('lmBadge').textContent = '7 LEVELS';
+ const g = document.getElementById('levelGrid');
+ g.innerHTML = LEVELS.map((lv, i) => {
+   const done = !!lvlDone[i];
+   const locked = i > 0 && !lvlDone[i-1] && !done;
+   const isHeb = !!lv.heb;
+   return `<div class="lv${done?' done':''}${locked?' locked':''}"
+     onclick="${locked?'toast(\'Complete Level '+(i)+' first\',\'info\')':'startLevel('+i+')'}"
+    >
+      <div class="lv-num">L${lv.num}</div>
+      <div class="lv-name">${lv.name}</div>
+      <div class="lv-chars${isHeb?' heb':''}">${lv.chars.join(' ')}</div>
+      <div class="lv-star">${done?'✦':locked?'🔒':''}</div>
+      <div class="lv-bar"><div class="lv-fill" style="width:${done?100:0}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function startLevel(i) {
+ LP.lvlIdx = i; LP.stepIdx = 0; LP.steps = buildSteps(LEVELS[i]); LP.answered = false;
+ document.getElementById('levelSelector').style.display = 'none';
+ document.getElementById('lessonArea').style.display = 'block';
+ const lv = LEVELS[i];
+ document.getElementById('lmTitle').textContent = `Level ${lv.num}: ${lv.name}`;
+ document.getElementById('lmSub').textContent = lv.sub;
+ document.getElementById('lmBadge').textContent = `LEVEL ${lv.num} / 7`;
+ renderTrack();
+ renderSrsChips();
+ renderStep();
+}
+
+function renderSrsChips() {
+ const lv = LEVELS[LP.lvlIdx];
+ document.getElementById('srsChips').innerHTML = lv.chars.map(ch => {
+   const sc = srsScore(ch);
+   const cls = sc >= 3 ? 'strong' : sc < 0 ? 'weak' : 'new';
+   const icon = sc >= 3 ? '✓' : sc < 0 ? '↩' : '·';
+   return `<span class="chip ${cls}${lv.heb?' heb':''}">${icon} ${ch}</span>`;
+  }).join('');
+}
+
+function renderStep() {
+ const step = LP.steps[LP.stepIdx];
+ document.getElementById('stepInfo').textContent = `Step ${LP.stepIdx+1} / ${LP.steps.length}`;
+ document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type).toUpperCase();
+ document.getElementById('lNextBtn').disabled = true;
+ document.getElementById('lBackBtn').style.visibility = LP.stepIdx > 0 ? 'visible' : 'hidden';
+ const st = document.getElementById('lstage');
+ LP.answered = false;
+ st.classList.add('fade');
+ setTimeout(() => {
+   st.classList.remove('fade');
+   switch (step.type) {
+     case 'intro': renderIntro(); break;
+     case 'flash': renderFlash(step.ch); break;
+     case 'recog': renderRecog(step.ch); break;
+     case 'recall': renderRecall(step.ch); break;
+     case 'srs':   renderSRS(step.ch); break;
+     case 'done':  renderDone(); break;
+    }
+  }, 230);
+}
+
+function renderIntro() {
+ const lv = LEVELS[LP.lvlIdx];
+ document.getElementById('lstage').innerHTML = `<div class="intro-wrap">
+    <div class="intro-lnum">LEVEL ${lv.num} OF 7</div>
+    <div class="intro-title">${lv.name}</div>
+    <div class="intro-sub">${lv.sub}</div>
+    <div class="intro-chips">
+      ${lv.chars.map(ch => `<span class="ichip${lv.heb?' heb':''}">${ch}<span class="icode">${fmtCode(getMorse(ch))}</span></span>`).join('')}
+    </div>
+  </div>`;
+ document.getElementById('lNextBtn').disabled = false;
+}
+
+function renderFlash(ch) {
+ const code = getMorse(ch);
+ const isHeb = LEVELS[LP.lvlIdx].heb;
+ const syms = code.split('').map(s=>`<div class="fc-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
+ document.getElementById('lstage').innerHTML = `<div style="text-align:center">
+    <div style="font-size:.78rem;color:var(--txt2);margin-bottom:.85rem">Tap the card to flip — then listen</div>
+    <div class="fc-wrap"><div class="fc" id="lfc">
+      <div class="fc-face fc-front">
+        <div class="fc-letter${isHeb?' heb':''}">${ch}</div>
+        <div class="fc-hint">tap to flip</div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-syms">${syms}</div>
+        <div class="fc-code">${fmtCode(code)}</div>
+        <div class="fc-letter${isHeb?' heb':''}" style="font-size:1.5rem;opacity:.5">${ch}</div>
+      </div>
+    </div></div>
+    <button class="play-btn" onclick="playCode('${code}')">
+      <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Hear it
+    </button>
+  </div>`;
+ document.getElementById('lfc').addEventListener('click', () => {
+   const fc = document.getElementById('lfc');
+   fc.classList.toggle('flipped');
+   if (fc.classList.contains('flipped')) { document.getElementById('lNextBtn').disabled=false; playCode(code); }
+  });
+}
+
+function buildOptPool(ch) {
+ const lv = LEVELS[LP.lvlIdx];
+ let pool = [...lv.chars];
+ if (pool.length < 4) {
+   for (let li = LP.lvlIdx-1; li >= 0 && pool.length < 8; li--) pool = pool.concat(LEVELS[li].chars);
+  }
+ const opts = [ch];
+ const shuffled = pool.filter(c=>c!==ch).sort(()=>Math.random()-.5);
+ for (const c of shuffled) { if (opts.length >= 4) break; opts.push(c); }
+ return opts.sort(()=>Math.random()-.5);
+}
+
+function renderRecog(ch) {
+ const code = getMorse(ch);
+ const isHeb = LEVELS[LP.lvlIdx].heb;
+ const syms = code.split('').map(s=>`<div class="q-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
+ const opts = buildOptPool(ch);
+ document.getElementById('lstage').innerHTML = `<div style="text-align:center;width:100%">
+    <div class="q-prompt">What letter is this Morse code?</div>
+    <div class="q-syms">${syms}</div>
+    <button class="play-btn" onclick="playCode('${code}')">
+      <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Play
+    </button>
+    <div class="opts" id="lOpts">
+      ${opts.map(o=>`<button class="opt${isHeb?' heb':''}" data-ch="${o}" onclick="recogAns('${ch}',this)">${o}</button>`).join('')}
+    </div>
+    <div class="lfb" id="lFb"></div>
+  </div>`;
+ setTimeout(() => playCode(code), 350);
+}
+
+function recogAns(correct, btn) {
+ if (LP.answered) return; LP.answered = true;
+ const ok = btn.dataset.ch === correct;
+ document.querySelectorAll('#lOpts .opt').forEach(b => {
+   b.disabled = true;
+   if (b.dataset.ch === correct) b.classList.add('correct');
+   else if (b === btn && !ok) b.classList.add('wrong');
+  });
+ showLFb(ok, correct);
+ srsRecord(correct, ok); renderSrsChips();
+ document.getElementById('lNextBtn').disabled = false;
+ if (ok) playCode(getMorse(correct));
+ maybeAutoAdvance(ok, lNext);
+}
+
+function renderRecall(ch) {
+ const code = getMorse(ch);
+ const isHeb = LEVELS[LP.lvlIdx].heb;
+ const syms = code.split('').map(s=>`<div class="q-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
+ document.getElementById('lstage').innerHTML = `<div style="text-align:center;width:100%">
+    <div class="q-prompt">Type the letter for this Morse code</div>
+    <div class="q-syms">${syms}</div>
+    <button class="play-btn" onclick="playCode('${code}')">
+      <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg> Play
+    </button>
+    <div class="type-wrap">
+      <input type="text" id="lTypeInp" class="type-inp${isHeb?' heb':''}" maxlength="2"
+       autocomplete="off" autocorrect="off" spellcheck="false"
+       autocapitalize="${isHeb?'off':'characters'}" placeholder="?">
+    </div>
+    <div class="lfb" id="lFb"></div>
+  </div>`;
+ const inp = document.getElementById('lTypeInp');
+ if (!isHeb) inp.addEventListener('input', e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,1); });
+ inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); checkRecall(ch); } });
+ setTimeout(() => { inp.focus(); playCode(code); }, 280);
+}
+
+function checkRecall(correct) {
+ if (LP.answered) return;
+ const inp = document.getElementById('lTypeInp');
+ const val = inp.value.trim();
+ if (!val) return;
+ LP.answered = true;
+ const isHeb = LEVELS[LP.lvlIdx].heb;
+ const ok = isHeb ? val === correct : val.toUpperCase() === correct.toUpperCase();
+ inp.disabled = true; inp.className = `type-inp${LEVELS[LP.lvlIdx].heb?' heb':''} ${ok?'ok':'bad'}`;
+ showLFb(ok, correct);
+ srsRecord(correct, ok); renderSrsChips();
+ document.getElementById('lNextBtn').disabled = false;
+ if (ok) playCode(getMorse(correct));
+ maybeAutoAdvance(ok, lNext);
+}
+
+function renderSRS(ch) {
+ renderRecall(ch); // same UI, phase pill already says REVIEW
+}
+
+function showLFb(ok, ch) {
+ const fb = document.getElementById('lFb');
+ if (!fb) return;
+ fb.className = 'lfb show ' + (ok?'ok':'bad');
+ fb.textContent = ok ? `✓ Correct! ${ch} = ${fmtCode(getMorse(ch))}` : `✗ Answer: ${ch} = ${fmtCode(getMorse(ch))}`;
+}
+
+function renderDone() {
+ const lv = LEVELS[LP.lvlIdx];
+ saveLvl(LP.lvlIdx, true);
+ const strong = lv.chars.filter(ch => srsScore(ch) >= 3).length;
+ document.getElementById('lstage').innerHTML = `<div class="complete-wrap">
+    <div class="complete-icon">🎉</div>
+    <div class="complete-title">Level ${lv.num} Complete!</div>
+    <div class="complete-sub">Learned: <strong>${lv.chars.join(', ')}</strong></div>
+    <div class="xp-row">
+      <div class="xp"><div class="xp-v">${lv.chars.length}</div><div class="xp-l">New chars</div></div>
+      <div class="xp"><div class="xp-v">${strong}</div><div class="xp-l">Strong</div></div>
+      <div class="xp"><div class="xp-v">${lv.chars.length-strong}</div><div class="xp-l">Review more</div></div>
+    </div>
+  </div>`;
+ const nb = document.getElementById('lNextBtn');
+ nb.disabled = false;
+ nb.textContent = LP.lvlIdx < LEVELS.length-1 ? 'Next Level →' : '🏆 All Done!';
+}
+
+function lNext() {
+ const step = LP.steps[LP.stepIdx];
+ if (step.type === 'done') {
+   if (LP.lvlIdx < LEVELS.length-1) startLevel(LP.lvlIdx+1);
+   else renderLevelGrid();
+   renderTrack();
+   return;
+  }
+ LP.stepIdx = Math.min(LP.stepIdx+1, LP.steps.length-1);
+ renderStep();
+}
+
+function lBack() {
+ if (LP.stepIdx > 0) { LP.stepIdx--; renderStep(); }
+ else renderLevelGrid();
+}
+
+/* ══════════════════════════════════════════
+  TELEGRAPH
+══════════════════════════════════════════ */
+const TAP = {
+ wpm: 8,
+ pressed: false, pressStart: 0,
+ tapped: [],
+ target: 'E', targetCode: '.',
+ correct: 0, streak: 0, total: 0,
+  // live decode state
+ liveSymbols: '',
+ liveDecodeTimer: null,
+ liveWord: '',
+  // oscillator for live tone
+  _osc: null, _gain: null,
+  // challenge mode flag
+ mode: 'challenge' // 'challenge' | 'free'
+};
+
+function initTap() {
+ tapNextTarget();
+ updateTapScores();
+}
+
+function tapPool() {
+ if (currentLang === 'en') return Object.keys(MORSE_EN).filter(k => /[A-Z]/.test(k));
+ return getLangLetters(currentLang);
+}
+
+function tapNextTarget() {
+ const pool = tapPool();
+ const weak = pool.filter(ch => srsScore(ch) < 0);
+ const src = weak.length > 0 && Math.random() < 0.38 ? weak : pool;
+ TAP.target = src[Math.floor(Math.random()*src.length)];
+ TAP.targetCode = getMorse(TAP.target) || '.';
+ TAP.tapped = [];
+ const isHeb = /[\u05D0-\u05EA]/.test(TAP.target);
+ const el = document.getElementById('tapLetter');
+ el.className = 'tap-letter' + (isHeb?' heb':'');
+ el.textContent = TAP.target;
+ document.getElementById('tapCode').textContent = fmtCode(TAP.targetCode);
+ document.getElementById('tapFb').textContent = '';
+ document.getElementById('tapFb').className = 'tap-fb';
+ renderTapProg();
+}
+
+function renderTapProg() {
+ document.getElementById('tapProg').innerHTML = TAP.targetCode.split('').map((s, i) => {
+   const on = i < TAP.tapped.length ? ' on' : '';
+   return `<div class="tp ${s==='.'?'dot':'dash'}${on}"></div>`;
+  }).join('');
+}
+
+function tapPressStart() {
+ if (TAP.pressed) return;
+ TAP.pressed = true;
+ TAP.pressStart = Date.now();
+ document.getElementById('keyArm').classList.add('pressed');
+ startKeyTone();
+}
+
+function tapPressEnd() {
+ if (!TAP.pressed) return;
+ TAP.pressed = false;
+ document.getElementById('keyArm').classList.remove('pressed');
+ stopKeyTone();
+ const dur = Date.now() - TAP.pressStart;
+ const threshold = wuMs(TAP.wpm) * 1.8;
+ const sym = dur < threshold ? '.' : '-';
+  // Register in challenge
+ registerTapSym(sym);
+  // Register in free decode
+ registerLiveSym(sym);
+}
+
+function startKeyTone() {
+ const ctx = getACtx();
+ stopKeyTone();
+ TAP._osc = ctx.createOscillator();
+ TAP._gain = ctx.createGain();
+ TAP._osc.connect(TAP._gain); TAP._gain.connect(ctx.destination);
+ TAP._osc.type = 'sine'; TAP._osc.frequency.value = 680;
+ TAP._gain.gain.setValueAtTime(0, ctx.currentTime);
+ TAP._gain.gain.linearRampToValueAtTime(0.38, ctx.currentTime + 0.008);
+ TAP._osc.start();
+}
+
+function stopKeyTone() {
+ if (TAP._osc) {
+   try {
+     const ctx = getACtx();
+     TAP._gain.gain.setValueAtTime(TAP._gain.gain.value, ctx.currentTime);
+     TAP._gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.012);
+     const o = TAP._osc; setTimeout(() => { try{ o.stop(); }catch(e){} }, 20);
+    } catch(e){}
+   TAP._osc = null; TAP._gain = null;
+  }
+}
+
+function registerTapSym(sym) {
+  // flash contact
+ const g = document.getElementById('contactGlow');
+ g.setAttribute('opacity','0.9');
+ setTimeout(() => g.setAttribute('opacity','0'), sym==='.'?70:190);
+ TAP.tapped.push(sym);
+ renderTapProg();
+ if (TAP.tapped.length >= TAP.targetCode.length) {
+   setTimeout(evalTap, 220);
+  }
+}
+
+function evalTap() {
+ const entered = TAP.tapped.join('');
+ const ok = entered === TAP.targetCode;
+ TAP.total++;
+ const fb = document.getElementById('tapFb');
+ if (ok) {
+   TAP.correct++; TAP.streak++;
+   srsRecord(TAP.target, true);
+   fb.className = 'tap-fb ok'; fb.textContent = `✓ ${TAP.target} — correct!`;
+  } else {
+   TAP.streak = 0;
+   srsRecord(TAP.target, false);
+   fb.className = 'tap-fb bad'; fb.textContent = `✗ ${TAP.target} = ${fmtCode(TAP.targetCode)}`;
+  }
+ updateTapScores();
+ setTimeout(tapNextTarget, 1100);
+}
+
+function updateTapScores() {
+ document.getElementById('tapC').textContent = TAP.correct;
+ document.getElementById('tapStr').textContent = TAP.streak;
+ document.getElementById('tapTot').textContent = TAP.total;
+}
+
+// Free decode (live display)
+function registerLiveSym(sym) {
+ clearTimeout(TAP.liveDecodeTimer);
+ TAP.liveSymbols += sym;
+ document.getElementById('tdSymbols').textContent = fmtCode(TAP.liveSymbols);
+  // After 1.2s silence: decode
+ TAP.liveDecodeTimer = setTimeout(() => {
+   const decoded = decodeCode(TAP.liveSymbols);
+   TAP.liveWord += decoded;
+   document.getElementById('tdWord').textContent = TAP.liveWord;
+   TAP.liveSymbols = '';
+   document.getElementById('tdSymbols').textContent = '—';
+  }, 1200);
+}
+
+function setTapWpm(btn) {
+ TAP.wpm = parseInt(btn.dataset.wpm);
+ document.querySelectorAll('#tapWpmSeg .wpm-btn').forEach(b => b.classList.toggle('on', b===btn));
+}
+
+function tapSkip() { TAP.tapped = []; tapNextTarget(); }
+function tapPlayTarget() { playCode(TAP.targetCode, TAP.wpm); }
+
+// Telegraph key DOM events
+const telegraph = document.getElementById('telegraph');
+telegraph.addEventListener('mousedown', e => { e.preventDefault(); tapPressStart(); });
+telegraph.addEventListener('touchstart', e => { e.preventDefault(); tapPressStart(); }, {passive:false});
+document.addEventListener('mouseup', () => { if (TAP.pressed) tapPressEnd(); });
+document.addEventListener('touchend', () => { if (TAP.pressed) tapPressEnd(); });
+
+// ── GLOBAL KEYBOARD for telegraph — GUARD against input focus ──
+document.addEventListener('keydown', e => {
+ if (inputHasFocus()) return; // ← KEY FIX: don't intercept when typing
+ if ((e.code === 'Space' || e.key === 'k' || e.key === 'K') && currentPage === 'tap') {
+   e.preventDefault();
+   tapPressStart();
+  }
+});
+document.addEventListener('keyup', e => {
+ if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+   if (TAP.pressed) tapPressEnd();
+  }
+});
+
+/* ══════════════════════════════════════════
+  PRACTICE
+══════════════════════════════════════════ */
+const P = {
+ mode:'letters', wpm:8, correct:0, wrong:0, streak:0, round:1,
+ current: null, answered: false, _init: false
+};
+
+function getPool(mode) {
+ if (mode==='numbers') return Object.keys(MORSE_EN).filter(k=>/[0-9]/.test(k));
+ if (mode==='heb') return Object.keys(MORSE_HEB);
+ if (mode==='lang') return getLangLetters(currentLang);
+ if (mode==='letters') {
+   // Use the currently selected language's letters
+   if (currentLang === 'en') return Object.keys(MORSE_EN).filter(k=>/[A-Z]/.test(k));
+   return getLangLetters(currentLang);
+ }
+ // mix
+ if (currentLang === 'en') return [...Object.keys(MORSE_EN).filter(k=>/[A-Z]/.test(k)), ...Object.keys(MORSE_EN).filter(k=>/[0-9]/.test(k))];
+ return [...getLangLetters(currentLang), ...Object.keys(MORSE_EN).filter(k=>/[0-9]/.test(k))];
+}
+
+function initPractice() {
+ if (P._init) return; P._init = true;
+ refreshPracticeUI();
+ // Set default mode based on current language
+ if (currentLang === 'he') P.mode = 'heb';
+ else if (currentLang !== 'en') P.mode = 'lang';
+ else P.mode = 'letters';
+ const inp = document.getElementById('pAns');
+  // Enter to check — only when input has focus (safe, no conflict)
+ inp.addEventListener('keydown', e => {
+   if (e.key === 'Enter') { e.preventDefault(); pCheck(); }
+  });
+  // Auto-uppercase for non-Hebrew
+ inp.addEventListener('input', e => {
+   if (!isHebLang() && currentLang==='en') e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,1);
+  });
+ pNext();
+}
+
+function pickChar() {
+ const pool = getPool(P.mode);
+ const weak = pool.filter(ch => srsScore(ch) < 0);
+ const src = weak.length > 0 && Math.random() < 0.4 ? weak : pool;
+ return src[Math.floor(Math.random()*src.length)];
+}
+
+function pNext() {
+ P.current = pickChar(); P.answered = false;
+ const code = getMorse(P.current);
+ document.getElementById('pVis').innerHTML = code.split('').map(s=>`<div class="mv-s ${s==='.'?'dot':'dash'}"></div>`).join('');
+ document.getElementById('pMorseTxt').textContent = fmtCode(code);
+ document.getElementById('pRound').textContent = '#' + String(P.round++).padStart(3,'0');
+ const inp = document.getElementById('pAns');
+ inp.value = '';
+ inp.className = 'ans-inp' + (isHebLang()?' heb':'');
+ inp.disabled = false;
+ document.getElementById('pFb').className = 'pfb';
+ document.getElementById('pCheckBtn').style.display = 'flex';
+ document.getElementById('pNextBtn').style.display = 'none';
+ setTimeout(() => { inp.focus(); playCode(code, P.wpm); }, 250);
+}
+
+function pPlay() {
+ const code = getMorse(P.current);
+ if (!code) return;
+ playCode(code, P.wpm);
+}
+
+function pCheck() {
+ if (P.answered) return;
+ const inp = document.getElementById('pAns');
+ const val = inp.value.trim();
+ if (!val) return;
+ P.answered = true;
+ const isHeb = isHebLang();
+ const ok = isHeb ? val === P.current : val.toUpperCase() === P.current;
+ inp.disabled = true;
+ inp.className = 'ans-inp' + (isHeb?' heb':'') + ' ' + (ok?'ok':'bad');
+ if (ok) { P.correct++; P.streak++; }
+ else { P.wrong++; P.streak = 0; }
+ srsRecord(P.current, ok);
+ document.getElementById('hudC').textContent = P.correct;
+ document.getElementById('hudS').textContent = P.streak;
+ document.getElementById('hudW').textContent = P.wrong;
+ const code = getMorse(P.current);
+ const fb = document.getElementById('pFb');
+ fb.className = 'pfb show ' + (ok?'ok':'bad');
+ document.getElementById('pFbIc').textContent = ok ? '✓' : '✗';
+ document.getElementById('pFbTitle').textContent = ok ? 'Correct!' : 'Wrong!';
+ document.getElementById('pFbSub').innerHTML = ok
+    ? `${P.current} = <b>${fmtCode(code)}</b> · Streak: ${P.streak}`
+    : `Answer: <b>${P.current}</b> = <b>${fmtCode(code)}</b>`;
+ document.getElementById('pCheckBtn').style.display = 'none';
+ document.getElementById('pNextBtn').style.display = 'flex';
+ if (ok) playCode(code, P.wpm);
+ maybeAutoAdvance(ok, pNext);
+}
+
+function pSkip() {
+ P.answered = true; P.streak = 0;
+ document.getElementById('hudS').textContent = P.streak;
+ pNext();
+}
+
+function setPMode(btn) {
+ P.mode = btn.dataset.mode;
+ document.querySelectorAll('#modeSeg .sbtn').forEach(b => b.classList.toggle('on', b===btn));
+  // Reset input class for Hebrew
+ document.getElementById('pAns').className = 'ans-inp' + (isHebLang()?' heb':'');
+ pNext();
+}
+
+function setPWpm(btn) {
+ P.wpm = parseInt(btn.dataset.wpm);
+ document.querySelectorAll('#speedSeg .sbtn').forEach(b => b.classList.toggle('on', b===btn));
+}
+
+/* ══════════════════════════════════════════
+  DICTIONARY
+══════════════════════════════════════════ */
+function dictTab(btn, tab) {
+ document.querySelectorAll('.dtab').forEach(b => b.classList.toggle('on', b===btn));
+ let entries;
+ if (tab==='en') entries = [...Object.entries(MORSE_EN).filter(([k])=>/[A-Z]/.test(k)), ...Object.entries(MORSE_EN).filter(([k])=>/[0-9]/.test(k))];
+ else if (tab==='heb') {
+   // Show the currently selected language (or Hebrew if English is active)
+   const lc = (currentLang && currentLang!=='en') ? currentLang : 'he';
+   entries = getLangLetters(lc).map(ch => [ch, (LANG_MORSE[lc].table[ch]||LANG_MORSE[lc].table[ch.toUpperCase()]||'')]);
+ }
+ else entries = Object.entries(MORSE_PUNC);
+ const isHeb = tab==='heb' && isHebLang();
+ document.getElementById('dictGrid').innerHTML = entries.map(([ch, code]) => `
+    <div class="di" onclick="dictPlay('${ch.replace(/'/g,"\\'")}')" title="${fmtCode(code)}">
+      <button class="di-globe" onclick="event.stopPropagation();showMorseInLanguages('${code}','${ch.replace(/'/g,"\\'")}')" title="See in 20 languages">🌍</button>
+      <div class="di-ch${isHeb?' heb':''}">${ch}</div>
+      <div class="di-syms">${code.split('').map(s=>`<div class="di-s ${s==='.'?'dot':'dash'}"></div>`).join('')}</div>
+      <div class="di-code">${fmtCode(code)}</div>
+    </div>`).join('');
+}
+
+function dictPlay(ch) {
+ const code = getMorse(ch); if (!code) return;
+ document.querySelectorAll('.di').forEach(d => d.classList.remove('playing'));
+  // Find by text content
+ for (const d of document.querySelectorAll('.di')) {
+   if (d.querySelector('.di-ch').textContent.trim() === ch) { d.classList.add('playing'); break; }
+  }
+ playCode(code, 14).then(() => document.querySelectorAll('.di').forEach(d => d.classList.remove('playing')));
+}
+
+/* ══════════════════════════════════════════
+  SETTINGS
+══════════════════════════════════════════ */
+// State
+const SETTINGS_KEY = 'mw_settings';
+let CFG = {
+ autoAdvance: true,
+ trigger: 'correct',   // 'correct' | 'wrong' | 'both'
+ delay: 0.5,           // seconds
+ delayMode: '0.5',     // preset or 'custom'
+};
+
+function loadSettings() {
+ try {
+   const s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+   if (s) Object.assign(CFG, s);
+  } catch(e) {}
+ applySettingsUI();
+}
+
+function saveSettings() {
+ CFG.autoAdvance = document.getElementById('swAutoAdvance').checked;
+ CFG.trigger = document.getElementById('selTrigger').value;
+ CFG.delayMode = document.getElementById('selDelay').value;
+ if (CFG.delayMode === 'custom') {
+   const v = parseFloat(document.getElementById('inpCustomDelay').value);
+   CFG.delay = isNaN(v) ? 0.5 : Math.min(3, Math.max(0, v));
+  } else {
+   CFG.delay = parseFloat(CFG.delayMode);
+  }
+ localStorage.setItem(SETTINGS_KEY, JSON.stringify(CFG));
+}
+
+function applySettingsUI() {
+ const sw = document.getElementById('swAutoAdvance');
+ if (!sw) return;
+ sw.checked = CFG.autoAdvance;
+ document.getElementById('selTrigger').value = CFG.trigger;
+ document.getElementById('autoAdvanceSub').style.display = CFG.autoAdvance ? '' : 'none';
+ const selDelay = document.getElementById('selDelay');
+ selDelay.value = CFG.delayMode;
+ document.getElementById('customDelayRow').style.display = CFG.delayMode === 'custom' ? '' : 'none';
+ if (CFG.delayMode === 'custom') {
+   document.getElementById('inpCustomDelay').value = CFG.delay;
+  }
+}
+
+function toggleSGroup(header) {
+ const arrow = header.querySelector('.sgroup-arrow');
+ const body = header.nextElementSibling;
+ const open = body.classList.toggle('open');
+ arrow.classList.toggle('open', open);
+}
+
+function onAutoAdvanceChange() {
+ CFG.autoAdvance = document.getElementById('swAutoAdvance').checked;
+ document.getElementById('autoAdvanceSub').style.display = CFG.autoAdvance ? '' : 'none';
+ saveSettings();
+}
+
+function onDelayChange() {
+ const v = document.getElementById('selDelay').value;
+ document.getElementById('customDelayRow').style.display = v === 'custom' ? '' : 'none';
+ saveSettings();
+}
+
+function clampDelay(inp) {
+ let v = parseFloat(inp.value);
+ if (isNaN(v) || v < 0.001) { inp.value = '0.001'; return; }
+ if (v > 3) inp.value = 3;
+ saveSettings();
+}
+
+// Auto-advance helper — call after answering
+function maybeAutoAdvance(wasCorrect, nextFn) {
+ if (!CFG.autoAdvance) return;
+ const t = CFG.trigger;
+ if (t === 'correct' && !wasCorrect) return;
+ if (t === 'wrong' && wasCorrect) return;
+ setTimeout(nextFn, CFG.delay * 1000);
+}
+
+// ═══ CROSSWORD ═══
+function initCrossword(){
+ crosswordInited=true;
+ const $=id=>document.getElementById(id);
+ const ROWS=8,COLS=6;
+ const WORDS=[{num:1,word:'MORSE',row:0,col:4,dir:'down',clue:"Navigation tool direction"},{num:2,word:'RADIO',row:1,col:0,dir:'across',clue:"AM broadcast technology"},{num:3,word:'CODE',row:4,col:1,dir:'across',clue:"Encrypted message"},{num:4,word:'DASH',row:4,col:3,dir:'down',clue:"Long Morse symbol"},{num:5,word:'WAVE',row:5,col:2,dir:'across',clue:"Oscillating motion"},{num:6,word:'SOS',row:6,col:3,dir:'across',clue:"Emergency distress call"},{num:7,word:'HAM',row:7,col:3,dir:'across',clue:"Amateur radio operator"}];
+ const SOL=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+ WORDS.forEach(w=>{for(let i=0;i<w.word.length;i++){const r=w.dir==='down'?w.row+i:w.row,c=w.dir==='across'?w.col+i:w.col;SOL[r][c]=w.word[i];}});
+ const totalCells=SOL.flat().filter(Boolean).length;
+ const CNUM={};WORDS.forEach(w=>{CNUM[`${w.row},${w.col}`]=w.num;});
+ function wordsAt(r,c){return WORDS.filter(w=>w.dir==='across'?w.row===r&&c>=w.col&&c<w.col+w.word.length:w.col===c&&r>=w.row&&r<w.row+w.word.length);}
+ const XS={active:null,activeWord:null,hints:0,plays:0,startTime:null,timerInt:null,isPlaying:false,stopFlag:false,values:Array.from({length:ROWS},()=>Array(COLS).fill(''))};
+ const gridEl=document.getElementById('xgrid'),cluesAEl=document.getElementById('cluesAcross'),cluesDEl=document.getElementById('cluesDown');
+ gridEl.style.setProperty('--rows',ROWS);gridEl.style.setProperty('--cols',COLS);
+
+ function buildXGrid(){gridEl.innerHTML='';for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const cell=document.createElement("div");cell.className=SOL[r][c]?'xcell fill':'xcell empty';cell.dataset.r=r;cell.dataset.c=c;if(SOL[r][c]){if(CNUM[`${r},${c}`]){const num=document.createElement("span");num.className='cell-num';num.textContent=CNUM[`${r},${c}`];cell.appendChild(num);}const inp=document.createElement("input");inp.className='cell-input';inp.maxLength=1;inp.dataset.r=r;inp.dataset.c=c;inp.autocomplete='off';cell.appendChild(inp);cell.addEventListener('click',()=>activateXCell(r,c));inp.addEventListener('focus',()=>activateXCell(r,c,false));inp.addEventListener('input',e=>onXInput(e,r,c));inp.addEventListener('keydown',e=>onXKey(e,r,c));}gridEl.appendChild(cell);}}
+ function buildXClues(){cluesAEl.innerHTML='';cluesDEl.innerHTML='';WORDS.forEach(w=>{const el=document.createElement("div");el.className='clue';el.dataset.num=w.num;el.dataset.dir=w.dir;el.innerHTML=`<div class="clue-num">${w.num}</div><div class="clue-main"><div class="clue-text">${w.clue}</div><div class="clue-meta"><span class="clue-len">${w.word.length} letters</span><span class="clue-morse">${w.word.split('').map(ch=>fmtCode(getMorse(ch)||"")).join(' / ')}</span></div></div><button class="clue-play" title="Play"><svg viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"/></svg></button>`;el.addEventListener('click',e=>{if(e.target.closest(".clue-play"))playXWord(w);else activateXWord(w);});(w.dir==='across'?cluesAEl:cluesDEl).appendChild(el);});}
+ function activateXCell(r,c,focus=true){if(!SOL[r][c])return;XS.active={row:r,col:c};const words=wordsAt(r,c);if(!XS.activeWord||!words.includes(XS.activeWord))XS.activeWord=words[0];renderX();if(focus){const inp=gridEl.querySelector(`.cell-input[data-r="${r}"][data-c="${c}"]`);if(inp)inp.focus();}}
+ function activateXWord(w){XS.activeWord=w;XS.active={row:w.row,col:w.col};for(let i=0;i<w.word.length;i++){const r=w.dir==='down'?w.row+i:w.row,c=w.dir==='across'?w.col+i:w.col;if(!XS.values[r][c]){XS.active={row:r,col:c};break;}}renderX();const{row,col}=XS.active;const inp=gridEl.querySelector(`.cell-input[data-r="${row}"][data-c="${col}"]`);if(inp)inp.focus();}
+ function onXInput(e,r,c){const val=e.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(-1);e.target.value=val;XS.values[r][c]=val;e.target.parentElement.classList.remove('correct','wrong');updateXStats();checkXWordSolved();if(val)xAdvance(1);if(allXFilled()&&allXCorrect())triggerXWin();}
+ function onXKey(e,r,c){if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.key==='Backspace'){if(!XS.values[r][c]){e.preventDefault();xAdvance(-1);const back=XS.active;if(back){XS.values[back.row][back.col]='';const inp=gridEl.querySelector(`.cell-input[data-r="${back.row}"][data-c="${back.col}"]`);if(inp){inp.value='';inp.parentElement.classList.remove('correct','wrong');}updateXStats();}}}else if(e.key==='ArrowRight'){e.preventDefault();xMove(0,1);}else if(e.key==='ArrowLeft'){e.preventDefault();xMove(0,-1);}else if(e.key==='ArrowDown'){e.preventDefault();xMove(1,0);}else if(e.key==='ArrowUp'){e.preventDefault();xMove(-1,0);}else if(e.key==='Tab'){e.preventDefault();xNextWord(e.shiftKey?-1:1);}else if(e.key===' '){e.preventDefault();playXActiveWord();}else if(e.key==='Enter'){e.preventDefault();playXActiveWord();}}
+ function xMove(dr,dc){if(!XS.active)return;let{row:r,col:c}=XS.active,att=0;do{r+=dr;c+=dc;att++;if(r<0||r>=ROWS||c<0||c>=COLS)return;}while(!SOL[r][c]&&att<ROWS*COLS);if(SOL[r][c])activateXCell(r,c);}
+ function xAdvance(step){if(!XS.activeWord||!XS.active)return;const w=XS.activeWord,idx=w.dir==='down'?XS.active.row-w.row:XS.active.col-w.col,next=idx+step;if(next<0||next>=w.word.length)return;const r=w.dir==='down'?w.row+next:w.row,c=w.dir==='across'?w.col+next:w.col;XS.active={row:r,col:c};renderX();const inp=gridEl.querySelector(`.cell-input[data-r="${r}"][data-c="${c}"]`);if(inp)inp.focus();}
+ function xNextWord(step){const idx=WORDS.indexOf(XS.activeWord);activateXWord(WORDS[(idx+step+WORDS.length)%WORDS.length]);}
+ function renderX(){document.querySelectorAll('.xcell.fill').forEach(cell=>{cell.classList.remove('active','in-word');const r=+cell.dataset.r,c=+cell.dataset.c;if(XS.activeWord){const w=XS.activeWord,inW=w.dir==='across'?(w.row===r&&c>=w.col&&c<w.col+w.word.length):(w.col===c&&r>=w.row&&r<w.row+w.word.length);if(inW)cell.classList.add('in-word');}if(XS.active&&XS.active.row===r&&XS.active.col===c)cell.classList.add('active');});document.querySelectorAll('.clue').forEach(el=>el.classList.toggle('active',XS.activeWord&&+el.dataset.num===XS.activeWord.num&&el.dataset.dir===XS.activeWord.dir));if(XS.activeWord){const w=XS.activeWord;document.getElementById('abNum').textContent=w.num;document.getElementById('abDir').textContent=`${w.dir==='across'?"Across":"Down"} · ${w.word.length} letters`;document.getElementById('abClue').textContent=w.clue;document.getElementById('abMorse').textContent=w.word.split('').map(ch=>fmtCode(getMorse(ch)||"")).join('  /  ');}}
+ function updateXStats(){const filled=XS.values.flat().filter(v=>v).length;document.getElementById('statFilled').textContent=`${filled}/${totalCells}`;document.getElementById('statSolved').textContent=`${WORDS.filter(isXWCorrect).length}/${WORDS.length}`;}
+ function isXWCorrect(w){for(let i=0;i<w.word.length;i++){const r=w.dir==='down'?w.row+i:w.row,c=w.dir==='across'?w.col+i:w.col;if(XS.values[r][c]!==w.word[i])return false;}return true;}
+ function checkXWordSolved(){WORDS.forEach(w=>{const el=document.querySelector(`.clue[data-num="${w.num}"][data-dir="${w.dir}"]`);if(el)el.classList.toggle('solved',isXWCorrect(w));});}
+ function allXFilled(){return XS.values.flat().filter((v,i)=>SOL.flat()[i]).every(v=>v);}
+ function allXCorrect(){return WORDS.every(isXWCorrect);}
+ function showXToast(txt,kind='info'){const t=document.getElementById('xtoast');t.textContent=txt;t.className='xtoast '+kind;void t.offsetWidth;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
+ const XWpm=14,xU=()=>1200/XWpm;
+ async function playXWord(w){if(XS.isPlaying){XS.stopFlag=true;await sleep(80);return;}XS.isPlaying=true;XS.stopFlag=false;XS.plays++;await ensureAudio();const clueEl=document.querySelector(`.clue[data-num="${w.num}"][data-dir="${w.dir}"]`),clueBtn=clueEl?.querySelector('.clue-play');clueBtn?.classList.add('playing');if(XS.activeWord&&XS.activeWord.num===w.num&&XS.activeWord.dir===w.dir){document.getElementById('abPlay').classList.add('playing');document.getElementById('abMorse').classList.add('playing');document.getElementById('abPlayIcon').outerHTML='<svg id="abPlayIcon" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>';}for(let i=0;i<w.word.length;i++){const code=MORSE[w.word[i]];for(let j=0;j<code.length;j++){if(XS.stopFlag)break;const dur=(code[j]==='.'?1:3)*xU();await beep(680,dur/1000);if(!XS.stopFlag&&j<code.length-1)await sleep(xU());}if(XS.stopFlag)break;if(i<w.word.length-1)await sleep(xU()*3);}clueBtn?.classList.remove('playing');try{document.getElementById('abPlay').classList.remove('playing');document.getElementById('abMorse').classList.remove('playing');document.getElementById('abPlayIcon').outerHTML='<svg id="abPlayIcon" viewBox="0 0 24 24"><polygon points="6,4 20,12 6,20"/></svg>';document.getElementById('abPlay').addEventListener('click',()=>{if(XS.activeWord)playXWord(XS.activeWord);},{once:true});}catch(e){}XS.isPlaying=false;}
+ function playXActiveWord(){if(XS.activeWord)playXWord(XS.activeWord);}
+ document.getElementById('abPlay').addEventListener('click',()=>{if(XS.activeWord)playXWord(XS.activeWord);});
+ function startXTimer(){XS.startTime=Date.now();XS.timerInt=setInterval(()=>{const sec=Math.floor((Date.now()-XS.startTime)/1000),mm=String(Math.floor(sec/60)).padStart(2,'0'),ss=String(sec%60).padStart(2,'0');document.getElementById('statTime').textContent=`${mm}:${ss}`;},1000);}
+ function triggerXWin(){if(document.getElementById('xwinOverlay').classList.contains('show'))return;clearInterval(XS.timerInt);document.getElementById('xwinTime').textContent=document.getElementById('statTime').textContent;document.getElementById('xwinHints').textContent=XS.hints;document.getElementById('xwinPlays').textContent=XS.plays;xConfetti();setTimeout(()=>document.getElementById('xwinOverlay').classList.add('show'),500);}
+ function xConfetti(){const syms=['·','−','·−','−·−','··','−−'],colors=['rgba(0,255,166,0.95)','rgba(0,212,255,0.95)','rgba(255,200,87,0.9)'],cx=innerWidth/2,cy=innerHeight/2;for(let i=0;i<30;i++){const p=document.createElement("div");p.className='particle';const a=Math.PI*2*Math.random(),d=150+Math.random()*200;p.style.left=cx+'px';p.style.top=cy+'px';p.style.setProperty('--dx',Math.cos(a)*d+'px');p.style.setProperty('--dy',Math.sin(a)*d+'px');p.style.color=colors[Math.floor(Math.random()*colors.length)];p.style.fontSize=(0.8+Math.random()*0.7)+'rem';p.textContent=syms[Math.floor(Math.random()*syms.length)];document.body.appendChild(p);setTimeout(()=>p.remove(),1300);}}
+ function resetX(){XS.values=Array.from({length:ROWS},()=>Array(COLS).fill(''));XS.hints=0;XS.plays=0;document.querySelectorAll('.xcell.fill').forEach(cell=>{cell.classList.remove('correct','wrong');const inp=cell.querySelector('.cell-input');if(inp)inp.value='';});document.querySelectorAll('.clue').forEach(el=>el.classList.remove('solved'));updateXStats();}
+ document.getElementById('checkBtn').addEventListener('click',()=>{let ok=0,bad=0;document.querySelectorAll('.xcell.fill').forEach(cell=>{const r=+cell.dataset.r,c=+cell.dataset.c,v=XS.values[r][c];cell.classList.remove('correct','wrong');if(!v)return;if(v===SOL[r][c]){cell.classList.add('correct');ok++;}else{cell.classList.add('wrong');bad++;}});if(bad===0&&ok===totalCells)triggerXWin();else if(bad===0)showXToast(`${ok} ${"correct so far — keep going!"}`,'success');else showXToast(`${ok} ${"correct"} · ${bad} ${"wrong"}`,'error');checkXWordSolved();});
+ document.getElementById('xhintBtn').addEventListener('click',()=>{if(!XS.active){showXToast("Pick a cell first",'info');return;}const{row,col}=XS.active,letter=SOL[row][col],inp=gridEl.querySelector(`.cell-input[data-r="${row}"][data-c="${col}"]`);if(inp){inp.value=letter;XS.values[row][col]=letter;inp.parentElement.classList.remove('wrong');inp.parentElement.classList.add('correct');XS.hints++;updateXStats();checkXWordSolved();if(allXCorrect())triggerXWin();else xAdvance(1);}});
+ document.getElementById('solveBtn').addEventListener('click',()=>{if(!XS.activeWord){showXToast("Select a word first",'info');return;}const w=XS.activeWord;for(let i=0;i<w.word.length;i++){const r=w.dir==='down'?w.row+i:w.row,c=w.dir==='across'?w.col+i:w.col;XS.values[r][c]=w.word[i];const inp=gridEl.querySelector(`.cell-input[data-r="${r}"][data-c="${c}"]`);if(inp){inp.value=w.word[i];inp.parentElement.classList.remove('wrong');inp.parentElement.classList.add('correct');}}XS.hints+=w.word.length;updateXStats();checkXWordSolved();if(allXCorrect())triggerXWin();});
+ document.getElementById('xresetBtn').addEventListener('click',()=>{if(!confirm('Reset the puzzle?'))return;document.getElementById('xwinOverlay').classList.remove('show');resetX();startXTimer();});
+ document.getElementById('xwinPlayAgain').addEventListener('click',()=>{document.getElementById('xwinOverlay').classList.remove('show');resetX();startXTimer();});
+ buildXGrid();buildXClues();activateXWord(WORDS[0]);updateXStats();startXTimer();
+}
+function refreshCrosswordUI(){
+  // Refresh stat labels
+ const fl=document.querySelector('.h-stat.filled .h-stat-l');if(fl)fl.textContent="xw_filled";
+ const sl=document.querySelector('.h-stat.solved .h-stat-l');if(sl)sl.textContent="xw_solved";
+ const tl=document.querySelector('.h-stat.time .h-stat-l');if(tl)tl.textContent="xw_time";
+  // Refresh subtitle
+ const sub=document.querySelector('.xw-subtitle');if(sub)sub.textContent="xw_sub";
+  // Refresh clues panel title
+ const ct=document.querySelector('.clues-title');if(ct)ct.textContent="Clues";
+  // Refresh section titles
+ const sects=document.querySelectorAll('.clues-section-title');
+ if(sects[0])sects[0].textContent="Across";
+ if(sects[1])sects[1].textContent="Down";
+  // Rebuild clues with new language (clue texts come from t())
+ const cluesAEl=document.getElementById('cluesAcross'),cluesDEl=document.getElementById('cluesDown');
+ if(cluesAEl&&cluesDEl){
+   const WORDS_REF=[
+      {num:1,word:'MORSE',dir:'down',key:'clue1'},{num:2,word:'RADIO',dir:'across',key:'clue2'},
+      {num:3,word:'CODE',dir:'across',key:'clue3'},{num:4,word:'DASH',dir:'down',key:'clue4'},
+      {num:5,word:'WAVE',dir:'across',key:'clue5'},{num:6,word:'SOS',dir:'across',key:'clue6'},
+      {num:7,word:'HAM',dir:'across',key:'clue7'}
+    ];
+   WORDS_REF.forEach(w=>{
+     const el=document.querySelector(`.clue[data-num="${w.num}"][data-dir="${w.dir}"]`);
+     if(el){
+       const ct=el.querySelector('.clue-text');if(ct)ct.textContent=t(w.key);
+       const cl=el.querySelector('.clue-len');if(cl)cl.textContent=`${w.word.length} letters`;
+      }
+    });
+  }
+  // Refresh win overlay
+ const wt=document.querySelector('.xwin-title');if(wt)wt.textContent="xw_win_title";
+ const ws=document.querySelector('.xwin-sub');if(ws)ws.textContent="xw_win_sub";
+ const xwinStats=document.querySelectorAll('.xwin-stat-l');
+ const xwinKeys=['xw_time','xw_hints','xw_plays'];
+ xwinStats.forEach((el,i)=>{if(xwinKeys[i])el.textContent=t(xwinKeys[i]);});
+  // Refresh buttons
+ const checkBtn=document.getElementById('checkBtn');if(checkBtn){const svg=checkBtn.querySelector('svg');const sp=checkBtn.querySelector('span');if(sp)sp.textContent="xw_check";}
+ const xhintBtn=document.getElementById('xhintBtn');if(xhintBtn){const sp=xhintBtn.querySelector('span');if(sp)sp.textContent="xw_reveal_letter";}
+ const solveBtn=document.getElementById('solveBtn');if(solveBtn){const sp=solveBtn.querySelector('span');if(sp)sp.textContent="xw_reveal_word";}
+ const xresetBtn=document.getElementById('xresetBtn');if(xresetBtn){const sp=xresetBtn.querySelector('span');if(sp)sp.textContent="xw_reset";}
+ const xpa=document.getElementById('xwinPlayAgain');if(xpa)xpa.textContent="xw_play_again";
+ const xmg=document.querySelector('#xwinOverlay .xbtn-ghost');if(xmg)xmg.textContent="xw_more_games";
+}
+
+
+
+// ═══ WORDLE ═══
+function initWordle(){
+ wordleInited=true;
+ const $=id=>document.getElementById(id);
+  // Valid 5-letter answer words (all exactly 5 letters)
+ const WORDS=['MORSE','RADIO','CODED','WAVES','BEATS','BLAST','CRANE','DRONE',
+    'FRAME','GAVEL','HANDS','KNAVE','LATCH','MAZES','NAVEL','ORBIT','PLAID','QUIRK',
+    'REALM','SMASH','TROVE','VAPOR','WOKEN','YARDS','ZONES','LIGHT','SWIFT','BRAVE',
+    'CHORD','DIALS','FLANK','GRIDS','LINKS','SPARK','CLOCK','DELTA','EXTRA','FLAIR',
+    'GLOBE','HASTE','INPUT','JOINT','KARMA','LANCE','MERIT','NOBLE','OZONE','PROXY',
+    'QUOTE','RIDGE','SOLAR','TOWER','ULTRA','VIVID','WORTH','YIELD','ALGAE','BRISK',
+    'CIVIC','DEBUT','ETHIC','FJORD','GHOST','HUMID','INDEX','KNACK','LOGIC','MAGIC',
+    'NASAL','OXIDE','PIXEL','RISKY','SIGMA','TOXIC','UMBRA','VALID','WHIFF','PIXEL',
+    'ABBEY','ABHOR','ABIDE','ABYSS','ACUTE','ADAGE','ADAPT','ADEPT','ADMIT','ADOBE',
+    'ADOPT','ADORE','ADULT','AFTER','AGAIN','AGATE','AGENT','AGILE','AGING','AGONY',
+    'AGREE','AHEAD','AIDED','AIMED','AIRED','AISLE','ALARM','ALBUM','ALERT','ALGAE',
+    'ALIBI','ALIEN','ALIGN','ALIKE','ALIVE','ALLAY','ALLEY','ALLOT','ALLOW','ALLOY',
+    'ALOFT','ALONE','ALONG','ALOOF','ALOUD','ALTAR','ALTER','AMBER','AMBLE','AMEND'];
+
+  // Comprehensive valid guess dictionary (5-letter English words)
+ const VALID_WORDS=new Set([
+    'ABACK','ABASE','ABASH','ABATE','ABBEY','ABBOT','ABHOR','ABIDE','ABODE','ABORT',
+    'ABOUT','ABOVE','ABUSE','ABYSS','ACUTE','ADAGE','ADAPT','ADEPT','ADMIT','ADOBE',
+    'ADOPT','ADORE','ADORN','ADULT','AFTER','AGAIN','AGAPE','AGATE','AGAVE','AGENT',
+    'AGILE','AGING','AGONY','AGORA','AGREE','AHEAD','AIDED','AIMED','AIRED','AISLE',
+    'ALARM','ALBUM','ALERT','ALGAE','ALIBI','ALIEN','ALIGN','ALIKE','ALIVE','ALLAY',
+    'ALLEY','ALLOT','ALLOW','ALLOY','ALOFT','ALONE','ALONG','ALOOF','ALOUD','ALPHA',
+    'ALTAR','ALTER','AMBER','AMBLE','AMEND','AMISS','AMONG','AMPLE','ANGEL','ANGER',
+    'ANGLE','ANGRY','ANGST','ANIME','ANKLE','ANNEX','ANTIC','ANVIL','APART','APHID',
+    'APPLE','APPLY','APRON','APTLY','ARISE','ARMOR','AROMA','AROSE','ARRAY','ARROW',
+    'ARSON','ARTSY','ASSET','ATONE','ATTIC','AUDIO','AUDIT','AUGUR','AVAIL','AVERT',
+    'AWAKE','AWARD','AWARE','AWFUL','BADGE','BADLY','BAGEL','BAGGY','BANAL','BASIC',
+    'BASIS','BATCH','BEACH','BEADY','BEARD','BEAST','BEATS','BEIGE','BELLE','BELLY',
+    'BELOW','BENCH','BERET','BEVEL','BIRCH','BLACK','BLADE','BLAME','BLAND','BLANK',
+    'BLARE','BLAST','BLAZE','BLEAT','BLEED','BLEND','BLESS','BLIND','BLOCK','BLOKE',
+    'BLOOD','BLOOM','BLOWN','BLUNT','BLURT','BOARD','BOAST','BONUS','BOOST','BOOTH',
+    'BOTCH','BOUGH','BOUND','BOXER','BRACE','BRAID','BRAKE','BRAND','BRAVE','BRAWL',
+    'BREAM','BREED','BRIBE','BRICK','BRIDE','BRINE','BRINK','BRISK','BROIL','BROKE',
+    'BROOD','BROOK','BROOM','BROWN','BRUNT','BRUSH','BRUTE','BUILD','BUILT','BULGE',
+    'BUNCH','BURNS','BURST','CABIN','CABLE','CANDY','CARGO','CARRY','CARVE','CATCH',
+    'CAUSE','CEASE','CEDAR','CHAIR','CHALK','CHAMP','CHAOS','CHAPS','CHASE','CHEAP',
+    'CHEAT','CHECK','CHEEK','CHEER','CHESS','CHEST','CHIDE','CHIEF','CHILD','CHINA',
+    'CHORD','CINCH','CIVIC','CIVIL','CLAIM','CLAMP','CLANK','CLASH','CLASP','CLEAN',
+    'CLEAR','CLEFT','CLERK','CLICK','CLIFF','CLING','CLOAK','CLOCK','CLONE','CLOSE',
+    'CLOTH','CLOUD','CLOUT','CLOVE','CLOWN','CLUMP','COACH','COAST','CODED','COMET',
+    'COMIC','COMMA','COUCH','COULD','COUNT','COURT','COVER','CRAFT','CRAMP','CRANE',
+    'CRASH','CRAWL','CRAZY','CREAM','CREEK','CRIMP','CRISP','CROSS','CROWD','CROWN',
+    'CRUSH','CRUST','CUBIC','CURLY','CURSE','CURVE','CYCLE','DAILY','DAISY','DALLY',
+    'DANCE','DANDY','DAUNT','DEBUT','DECAY','DECOY','DEFER','DEITY','DELTA','DENSE',
+    'DEPTH','DERBY','DETER','DEVIL','DIALS','DISCO','DITCH','DODGE','DOING','DOUBT',
+    'DOUGH','DOWDY','DOWEL','DRAFT','DRAIN','DRAPE','DREAR','DRILL','DRINK','DRONE',
+    'DROOL','DROOP','DROVE','DRUNK','DRYER','DUCHY','DUSKY','DUSTY','DWARF','DWELL',
+    'EAGER','EARLY','EARTH','EASEL','EATEN','EJECT','ELUDE','EMOTE','EMPTY','ENACT',
+    'ENDOW','EQUIP','ERODE','ERUPT','ESSAY','ETHIC','EVADE','EVENT','EVERY','EXACT',
+    'EXALT','EXPEL','EXTOL','EXTRA','EXUDE','FABLE','FACET','FAINT','FAITH','FALSE',
+    'FANCY','FARCE','FATAL','FAULT','FEAST','FETCH','FIERY','FIFTH','FIFTY','FIGHT',
+    'FILTH','FINCH','FIRST','FIXED','FJORD','FLAIR','FLAME','FLANK','FLARE','FLASH',
+    'FLEET','FLESH','FLICK','FLOOD','FLOOR','FLORA','FLOSS','FLOUR','FLUID','FLUKE',
+    'FLUTE','FOAMY','FOGGY','FOLIO','FOLLY','FORCE','FORGE','FORTH','FORUM','FOUND',
+    'FRAIL','FRAME','FRANK','FRAUD','FREAK','FRESH','FRIAR','FRITZ','FROND','FROST',
+    'FROZE','FULLY','FUNNY','FURRY','GAVEL','GHOST','GIANT','GIVEN','GLAND','GLOAT',
+    'GLOBE','GLOOM','GLOSS','GLOVE','GLYPH','GNASH','GODLY','GOING','GOOSE','GRACE',
+    'GRADE','GRAIN','GRAND','GRANT','GRASP','GRASS','GRATE','GRAVY','GRAZE','GREED',
+    'GREEN','GRIDS','GRILL','GROAN','GROIN','GROUT','GROVE','GROWL','GRUEL','GRUFF',
+    'GUARD','GUILE','GUISE','GUSTO','GYPSY','HANDS','HANDY','HARSH','HASTE','HAVEN',
+    'HEART','HEAVY','HEIST','HENCE','HERON','HITCH','HOARD','HOLLY','HONOR','HOUND',
+    'HOUSE','HOWDY','HUMAN','HUMID','HURRY','HUSKY','IDEAL','IMAGE','IMPLY','INANE',
+    'INCUR','INDEX','INFER','INGOT','INLET','INNER','INPUT','INTER','IRATE','IRONY',
+    'ISSUE','IVORY','JOINT','KARMA','KNACK','KNAVE','LANCE','LAPEL','LARGE','LASER',
+    'LATCH','LATER','LATHE','LAUGH','LAYER','LEACH','LEAFY','LEARN','LEASE','LEAVE',
+    'LEDGE','LIBEL','LIEGE','LIGHT','LINKS','LITHE','LIVER','LOCAL','LODGE','LOFTY',
+    'LOGIC','LOOSE','LURCH','LUSTY','LYMPH','LYRIC','MAGIC','MANLY','MAPLE','MARCH',
+    'MARSH','MASSE','MATCH','MAXIM','MAYOR','MAZES','MEALY','MELEE','MERCY','MERIT',
+    'MIRTH','MOCHA','MOOSE','MORAL','MORSE','MOUNT','MOURN','MOUTH','MUDDY','MULCH',
+    'MURAL','MURKY','MUSIC','MUSTY','NASAL','NAVEL','NERVE','NEVER','NEXUS','NIGHT',
+    'NIPPY','NITTY','NOBLE','NORTH','NOTCH','NOVEL','NUDGE','NURSE','NYMPH','OAKEN',
+    'ORBIT','OUGHT','OUNCE','OUTDO','OVARY','OVOID','OWING','OXIDE','OZONE','PACER',
+    'PAINT','PATCH','PATIO','PEACE','PEACH','PEAKY','PENAL','PERCH','PERKY','PETTY',
+    'PHASE','PHONE','PHOTO','PIANO','PIECE','PILOT','PINCH','PIQUE','PITCH','PITHY',
+    'PIVOT','PIXEL','PLAID','PLAIN','PLANE','PLANT','PLAZA','PLEAD','PLEAT','PLIED',
+    'PLUMB','PLUMP','PLUNK','PLUSH','POINT','POKER','POLAR','POPPY','PORCH','PRANK',
+    'PRAWN','PRESS','PRIME','PRISM','PRIVY','PROBE','PRONE','PROSE','PROUD','PROVE',
+    'PROXY','PSALM','PUFFY','PULSE','PUNCH','PUPPY','PURGE','PURSE','PUSHY','QUAIL',
+    'QUAKE','QUALM','QUASH','QUELL','QUIRK','QUOTE','RADIO','RAISE','RALLY','RAMEN',
+    'RANCH','RANGE','RAPID','RASPY','REALM','REARM','REBEL','REBUS','REFIT','REIGN',
+    'RELAX','REPAY','REPEL','REPOT','RERUN','RESET','RESIN','REVEL','RHYME','RIDER',
+    'RIDGE','RINSE','RIPEN','RISKY','RIVET','ROAST','ROCKY','ROUGH','ROUND','ROUTE',
+    'ROWDY','ROYAL','RUGBY','RULER','RUSTY','SADLY','SAINT','SALSA','SANDY','SAUCE',
+    'SAVVY','SCALD','SCALP','SCALY','SCAMP','SCANT','SCARE','SCARY','SCENE','SCONE',
+    'SCOOP','SCOUT','SCRAM','SCREW','SCRUB','SEIZE','SETUP','SEVEN','SHACK','SHADE',
+    'SHAFT','SHAKE','SHAKY','SHALL','SHAME','SHAPE','SHARE','SHARK','SHARP','SHAWL',
+    'SHEER','SHELF','SHELL','SHIFT','SHINE','SHORE','SHORT','SHOUT','SHOVE','SHOWY',
+    'SHRUG','SIEGE','SIGMA','SILKY','SILLY','SINCE','SIXTH','SIXTY','SIZED','SKATE',
+    'SKIMP','SLATE','SLAVE','SLEEP','SLEET','SLICE','SLIDE','SLOPE','SLOTH','SLUMP',
+    'SMASH','SNAIL','SNAKE','SNARE','SNEAK','SNEER','SNIFF','SNORE','SNUFF','SOLAR',
+    'SOLID','SOLVE','SORRY','SOUTH','SPACE','SPADE','SPARE','SPARK','SPAWN','SPEAR',
+    'SPEED','SPELL','SPICE','SPILL','SPINE','SPITE','SPLIT','SPOKE','SPOON','SPORT',
+    'SPOUT','SPRAY','SPREE','SPRIG','SQUAD','STAIN','STAIR','STAKE','STALE','STALL',
+    'STAMP','STAND','STARE','START','STASH','STEAL','STEAM','STEEL','STEEP','STEER',
+    'STERN','STICK','STIFF','STILL','STING','STOCK','STOIC','STOMP','STONY','STOOD',
+    'STORK','STORY','STOUT','STOVE','STRAP','STRAY','STRIP','STRUT','STUDY','STUMP',
+    'STUNT','STYLE','SURGE','SWAMP','SWEAR','SWEAT','SWEEP','SWEET','SWELL','SWEPT',
+    'SWIFT','SWIRL','SWOOP','SWORD','TABOO','TASTE','TAUNT','TEASE','TEMPO','TENSE',
+    'TEPID','THANK','THEFT','THEIR','THEME','THERE','THESE','THICK','THING','THINK',
+    'THORN','THOSE','THREW','THROW','THUMB','THUMP','TIARA','TIDAL','TIGHT','TIMER',
+    'TIPSY','TIRED','TITLE','TODAY','TOKEN','TONAL','TOPIC','TORCH','TOTAL','TOUGH',
+    'TOWER','TOXIC','TRACE','TRACK','TRADE','TRAIL','TRAIN','TRAIT','TRAWL','TREAD',
+    'TREAT','TRICK','TRIED','TRIPE','TRITE','TROUT','TROVE','TRUCK','TRULY','TRUMP',
+    'TRUNK','TRUSS','TRUST','TRUTH','TULIP','TUNIC','TWANG','TWEAK','TWIRL','TWIST',
+    'ULCER','ULTRA','UMBRA','UNFIT','UNIFY','UNION','UNITE','UNITY','UNTIE','UNTIL',
+    'UPPER','UPSET','USHER','USUAL','UTTER','VAGUE','VALET','VALID','VALVE','VAPOR',
+    'VAULT','VAUNT','VENOM','VERGE','VERSE','VICAR','VIGOR','VIRAL','VISOR','VIVID',
+    'VOCAL','VOUCH','WAGER','WALTZ','WATCH','WAVES','WEAVE','WEDGE','WEEDY','WEIGH',
+    'WEIRD','WHEAT','WHEEL','WHERE','WHIFF','WHILE','WHINE','WHIRL','WHOSE','WIDEN',
+    'WIELD','WIMPY','WITTY','WOKEN','WOMAN','WOMEN','WOODY','WORLD','WORRY','WORSE',
+    'WORST','WORTH','WOUND','WRATH','WRING','WROTE','XENON','YACHT','YARDS','YEARN',
+    'YEAST','YIELD','YOUNG','YOURS','ZAPPY','ZEBRA','ZIPPY','ZONAL','ZONES'
+  ]);;
+ const WS={answer:'',guesses:[],current:'',over:false,played:0,wins:0,streak:0,best:0,isPlaying:false,lastGuess:''};
+ function newWGame(){WS.answer=WORDS[Math.floor(Math.random()*WORDS.length)];WS.guesses=[];WS.current='';WS.over=false;document.getElementById('wendOverlay').classList.remove('show');buildWBoard();buildWKbd();}
+ function buildWBoard(){const b=document.getElementById('wboard');b.innerHTML='';for(let r=0;r<6;r++){const row=document.createElement("div");row.className='wrow';for(let c=0;c<5;c++){const tile=document.createElement("div");tile.className='tile';tile.dataset.r=r;tile.dataset.c=c;const mc=MORSE[WS.answer[0]]||'';tile.innerHTML=`<div class="tile-inner"><div class="tile-face front"><span class="tile-letter"></span><div class="tile-morse"></div></div><div class="tile-face back"><span class="tile-letter"></span><div class="tile-morse"></div></div></div>`;row.appendChild(tile);}b.appendChild(row);}}
+  // ── Keyboard mode state ──
+ let kbdMode='english'; // 'english' | 'morse-display' | 'morse-sound' | 'letter-sound'
+ let pendingMorseKey=null; // for morse-sound: letter waiting for confirm
+
+ function buildWKbd(){
+   const kb=document.getElementById('wkeyboard');kb.innerHTML='';
+   pendingMorseKey=null;
+   const rows=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']];
+   rows.forEach(keys=>{
+     const row=document.createElement("div");row.className='kb-row';
+     keys.forEach(k=>{
+       const btn=document.createElement("button");
+       const isWide=k.length>1;
+       btn.dataset.key=k;
+       btn.className='kb-key'+(isWide?' wide':'');
+        // Add mode class to letter keys
+       if(!isWide){
+         if(kbdMode==='morse-display')btn.classList.add('morse-display-key');
+         else if(kbdMode==='morse-sound')btn.classList.add('morse-sound-key');
+        }
+       if(isWide){
+         btn.innerHTML=k==='⌫'
+            ?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>`
+            :"Enter";
+        } else {
+         const mc=MORSE[k]||'';
+         const morseHTML=mc.split('').map(s=>`<span class="km ${s==='.'?'dot':'dash'}"></span>`).join('');
+         if(kbdMode==='morse-display'||kbdMode==='morse-sound'){
+            // Only show morse symbols, no letter
+           btn.innerHTML=`<div class="kb-morse">${morseHTML}</div>`;
+            // Tooltip = letter
+           btn.title=k;
+          } else {
+            // english / letter-sound: show letter + morse dots below
+           btn.innerHTML=`<span class="kb-letter">${k}</span><div class="kb-morse">${morseHTML}</div>`;
+          }
+        }
+        // Click handler depends on mode
+       if(!isWide && (kbdMode==='morse-sound'||kbdMode==='letter-sound')){
+         btn.addEventListener('click',()=>handleWKeyWithSound(k,btn));
+        } else {
+         btn.addEventListener('click',()=>handleWKey(k));
+        }
+       row.appendChild(btn);
+      });
+     kb.appendChild(row);
+    });
+  }
+
+ function handleWKeyWithSound(k,btn){
+   if(WS.over)return;
+   if(kbdMode==='letter-sound'){
+      // Type letter AND play sound simultaneously
+     handleWKey(k);
+     playLetterSound(k);
+     return;
+    }
+    // morse-sound: 1st click = play, 2nd click = type
+   if(pendingMorseKey===k){
+      // Second click on same key → type it
+     clearPendingMorse();
+     handleWKey(k);
+    } else {
+      // First click (or different key) → play sound, set pending
+     clearPendingMorse();
+     pendingMorseKey=k;
+     btn.classList.add('pending');
+     playLetterSound(k);
+    }
+  }
+
+ function clearPendingMorse(){
+   if(pendingMorseKey){
+     const old=document.getElementById('wkeyboard').querySelector(`[data-key="${pendingMorseKey}"].pending`);
+     if(old)old.classList.remove('pending');
+     pendingMorseKey=null;
+    }
+  }
+
+ async function playLetterSound(letter){
+   await ensureAudio();
+   const code=MORSE[letter]||'';
+   const u=1200/16;
+   for(let i=0;i<code.length;i++){
+     const dur=(code[i]==='.'?1:3)*u;
+     await beep(700,dur/1000);
+     if(i<code.length-1)await sleep(u);
+    }
+  }
+
+ function setKbdMode(mode){
+   kbdMode=mode;
+   pendingMorseKey=null;
+    // Update button selection in settings panel
+   document.querySelectorAll('.kbd-mode-btn').forEach(b=>{
+     b.classList.toggle('selected',b.dataset.mode===mode);
+    });
+    // Rebuild keyboard with new mode, preserving key states
+   const oldStates={};
+   document.querySelectorAll('#wkeyboard .kb-key').forEach(b=>{
+     const k=b.dataset.key;
+     const stateClass=['state-correct','state-present','state-absent'].find(c=>b.classList.contains(c));
+     if(stateClass)oldStates[k]=stateClass;
+    });
+   buildWKbd();
+    // Re-apply states
+   Object.entries(oldStates).forEach(([k,cls])=>{
+     const btn=document.querySelector(`#wkeyboard [data-key="${k}"]`);
+     if(btn)btn.classList.add(cls);
+    });
+  }
+ function setWTile(r,c,letter){const tile=document.getElementById('wboard').querySelectorAll('.wrow')[r]?.querySelectorAll('.tile')[c];if(!tile)return;const mc=MORSE[letter]||'';tile.classList.add('filled');tile.querySelector('.tile-face.front .tile-letter').textContent=letter;tile.querySelector('.tile-face.front .tile-morse').innerHTML=mc.split('').map(s=>`<span class="tm ${s==='.'?'dot':'dash'}"></span>`).join('');}
+ function handleWKey(k){
+   if(WS.over)return;
+   if(k==='ENTER'){
+     clearPendingMorse&&clearPendingMorse();
+     submitWGuess();
+    } else if(k==='⌫'){
+     clearPendingMorse&&clearPendingMorse();
+     if(WS.current.length>0){
+       WS.current=WS.current.slice(0,-1);
+       const r=WS.guesses.length,c=WS.current.length;
+       const tile=document.getElementById('wboard').querySelectorAll('.wrow')[r]?.querySelectorAll('.tile')[c];
+       if(tile){tile.classList.remove('filled');tile.querySelector('.tile-face.front .tile-letter').textContent='';tile.querySelector('.tile-face.front .tile-morse').innerHTML='';}
+      }
+    } else if(/^[A-Z]$/.test(k)&&WS.current.length<5){
+     WS.current+=k;
+     setWTile(WS.guesses.length,WS.current.length-1,k);
+    }
+  }
+ async function submitWGuess(){
+   if(WS.current.length!==5)return;
+    // Validate that the guess is a real word
+   if(!VALID_WORDS.has(WS.current)){
+     const rows=document.getElementById('wboard').querySelectorAll('.wrow');
+     const tiles=rows[WS.guesses.length]?.querySelectorAll('.tile');
+     if(tiles)tiles.forEach(t=>t.classList.add('wshake'));
+     setTimeout(()=>{if(tiles)tiles.forEach(t=>t.classList.remove('wshake'));},500);
+     showWToast("Not a valid word!"||'Not a valid word!','error');
+     return;
+    }
+   const guess=WS.current,answer=WS.answer,result=Array(5).fill('absent'),ansCount={};for(let i=0;i<5;i++)if(guess[i]===answer[i])result[i]='correct';else ansCount[answer[i]]=(ansCount[answer[i]]||0)+1;for(let i=0;i<5;i++)if(result[i]!=='correct'&&ansCount[guess[i]]>0){result[i]='present';ansCount[guess[i]]--;}WS.lastGuess=guess;WS.guesses.push({guess,result});WS.current='';const r=WS.guesses.length-1,rows=document.getElementById('wboard').querySelectorAll('.wrow'),tiles=rows[r]?.querySelectorAll('.tile');for(let c=0;c<5;c++){const tile=tiles[c],mc=MORSE[guess[c]]||'';tile.querySelector('.tile-face.back .tile-letter').textContent=guess[c];tile.querySelector('.tile-face.back .tile-morse').innerHTML=mc.split('').map(s=>`<span class="tm ${s==='.'?'dot':'dash'}"></span>`).join('');tile.classList.add('state-'+result[c]);setTimeout(()=>tile.classList.add('flip'),c*100);}setTimeout(()=>{for(let c=0;c<5;c++){const key=document.getElementById('wkeyboard').querySelector(`[data-key="${guess[c]}"]`);if(key){const pri={correct:3,present:2,absent:1},cur=pri[result[c]],prevC=key.className.match(/state-(\w+)/)?.[1],prev=pri[prevC]||0;if(cur>prev){key.classList.remove('state-correct','state-present','state-absent');key.classList.add('state-'+result[c]);}}}},600);setTimeout(async()=>{await playWGuess(guess);const won=result.every(r=>r==='correct'),lost=!won&&WS.guesses.length===6;WS.played++;if(won){WS.wins++;WS.streak++;if(WS.streak>WS.best)WS.best=WS.streak;WS.over=true;tiles.forEach((t,i)=>setTimeout(()=>t.classList.add('win-bounce'),i*80));showWEnd(true);}else if(lost){WS.streak=0;WS.over=true;showWEnd(false);}},800);}
+ const WU=()=>1200/14;
+ async function playWGuess(word){await ensureAudio();WS.isPlaying=true;for(let i=0;i<word.length;i++){const code=MORSE[word[i]]||'';for(let j=0;j<code.length;j++){if(!WS.isPlaying)break;const dur=(code[j]==='.'?1:3)*WU();await beep(680,dur/1000);if(j<code.length-1)await sleep(WU());}if(i<word.length-1)await sleep(WU()*3);}WS.isPlaying=false;}
+ function showWEnd(won){const modal=document.getElementById('wendModal');modal.className='wmodal '+(won?'win':'lose');document.getElementById('wendIcon').textContent=won?'🏆':'📻';const solved="Solved!";document.getElementById('wendTitle').textContent=won?(Array.isArray(solved)?solved[Math.floor(Math.random()*solved.length)]:solved):"Nice try!";document.getElementById('wendSub').textContent=won?"You decoded it!":("The word was: "+WS.answer);document.getElementById('wendWord').textContent=WS.answer;document.getElementById('wendMorse').textContent=WS.answer.split('').map(c=>fmt(MORSE[c]||'')).join('  ');document.getElementById('wstatPlayed').textContent=WS.played;document.getElementById('wstatWinPct').textContent=WS.played?Math.round(WS.wins/WS.played*100)+'%':'0%';document.getElementById('wstatStreak').textContent=WS.streak;document.getElementById('wstatBest').textContent=WS.best;setTimeout(()=>document.getElementById('wendOverlay').classList.add('show'),1200);}
+ document.addEventListener('keydown',e=>{
+   if(currentPage!=='wordle')return;
+   if(e.ctrlKey||e.metaKey||e.altKey)return;
+   const letter=/^[a-zA-Z]$/.test(e.key)?e.key.toUpperCase():null;
+   if(e.key==='Enter'){handleWKey('ENTER');}
+   else if(e.key==='Backspace'){handleWKey('⌫');}
+   else if(letter){
+     if(kbdMode==='letter-sound'){handleWKey(letter);playLetterSound(letter);}
+     else{handleWKey(letter);}
+    }
+  });
+ function showWToast(msg,kind='info'){const toast=document.getElementById('wtoast');toast.textContent=msg;toast.className='wtoast show '+(kind==='error'?'error':kind==='success'?'success':'info');clearTimeout(toast._t);toast._t=setTimeout(()=>toast.classList.remove('show'),1800);}
+  // Settings panel wiring
+ document.getElementById('wSettingsBtn').addEventListener('click',()=>{
+   document.getElementById('wSettingsOverlay').style.display='flex';
+  });
+ document.getElementById('wSettingsClose').addEventListener('click',()=>{
+   document.getElementById('wSettingsOverlay').style.display='none';
+  });
+ document.getElementById('wSettingsOverlay').addEventListener('click',e=>{
+   if(e.target===document.getElementById('wSettingsOverlay'))document.getElementById('wSettingsOverlay').style.display='none';
+  });
+ document.querySelectorAll('.kbd-mode-btn').forEach(btn=>{
+   btn.addEventListener('click',()=>{
+     setKbdMode(btn.dataset.mode);
+    });
+  });
+
+ document.getElementById('wnewBtn').addEventListener('click',newWGame);
+ document.getElementById('replayBtn').addEventListener('click',()=>{if(WS.lastGuess&&!WS.isPlaying)playWGuess(WS.lastGuess);});
+ document.getElementById('wendNewBtn').addEventListener('click',newWGame);
+ document.getElementById('helpCloseBtn').addEventListener('click',()=>document.getElementById('helpOverlay').classList.remove('show'));
+ document.getElementById('helpOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('helpOverlay'))document.getElementById('helpOverlay').classList.remove('show');});
+ document.getElementById('wendOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('wendOverlay'))document.getElementById('wendOverlay').classList.remove('show');});
+ newWGame();
+}
+function refreshWordleUI(){
+  // Title & subtitle
+ const wt=document.querySelector('.wordle-title');
+ if(wt)wt.innerHTML=`<span>${"wl_title"}</span> <span style="background:linear-gradient(135deg,var(--cyan),var(--mint));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">${"wl_title2"}</span>`;
+ const ws=document.querySelector('.wordle-subtitle');if(ws)ws.textContent="wl_sub";
+  // Buttons
+ const rep=document.getElementById('replayBtn');if(rep){const svg=rep.querySelector('svg');const sp=rep.querySelector('span');if(sp)sp.textContent="wl_replay";}
+ const nw=document.getElementById('wnewBtn');if(nw){const svg=nw.querySelector('svg');const sp=nw.querySelector('span');if(sp)sp.textContent="wl_new";}
+  // Help modal
+ const hTitle=document.querySelector('#helpOverlay .modal-title');if(hTitle)hTitle.textContent="wl_how";
+ const helpParas=document.querySelectorAll('#helpOverlay .help-content p');
+ if(helpParas[0])helpParas[0].innerHTML=`${"wl_guess"} <strong style="color:var(--cyan)">${"wl_word"}</strong> ${"wl_in6"}`;
+ if(helpParas[1])helpParas[1].textContent="wl_after";
+ if(helpParas[2])helpParas[2].innerHTML=`<strong style="color:var(--mint)">${"wl_green"}</strong> ${"wl_green2"}`;
+ if(helpParas[3])helpParas[3].innerHTML=`<strong style="color:var(--gold)">${"wl_gold"}</strong> ${"wl_gold2"}`;
+ if(helpParas[4])helpParas[4].innerHTML=`<strong style="color:var(--txt2)">${"wl_gray"}</strong> ${"wl_gray2"}`;
+ const helpH3=document.querySelector('#helpOverlay .help-content h3');if(helpH3)helpH3.textContent="wl_colors";
+ const gotIt=document.getElementById('helpCloseBtn');if(gotIt)gotIt.textContent="wl_gotit";
+  // End overlay stat labels
+ const msl=document.querySelectorAll('#wendOverlay .modal-stat-l');
+ const mslKeys=['wl_played','wl_win_pct','wl_streak_lbl','wl_best'];
+ msl.forEach((el,i)=>{if(mslKeys[i])el.textContent=t(mslKeys[i]);});
+ const wNewBtn=document.getElementById('wendNewBtn');if(wNewBtn)wNewBtn.textContent="wl_new_word";
+ const wMoreBtn=document.querySelector('#wendOverlay .modal-btn.ghost');if(wMoreBtn)wMoreBtn.textContent="xw_more_games";
+  // Rebuild keyboard (ENTER key label changes)
+ if(typeof buildWKbd==='function'){}// buildWKbd is scoped inside initWordle — handle via kbd selector
+ const enterKey=document.querySelector('.kb-key.wide[data-key="ENTER"]');
+ if(enterKey)enterKey.textContent="Enter";
+}
+
+
+
+
+// ── SPEED DECODE ──
+const SD = {
+ running: false, timeLeft: 60, timer: null,
+ score: 0, streak: 0, missed: 0, best: parseInt(localStorage.getItem('mw_speed_best')||'0'),
+ current: null, answered: false
+};
+const CIRCUMFERENCE = 2 * Math.PI * 54; // 339.3
+
+function speedPool() {
+ const pool = [...Object.keys(MORSE_EN).filter(k => /[A-Z]/.test(k))];
+ return pool;
+}
+
+function speedNext() {
+ SD.answered = false;
+ const pool = speedPool();
+ const weak = pool.filter(ch => srsScore(ch) < 0);
+ const src = weak.length > 0 && Math.random() < 0.35 ? weak : pool;
+ SD.current = src[Math.floor(Math.random() * src.length)];
+ const code = getMorse(SD.current);
+ document.getElementById('speedVis').innerHTML = code.split('').map(s =>
+    `<div class="sms ${s==='.'?'dot':'dash'}"></div>`).join('');
+ document.getElementById('speedMorseTxt').textContent = fmtCode(code);
+ const inp = document.getElementById('speedInp');
+ inp.value = '';
+ inp.className = 'speed-inp';
+ inp.disabled = false;
+ inp.focus();
+ playCode(code, 14);
+}
+
+function speedPlay() {
+ if (!SD.current) return;
+ playCode(getMorse(SD.current), 14);
+}
+
+function speedStart() {
+ SD.running = true;
+ SD.timeLeft = 60;
+ SD.score = 0;
+ SD.streak = 0;
+ SD.missed = 0;
+ SD.answered = false;
+
+ document.getElementById('speedStartBtn').style.display = 'none';
+ document.getElementById('speedResult').style.display = 'none';
+ document.getElementById('speedGameCard').style.display = 'block';
+
+ updateSpeedHud();
+ updateSpeedTimer();
+ speedNext();
+
+ SD.timer = setInterval(() => {
+   SD.timeLeft--;
+   updateSpeedTimer();
+   if (SD.timeLeft <= 0) speedEnd();
+  }, 1000);
+
+  // Input handler
+ const inp = document.getElementById('speedInp');
+ inp.oninput = e => {
+   e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,1);
+  };
+ inp.onkeydown = e => {
+   if (e.key === 'Enter') { e.preventDefault(); speedCheck(); }
+  };
+}
+
+function speedCheck() {
+ if (!SD.running || SD.answered || !SD.current) return;
+ const val = document.getElementById('speedInp').value.trim().toUpperCase();
+ if (!val) return;
+ SD.answered = true;
+ const ok = val === SD.current;
+ const inp = document.getElementById('speedInp');
+ inp.disabled = true;
+ inp.className = 'speed-inp ' + (ok ? 'ok' : 'bad');
+ if (ok) { SD.score++; SD.streak++; srsRecord(SD.current, true); }
+ else { SD.missed++; SD.streak = 0; srsRecord(SD.current, false); }
+ updateSpeedHud();
+ setTimeout(() => { if (SD.running) speedNext(); }, ok ? 400 : 600);
+}
+
+function updateSpeedHud() {
+ document.getElementById('speedScore').textContent = SD.score;
+ document.getElementById('speedStreak').textContent = SD.streak;
+ document.getElementById('speedMissed').textContent = SD.missed;
+}
+
+function updateSpeedTimer() {
+ const t = SD.timeLeft;
+ document.getElementById('speedTimerLabel').textContent = t;
+ const pct = t / 60;
+ const offset = CIRCUMFERENCE * (1 - pct);
+ const fill = document.getElementById('speedTimerFill');
+ fill.style.strokeDashoffset = offset;
+ fill.style.stroke = t > 20 ? 'var(--cyan)' : t > 10 ? 'var(--gold)' : 'var(--rose)';
+}
+
+function speedEnd() {
+ clearInterval(SD.timer);
+ SD.running = false;
+ stopAllOscs();
+ document.getElementById('speedGameCard').style.display = 'none';
+ document.getElementById('speedInp').disabled = true;
+ if (SD.score > SD.best) {
+   SD.best = SD.score;
+   localStorage.setItem('mw_speed_best', SD.best);
+  }
+ const total = SD.score + SD.missed;
+ const acc = total > 0 ? Math.round(SD.score / total * 100) : 0;
+ document.getElementById('speedFinalScore').textContent = SD.score;
+ document.getElementById('speedBest').textContent = SD.best;
+ document.getElementById('speedFinalMissed').textContent = SD.missed;
+ document.getElementById('speedAcc').textContent = acc + '%';
+ document.getElementById('speedResult').style.display = 'block';
+}
+
+
+/* ══════════════════════════════════════════
+  UNIVERSAL MORSE TRANSLATOR
+══════════════════════════════════════════ */
+
+// ── LANGUAGE MORSE TABLES ──
+const LANG_MORSE = {
+ en: { name:'English', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+ he: { name:'עברית', flag:'', dir:'rtl',
+   table: Object.assign({},MORSE_HEB,MORSE_EN,MORSE_PUNC) },
+ de: { name:'Deutsch', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ä':'.-.-','Ö':'---.','Ü':'..--','ä':'.-.-','ö':'---.','ü':'..--','ß':'...--..','CH':'----','ch':'----'}) },
+ fr: { name:'Français', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'É':'..-..','À':'.--.-','Ç':'-.-..','È':'.-..-','Ê':'.','é':'..-..','à':'.--.-','ç':'-.-..','è':'.-..-','ê':'.'}) },
+ es: { name:'Español', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ñ':'--.--','ñ':'--.--','Á':'.--.-','É':'..-..','Í':'..','Ó':'---.','Ú':'..--','Ü':'..--','á':'.--.-','é':'..-..','í':'..','ó':'---.','ú':'..--'}) },
+ it: { name:'Italiano', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'À':'.--.-','È':'.-..-','É':'..-..','Ì':'..','Ò':'---.','Ù':'..--','à':'.--.-','è':'.-..-','é':'..-..','ì':'..','ò':'---.','ù':'..--'}) },
+ pt: { name:'Português', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ã':'.-...','Ç':'-.-..','Ê':'..-.','Ô':'-..-.',  'Ó':'---.','Á':'.--.-','ã':'.-...','ç':'-.-..','ê':'..-.','ô':'-..-.','ó':'---.','á':'.--.-'}) },
+ nl: { name:'Nederlands', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'IJ':'..---','ij':'..---'}) },
+ sv: { name:'Svenska', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Å':'.--.-','Ä':'.-.-','Ö':'---.','å':'.--.-','ä':'.-.-','ö':'---.'}) },
+ no: { name:'Norsk', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Æ':'.-.-','Ø':'---.','Å':'.--.-','æ':'.-.-','ø':'---.','å':'.--.-'}) },
+ da: { name:'Dansk', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Æ':'.-.-','Ø':'---.','Å':'.--.-','æ':'.-.-','ø':'---.','å':'.--.-'}) },
+ fi: { name:'Suomi', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ä':'.-.-','Ö':'---.','å':'.--.-','ä':'.-.-','ö':'---.'}) },
+ pl: { name:'Polski', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ą':'.--.-','Ć':'-.-.','Ę':'..-..','Ł':'.-..-','Ń':'--.','Ó':'---.','Ś':'...-..','Ź':'--..-','Ż':'--..-.','ą':'.--.-','ć':'-.-.','ę':'..-..','ł':'.-..-','ń':'--.','ó':'---.','ś':'...-..','ź':'--..-','ż':'--..-.','Ż':'--..-.','Ź':'--..-'}) },
+ tr: { name:'Türkçe', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ç':'-.-.','Ğ':'--.-.','İ':'..-.','Ö':'---.','Ş':'.-.-','Ü':'..--','ç':'-.-.','ğ':'--.-.','ı':'..','ö':'---.','ş':'.-.-','ü':'..--'}) },
+ cs: { name:'Čeština', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','Č':'-.-.','Ď':'-..-.','É':'..-..','Í':'..','Ň':'--.','Ó':'---.','Ř':'.-...','Š':'----','Ú':'..--','Ů':'..--','Ý':'-.--','Ž':'--..','á':'.--.-','č':'-.-.','ď':'-..-.','é':'..-..','í':'..','ň':'--.','ó':'---.','ř':'.-...','š':'----','ú':'..--','ů':'..--','ý':'-.--','ž':'--..','Ž':'--..','Š':'----'}) },
+ ro: { name:'Română', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ă':'.-..-','Â':'...-','Î':'...-','Ș':'----','Ț':'-.','ă':'.-..-','â':'...-','î':'...-','ș':'----','ț':'-.'}) },
+ hu: { name:'Magyar', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','É':'..-..','Í':'..','Ó':'---.','Ö':'---.','Ő':'...','Ú':'..--','Ü':'..--','Ű':'...--','á':'.--.-','é':'..-..','í':'..','ó':'---.','ö':'---.','ő':'...','ú':'..--','ü':'..--','ű':'...--'}) },
+ ru: { name:'Русский', flag:'', dir:'ltr',
+   table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','З':'--..','И':'..','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Щ':'--.-','Ъ':'.--.-.','Ы':'-.--','Ь':'-..-','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','щ':'--.-','ъ':'.--.-.','ы':'-.--','ь':'-..-','э':'..-..','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ ar: { name:'العربية', flag:'', dir:'rtl',
+   table: {'ا':'.-','ب':'-...','ت':'-','ث':'-.-.','ج':'.---','ح':'....','خ':'---','د':'-..','ذ':'--..','ر':'.-.','ز':'--..','س':'...','ش':'----','ص':'-..-','ض':'...-','ط':'..-','ظ':'-.--','ع':'.-.-','غ':'--.','ف':'..-.','ق':'--.-','ك':'-.-','ل':'.-..','م':'--','ن':'-.','ه':'.....','و':'.--','ي':'..','ء':'.','ة':'-','ى':'..','لا':'.-...-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ el: { name:'Ελληνικά', flag:'', dir:'ltr',
+   table: {'Α':'.-','Β':'-...','Γ':'--.','Δ':'-..','Ε':'.','Ζ':'--..','Η':'....','Θ':'-.-.','Ι':'..','Κ':'-.-','Λ':'.-..','Μ':'--','Ν':'-.','Ξ':'-..-','Ο':'---','Π':'.--.','Ρ':'.-.','Σ':'...','Τ':'-','Υ':'-.--','Φ':'..-.','Χ':'----','Ψ':'--.-','Ω':'.--','α':'.-','β':'-...','γ':'--.','δ':'-..','ε':'.','ζ':'--..','η':'....','θ':'-.-.','ι':'..','κ':'-.-','λ':'.-..','μ':'--','ν':'-.','ξ':'-..-','ο':'---','π':'.--.','ρ':'.-.','σ':'...','τ':'-','υ':'-.--','φ':'..-.','χ':'----','ψ':'--.-','ω':'.--',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+
+ uk: { name:'Українська', flag:'', dir:'ltr',
+   table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Ґ':'--.','Д':'-..','Е':'.','Є':'..-..','Ж':'...-','З':'--..','И':'-.--','І':'..','Ї':'.---','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Щ':'--.-','Ь':'-..-','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','ґ':'--.','д':'-..','е':'.','є':'..-..','ж':'...-','з':'--..','и':'-.--','і':'..','ї':'.---','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','щ':'--.-','ь':'-..-','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ bg: { name:'Български', flag:'', dir:'ltr',
+   table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','З':'--..','И':'..','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Щ':'--.-','Ъ':'-.--','Ь':'-..-','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','щ':'--.-','ъ':'-.--','ь':'-..-','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ sr: { name:'Српски', flag:'', dir:'ltr',
+   table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Ђ':'--.-.','Е':'.','Ж':'...-','З':'--..','И':'..','Ј':'.---','К':'-.-','Л':'.-..','Љ':'.-..','М':'--','Н':'-.','Њ':'--.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','Ћ':'-.-.','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Џ':'-.-.','Ш':'----','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','ђ':'--.-.','е':'.','ж':'...-','з':'--..','и':'..','ј':'.---','к':'-.-','л':'.-..','љ':'.-..','м':'--','н':'-.','њ':'--.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','ћ':'-.-.','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','џ':'-.-.','ш':'----',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ hr: { name:'Hrvatski', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Č':'-.-.','Ć':'-.-.','Đ':'-..-.','Š':'----','Ž':'--..','č':'-.-.','ć':'-.-.','đ':'-..-.','š':'----','ž':'--..','Dž':'-..-.','dž':'-..-.'}) },
+ sk: { name:'Slovenčina', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','Ä':'.-.-','Č':'-.-.','Ď':'-..-.','É':'..-..','Í':'..','Ĺ':'.-..','Ľ':'.-..','Ň':'--.','Ó':'---.','Ô':'---.','Ŕ':'.-...','Š':'----','Ť':'-.','Ú':'..--','Ý':'-.--','Ž':'--..','á':'.--.-','ä':'.-.-','č':'-.-.','ď':'-..-.','é':'..-..','í':'..','ĺ':'.-..','ľ':'.-..','ň':'--.','ó':'---.','ô':'---.','ŕ':'.-...','š':'----','ť':'-.','ú':'..--','ý':'-.--','ž':'--..','ô':'---.'}) },
+ sl: { name:'Slovenščina', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Č':'-.-.','Š':'----','Ž':'--..','č':'-.-.','š':'----','ž':'--..','Đ':'-..-.','đ':'-..-.'}) },
+ et: { name:'Eesti', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ä':'.-.-','Ö':'---.','Ü':'..--','Õ':'---.','ä':'.-.-','ö':'---.','ü':'..--','õ':'---.'}) },
+ lv: { name:'Latviešu', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ā':'.--.-','Č':'-.-.','Ē':'..-..','Ģ':'--.-.','Ī':'..','Ķ':'-.-','Ļ':'.-..','Ņ':'-.','Š':'----','Ū':'..--','Ž':'--..','ā':'.--.-','č':'-.-.','ē':'..-..','ģ':'--.-.','ī':'..','ķ':'-.-','ļ':'.-..','ņ':'-.','š':'----','ū':'..--','ž':'--..','Ž':'--..','Š':'----'}) },
+ lt: { name:'Lietuvių', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ą':'.--.-','Č':'-.-.','Ę':'..-..','Ė':'..-..','Į':'..','Š':'----','Ų':'..--','Ū':'..--','Ž':'--..','ą':'.--.-','č':'-.-.','ę':'..-..','ė':'..-..','į':'..','š':'----','ų':'..--','ū':'..--','ž':'--..','Ž':'--..','Š':'----'}) },
+ sq: { name:'Shqip', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ç':'-.-.','Dh':'-..-','Gj':'--.-.','Ll':'.-..','Nj':'-.','Rr':'.-.','Sh':'----','Th':'-.','Xh':'-.-.','Zh':'--..','ç':'-.-.','dh':'-..-','gj':'--.-.','ll':'.-..','nj':'-.','rr':'.-.','sh':'----','th':'-.','xh':'-.-.','zh':'--..','Ë':'.','ë':'.'}) },
+ mk: { name:'Македонски', flag:'', dir:'ltr',
+   table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Ѓ':'--.-.','Е':'.','Ж':'...-','З':'--..','Ѕ':'-.-.','И':'..','Ј':'.---','К':'-.-','Л':'.-..','Љ':'.-..','М':'--','Н':'-.','Њ':'--.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','Ќ':'-.-.','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Џ':'-.-.','Ш':'----','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','ј':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ ca: { name:'Català', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'À':'.--.-','É':'..-..','È':'.-..-','Í':'..','Ï':'..','Ó':'---.','Ò':'---.','Ú':'..--','Ü':'..--','Ç':'-.-..','·':'-....','L·L':'.-..','à':'.--.-','é':'..-..','è':'.-..-','í':'..','ï':'..','ó':'---.','ò':'---.','ú':'..--','ü':'..--','ç':'-.-..'}) },
+ cy: { name:'Cymraeg', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Â':'.--.-','Ê':'.','Î':'..','Ô':'---.','Û':'..--','Ŵ':'.--','Ŷ':'-.--','â':'.--.-','ê':'.','î':'..','ô':'---.','û':'..--','ŵ':'.--','ŷ':'-.--','Ch':'----','Dd':'-..','Ff':'..-.','Ng':'--.','Ll':'.-..','Ph':'.--.','Rh':'.-.'}) },
+ is: { name:'Íslenska', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','Ð':'..-..','É':'..-..','Í':'..','Ó':'---.','Ú':'..--','Ý':'-.--','Þ':'-.-.','Æ':'.-.-','Ö':'---.','á':'.--.-','ð':'..-..','é':'..-..','í':'..','ó':'---.','ú':'..--','ý':'-.--','þ':'-.-.','æ':'.-.-','ö':'---.'}) },
+ mt: { name:'Malti', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ċ':'-.-.','Ġ':'--.','Għ':'....','Ħ':'....','Ċ':'-.-.','ċ':'-.-.','ġ':'--.','għ':'....','ħ':'....'}) },
+ eo: { name:'Esperanto', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ĉ':'-.-.','Ĝ':'--.-.','Ĥ':'....','Ĵ':'.---','Ŝ':'....','Ŭ':'..--','ĉ':'-.-.','ĝ':'--.-.','ĥ':'....','ĵ':'.---','ŝ':'....','ŭ':'..--'}) },
+ ja: { name:'日本語', flag:'', dir:'ltr',
+   table: {'ア':'--.--','イ':'.-','ウ':'...-','エ':'-.---','オ':'.-...','カ':'.-..','キ':'-.-.','ク':'...-','ケ':'-.--','コ':'----','サ':'-.-.-','シ':'--.-.','ス':'---.-','セ':'.---.','ソ':'---.','タ':'-.','チ':'..-.','ツ':'..-.',  'テ':'.-.--','ト':'..-..',  'ナ':'.-.',  'ニ':'-.-.','ヌ':'....','ネ':'--.-','ノ':'..--','ハ':'-...','ヒ':'--..-','フ':'--..','ヘ':'.','ホ':'-..','マ':'-..-','ミ':'..-.-','ム':'-','メ':'-...-','モ':'-..-.',  'ヤ':'.--','ユ':'-..--','ヨ':'--','ラ':'...','リ':'--.','ル':'-..-.',  'レ':'---','ロ':'.-.-','ワ':'-.-','ヲ':'.---','ン':'.-.-.',' ':' ','。':'.-.-.-','、':'.-.-.-','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ ko: { name:'한국어', flag:'', dir:'ltr',
+   table: {'ㄱ':'.-.','ㄴ':'-.','ㄷ':'-..','ㄹ':'.-..','ㅁ':'--','ㅂ':'-...','ㅅ':'...','ㅇ':'-','ㅈ':'.--','ㅊ':'-.-.','ㅋ':'-.-','ㅌ':'-','ㅍ':'.--.','ㅎ':'....','ㅏ':'.-','ㅑ':'.---','ㅓ':'.','ㅕ':'..--','ㅗ':'---','ㅛ':'.--','ㅜ':'...-','ㅠ':'--..','ㅡ':'---','ㅣ':'..','가':'.-..-','나':'-..-','다':'-...','라':'.-.-','마':'--.-','바':'-...-','사':'...-','아':'-.-','자':'.--.-','차':'-.-.-.','카':'-.-.','타':'-..-','파':'.--.-','하':'....-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+ ka: { name:'ქართული', flag:'', dir:'ltr',
+   table: {'ა':'.-','ბ':'-...','გ':'--.','დ':'-..','ე':'.','ვ':'.--','ზ':'--..','თ':'-.-.','ი':'..','კ':'-.-','ლ':'.-..','მ':'--','ნ':'-.','ო':'---','პ':'.--.','ჟ':'...-','რ':'.-.','ს':'...','ტ':'-','უ':'..-','ფ':'..-.','ქ':'----','ღ':'--.','ყ':'--.-','შ':'----','ჩ':'---.','ც':'-.-.','ძ':'-..-','წ':'..-','ჭ':'--.-','ხ':'....','ჯ':'.---','ჰ':'....',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+
+  be: { name:'Беларуская', flag:'', dir:'ltr',
+    table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','З':'--..','І':'..','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Ы':'-.--','Ь':'-..-','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','і':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','ы':'-.--','ь':'-..-','э':'..-..','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  az: { name:'Azərbaycan', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ə':'..-..','Ğ':'--.-.','İ':'..','Ö':'---.','Ş':'----','Ü':'..--','Ç':'-.-.','ə':'..-..','ğ':'--.-.','ı':'..','ö':'---.','ş':'----','ü':'..--','ç':'-.-.'}) },
+  kk: { name:'Қазақша', flag:'', dir:'ltr',
+    table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','З':'--..','И':'..','Й':'.---','К':'-.-','Қ':'--.-','Л':'.-..','М':'--','Н':'-.','Ң':'--.','О':'---','Ө':'---.','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Ы':'-.--','І':'..','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','й':'.---','к':'-.-','қ':'--.-','л':'.-..','м':'--','н':'-.','ң':'--.','о':'---','ө':'---.','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','ы':'-.--','і':'..','э':'..-..','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  hy: { name:'Հայերեն', flag:'', dir:'ltr',
+    table: {'Ա':'.-','Բ':'-...','Գ':'--.','Դ':'-..','Ե':'.','Զ':'--..','Է':'-.-.','Ը':'...-','Թ':'-.--','Ի':'..','Լ':'.-..','Կ':'-.-','Հ':'....','Մ':'--','Յ':'.---','Ն':'-.','Շ':'----','Ո':'---','Չ':'---.','Պ':'.--.','Ռ':'.-.','Ս':'...','Վ':'.--','Տ':'-','Ց':'-.-.','Փ':'..-.','Ք':'-.-','Ֆ':'..-.','ա':'.-','բ':'-...','գ':'--.','դ':'-..','ե':'.','զ':'--..','է':'-.-.','ը':'...-','թ':'-.--','ի':'..','լ':'.-..','կ':'-.-','հ':'....','մ':'--','յ':'.---','ն':'-.','շ':'----','ո':'---','չ':'---.','պ':'.--.','ռ':'.-.','ս':'...','վ':'.--','տ':'-','ց':'-.-.','փ':'..-.','ք':'-.-','ֆ':'..-.','ու':'..-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  fa: { name:'فارسی', flag:'', dir:'rtl',
+    table: {'ا':'.-','ب':'-...','پ':'.--.','ت':'-','ج':'.---','ح':'....','خ':'---','د':'-..','ر':'.-.','ز':'--..','س':'...','ش':'----','ص':'-..-','ع':'.-.-','غ':'--.','ف':'..-.','ق':'--.-','ک':'-.-','گ':'--.-.','ل':'.-..','م':'--','ن':'-.','و':'.--','ه':'.....','ی':'..','ء':'.',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  ur: { name:'اردو', flag:'', dir:'rtl',
+    table: {'ا':'.-','ب':'-...','پ':'.--.','ت':'-','ج':'.---','ح':'....','خ':'---','د':'-..','ر':'.-.','ز':'--..','س':'...','ش':'----','ص':'-..-','ع':'.-.-','غ':'--.','ف':'..-.','ق':'--.-','ک':'-.-','گ':'--.','ل':'.-..','م':'--','ن':'-.','و':'.--','ہ':'.....','ی':'..','ء':'.',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  hi: { name:'हिन्दी', flag:'', dir:'ltr',
+    table: {'क':'-.-','ख':'-.-','ग':'--.','घ':'--.','च':'-.-.','ज':'.---','ट':'-','ड':'-..','त':'-','द':'-..','न':'-.','प':'.--.','ब':'-...','म':'--','य':'.---','र':'.-.','ल':'.-..','व':'.--','श':'----','स':'...','ह':'....','अ':'.-','आ':'.--.-','इ':'..','उ':'..-','ए':'.','ओ':'---','ण':'-.','थ':'-.-.','ध':'-..','ख':'-..',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  sw: { name:'Kiswahili', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  af: { name:'Afrikaans', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'ê':'..-.','î':'..','ô':'---.','û':'..--','ë':'.','ï':'..','ö':'---.','ü':'..--','â':'.--.-'}) },
+  id: { name:'Bahasa Indonesia', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  ms: { name:'Bahasa Melayu', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  tl: { name:'Filipino', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ng':'--.','ng':'--.','Ñ':'--.--','ñ':'--.--'}) },
+  la: { name:'Latina', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Æ':'.-.-','Œ':'---.','æ':'.-.-','œ':'---.'}) },
+  ga: { name:'Gaeilge', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','É':'..-..','Í':'..','Ó':'---.','Ú':'..--','á':'.--.-','é':'..-..','í':'..','ó':'---.','ú':'..--'}) },
+  eu: { name:'Euskara', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ñ':'--.--','ñ':'--.--'}) },
+  gl: { name:'Galego', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','É':'..-..','Í':'..','Ó':'---.','Ú':'..--','Ñ':'--.--','á':'.--.-','é':'..-..','í':'..','ó':'---.','ú':'..--','ñ':'--.--'}) },
+  uz: { name:'Uzbek', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Sh':'----','Ch':'---.','Ng':'--.','sh':'----','ch':'---.','ng':'--.'}) },
+  tk: { name:'Türkmençe', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ä':'.-.-','Ç':'-.-.','Ž':'--..','Ň':'--.','Ö':'---.','Ş':'----','Ü':'..--','Ý':'-.--','ä':'.-.-','ç':'-.-.','ž':'--..','ň':'--.','ö':'---.','ş':'----','ü':'..--','ý':'-.--'}) },
+  ky: { name:'Кыргызча', flag:'', dir:'ltr',
+    table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','З':'--..','И':'..','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','Ң':'--.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Ы':'-.--','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','ң':'--.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','ы':'-.--','э':'..-..','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  zh: { name:'中文 (Pinyin)', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ā':'.--.-','Á':'.--.-','Ǎ':'.--.-','À':'.--.-','Ē':'.','É':'.','Ě':'.','È':'.','Ī':'..','Í':'..','Ǐ':'..','Ì':'..','Ō':'---','Ó':'---','Ǒ':'---','Ò':'---','Ū':'..-','Ú':'..-','Ǔ':'..-','Ù':'..-','Ǖ':'..--','ǘ':'..--','ǚ':'..--','ǜ':'..--','ü':'..--'}) },
+  mn: { name:'Монгол', flag:'', dir:'ltr',
+    table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','З':'--..','И':'..','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','О':'---','Ө':'---.','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ү':'..-.-','Ф':'..-.','Х':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Щ':'--.-','Ъ':'.--.-.','Ы':'-.--','Ь':'-..-','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','о':'---','ө':'---.','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ү':'..-.-','ф':'..-.','х':'....','ц':'-.-.','ч':'---.','ш':'----','щ':'--.-','ы':'-.--','ь':'-..-','э':'..-..','ю':'..--','я':'.-.-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  ne: { name:'नेपाली', flag:'', dir:'ltr',
+    table: {'क':'-.-','ख':'-.-','ग':'--.','घ':'--.','च':'-.-.','छ':'-.-.','ज':'.---','झ':'.---','ट':'-','ठ':'-','ड':'-..','ढ':'-..','ण':'-.','त':'-','थ':'-.-.','द':'-..','ध':'-..','न':'-.','प':'.--.','फ':'.--.','ब':'-...','भ':'-...','म':'--','य':'.---','र':'.-.','ल':'.-..','व':'.--','श':'----','ष':'....','स':'...','ह':'....','अ':'.-','आ':'.--.-','इ':'..','उ':'..-','ए':'.','ओ':'---',' ':' ','०':'-----','१':'.----','२':'..---','३':'...--','४':'....-','५':'.....','६':'-....','७':'--...','८':'---..','९':'----.'} },
+  ta: { name:'தமிழ்', flag:'', dir:'ltr',
+    table: {'அ':'.-','ஆ':'.--.-','இ':'..','ஈ':'..','உ':'..-','ஊ':'..-','எ':'.','ஏ':'.','ஐ':'.-.-','ஒ':'---','ஓ':'---','க':'-.-','ங':'--.','ச':'-.-.','ஞ':'.---','ட':'-','ண':'-.','த':'-','ந':'-.','ப':'.--.','ம':'--','ய':'.---','ர':'.-.','ல':'.-..','வ':'.--','ழ':'....','ள':'.-..','ற':'.-.','ன':'-.','ஸ':'...','ஷ':'....','ஜ':'.---','ஹ':'....',' ':' ','௦':'-----','௧':'.----','௨':'..---','௩':'...--','௪':'....-','௫':'.....','௬':'-....','௭':'--...','௮':'---..','௯':'----.'} },
+  te: { name:'తెలుగు', flag:'', dir:'ltr',
+    table: {'అ':'.-','ఆ':'.--.-','ఇ':'..','ఈ':'..','ఉ':'..-','ఊ':'..-','ఎ':'.','ఏ':'.','ఐ':'.-.-','ఒ':'---','ఓ':'---','క':'-.-','ఖ':'-.-','గ':'--.','ఘ':'--.','చ':'-.-.','ఛ':'-.-.','జ':'.---','ఝ':'.---','ట':'-','ఠ':'-','డ':'-..','ఢ':'-..','ణ':'-.','త':'-','థ':'-.-.','ద':'-..','ధ':'-..','న':'-.','ప':'.--.','ఫ':'.--.','బ':'-...','భ':'-...','మ':'--','య':'.---','ర':'.-.','ల':'.-..','వ':'.--','శ':'----','ష':'....','స':'...','హ':'....','ళ':'.-..',' ':' '} },
+  am: { name:'አማርኛ', flag:'', dir:'ltr',
+    table: {'ሀ':'....','ለ':'.-..','ሐ':'....','መ':'--','ሠ':'...','ረ':'.-.','ሰ':'...','ሸ':'----','ቀ':'--.-','በ':'-...','ተ':'-','ቸ':'---.','ኀ':'....','ነ':'-.','ኘ':'--.','አ':'.-','ከ':'-.-','ኸ':'----','ወ':'.--','ዘ':'--..','ዠ':'--..','የ':'.---','ደ':'-..','ጀ':'.---','ገ':'--.','ጠ':'-','ጨ':'-.-.','ጰ':'.--.','ጸ':'-..-','ፀ':'-..-','ፈ':'..-.','ፐ':'.--.',' ':' '} },
+  yi: { name:'ייִדיש', flag:'', dir:'rtl',
+    table: {'א':'.-','ב':'-...','ג':'--.','ד':'-..','ה':'.....','ו':'.--','ז':'--..','ח':'....','ט':'..-','י':'..','כ':'-.-','ל':'.-..','מ':'--','נ':'-.','ס':'...','ע':'.-.-','פ':'.--.','צ':'.--','ק':'--.-','ר':'.-.','ש':'----','ת':'-',' ':' ','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....','6':'-....','7':'--...','8':'---..','9':'----.'} },
+  ps: { name:'پښتو', flag:'', dir:'rtl',
+    table: {'ا':'.-','ب':'-...','پ':'.--.','ت':'-','ټ':'-','ج':'.---','چ':'---.','ح':'....','خ':'---','د':'-..','ډ':'-..','ر':'.-.','ړ':'.-.','ز':'--..','ژ':'--..','س':'...','ش':'----','ښ':'----','ع':'.-.-','غ':'--.','ف':'..-.','ق':'--.-','ک':'-.-','ګ':'--.','ل':'.-..','م':'--','ن':'-.','ڼ':'-.','و':'.--','ه':'.....','ی':'..',' ':' '} },
+  tg: { name:'Тоҷикӣ', flag:'', dir:'ltr',
+    table: {'А':'.-','Б':'-...','В':'.--','Г':'--.','Ғ':'--.-.','Д':'-..','Е':'.','Ж':'...-','З':'--..','И':'..','Ӣ':'..','Й':'.---','К':'-.-','Қ':'--.-','Л':'.-..','М':'--','Н':'-.','О':'---','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ӯ':'..-','Ф':'..-.','Х':'....','Ҳ':'....','Ч':'---.','Ҷ':'.---','Ш':'----','Ъ':'.--.-.','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','б':'-...','в':'.--','г':'--.','ғ':'--.-.','д':'-..','е':'.','ж':'...-','з':'--..','и':'..','ӣ':'..','й':'.---','к':'-.-','қ':'--.-','л':'.-..','м':'--','н':'-.','о':'---','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ӯ':'..-','ф':'..-.','х':'....','ҳ':'....','ч':'---.','ҷ':'.---','ш':'----','э':'..-..','ю':'..--','я':'.-.-',' ':' '} },
+  tt: { name:'Татарча', flag:'', dir:'ltr',
+    table: {'А':'.-','Ә':'.--.-','Б':'-...','В':'.--','Г':'--.','Д':'-..','Е':'.','Ж':'...-','Җ':'.---','З':'--..','И':'..','Й':'.---','К':'-.-','Л':'.-..','М':'--','Н':'-.','Ң':'--.','О':'---','Ө':'---.','П':'.--.','Р':'.-.','С':'...','Т':'-','У':'..-','Ү':'..-.-','Ф':'..-.','Х':'....','Һ':'....','Ц':'-.-.','Ч':'---.','Ш':'----','Щ':'--.-','Ы':'-.--','Э':'..-..','Ю':'..--','Я':'.-.-','а':'.-','ә':'.--.-','б':'-...','в':'.--','г':'--.','д':'-..','е':'.','ж':'...-','җ':'.---','з':'--..','и':'..','й':'.---','к':'-.-','л':'.-..','м':'--','н':'-.','ң':'--.','о':'---','ө':'---.','п':'.--.','р':'.-.','с':'...','т':'-','у':'..-','ү':'..-.-','ф':'..-.','х':'....','һ':'....','ц':'-.-.','ч':'---.','ш':'----','щ':'--.-','ы':'-.--','э':'..-..','ю':'..--','я':'.-.-',' ':' '} },
+  ha: { name:'Hausa', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ɓ':'-...','Ɗ':'-..','Ƙ':'-.-','Ƴ':'-.--','ɓ':'-...','ɗ':'-..','ƙ':'-.-','ƴ':'-.--'}) },
+  yo: { name:'Yorùbá', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ẹ':'.','Ọ':'---','Ṣ':'----','ẹ':'.','ọ':'---','ṣ':'----','Gb':'--.','gb':'--.'}) },
+  zu: { name:'isiZulu', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC) },
+  so: { name:'Soomaali', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Dh':'-..','Kh':'-.-','Sh':'----','dh':'-..','kh':'-.-','sh':'----'}) },
+  ht: { name:'Kreyòl Ayisyen', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'È':'.-..-','Ò':'---.','é':'..-..','è':'.-..-','ò':'---.','À':'.--.-','à':'.--.-'}) },
+  lb: { name:'Lëtzebuergesch', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ä':'.-.-','Ë':'.','É':'..-..','ä':'.-.-','ë':'.','é':'..-..'}) },
+  fo: { name:'Føroyskt', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Á':'.--.-','Í':'..','Ó':'---.','Ú':'..--','Ý':'-.--','Æ':'.-.-','Ø':'---.','Ð':'..-..','á':'.--.-','í':'..','ó':'---.','ú':'..--','ý':'-.--','æ':'.-.-','ø':'---.','ð':'..-..'}) },
+  gd: { name:'Gàidhlig', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'À':'.--.-','È':'.-..-','Ì':'..','Ò':'---.','Ù':'..--','à':'.--.-','è':'.-..-','ì':'..','ò':'---.','ù':'..--'}) },
+  br: { name:'Brezhoneg', flag:'', dir:'ltr',
+    table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ñ':'--.--','ñ':'--.--','Ch':'----','Cʼh':'-.-.','ch':'----'}) },
+ vi: { name:'Tiếng Việt', flag:'', dir:'ltr',
+   table: Object.assign({},MORSE_EN,MORSE_PUNC,{'Ă':'.-...','Â':'..-.','Đ':'-..-.','Ê':'..-.','Ô':'-....','Ơ':'.--.','Ư':'..-.-','ă':'.-...','â':'..-.','đ':'-..-.','ê':'..-.','ô':'-....','ơ':'.--.','ư':'..-.-'}) },
+};
+
+// ── TRANSLATION FUNCTION ──
+function trTranslateText(text, langCode) {
+ const lang = LANG_MORSE[langCode] || LANG_MORSE.en;
+ const tbl = lang.table;
+ const words = text.split(/\s+/).filter(Boolean);
+ const wordMorses = [];
+ for (const word of words) {
+   const charMorses = [];
+   for (const ch of word) {
+     const code = tbl[ch] || tbl[ch.toUpperCase()];
+     if (code) charMorses.push(code);
+    }
+   if (charMorses.length) wordMorses.push(charMorses.join(' '));
+  }
+ return wordMorses.join('   ');
+}
+
+// ── UI STATE ──
+const TR = {
+ mode: 'text',
+ imageData: null, imageFile: null,
+ morseResult: '',
+ recActive: false, recSpeech: null,
+ videoStream: null, videoLiveTimer: null,
+};
+
+function trTab(btn, mode) {
+ document.querySelectorAll('.tr-tab').forEach(b => b.classList.remove('on'));
+ btn.classList.add('on');
+ document.querySelectorAll('.tr-panel').forEach(p => p.classList.remove('on'));
+ document.getElementById('trPanel' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('on');
+ TR.mode = mode;
+ trClearOutput();
+ if (mode === 'video' && !TR.videoStream) trStartVideo();
+}
+
+function trClearOutput() {
+ document.getElementById('trOutput').style.display = 'none';
+ TR.morseResult = '';
+}
+
+function trSwapInfo() {
+ toast('Morse is always the output — select your input language on the left 😊', 'info', 3000);
+}
+
+// ── IMAGE ──
+function trDropImage(e) {
+ e.preventDefault();
+ document.getElementById('trImageDrop').classList.remove('drag-over');
+ const file = e.dataTransfer.files[0];
+ if (file && file.type.startsWith('image/')) trLoadImage(file);
+}
+function trImageFile(input) {
+ if (input.files[0]) trLoadImage(input.files[0]);
+}
+function trLoadImage(file) {
+ TR.imageFile = file;
+ const reader = new FileReader();
+ reader.onload = e => {
+   TR.imageData = e.target.result;
+   document.getElementById('trImageThumb').src = TR.imageData;
+   document.getElementById('trImageName').textContent = file.name;
+   document.getElementById('trImageSize').textContent = (file.size/1024).toFixed(1) + ' KB';
+   document.getElementById('trImagePreview').classList.add('show');
+  };
+ reader.readAsDataURL(file);
+ trClearOutput();
+}
+function trClearImage() {
+ TR.imageData = null; TR.imageFile = null;
+ document.getElementById('trImagePreview').classList.remove('show');
+ document.getElementById('trImageThumb').src = '';
+ trClearOutput();
+}
+
+// ── AUDIO RECORDING ──
+function trToggleRec() {
+ if (!TR.recActive) trStartRec(); else trStopRec();
+}
+function trStartRec() {
+ if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+   toast('Speech recognition not supported in this browser', 'bad'); return;
+  }
+ const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+ TR.recSpeech = new SR();
+ TR.recSpeech.continuous = true;
+ TR.recSpeech.interimResults = true;
+ const langCode = document.getElementById('trLangSel').value;
+ const bcp47 = {en:'en-US',he:'he-IL',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',pt:'pt-PT',nl:'nl-NL',sv:'sv-SE',no:'nb-NO',da:'da-DK',fi:'fi-FI',pl:'pl-PL',tr:'tr-TR',cs:'cs-CZ',ro:'ro-RO',hu:'hu-HU',ru:'ru-RU',ar:'ar-SA',el:'el-GR'};
+ TR.recSpeech.lang = bcp47[langCode] || 'en-US';
+ TR.recSpeech.onresult = e => {
+   let txt = '';
+   for (let i=0; i<e.results.length; i++) txt += e.results[i][0].transcript;
+   document.getElementById('trRecText').value = txt;
+  };
+ TR.recSpeech.onerror = () => trStopRec();
+ TR.recSpeech.onend = () => { if (TR.recActive) trStopRec(); };
+ TR.recSpeech.start();
+ TR.recActive = true;
+ document.getElementById('trRecBtn').classList.add('recording');
+ document.getElementById('trRecLabel').textContent = 'Recording… tap to stop';
+ document.getElementById('trRecStatus').textContent = '🎤 Listening…';
+}
+function trStopRec() {
+ TR.recActive = false;
+ if (TR.recSpeech) { try { TR.recSpeech.stop(); } catch(e){} TR.recSpeech = null; }
+ document.getElementById('trRecBtn').classList.remove('recording');
+ document.getElementById('trRecLabel').textContent = 'Hold to record';
+ document.getElementById('trRecStatus').textContent = 'Done. Edit the text above if needed, then translate.';
+}
+
+// ── VIDEO ──
+async function trStartVideo() {
+ try {
+   TR.videoStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+   document.getElementById('trVideoEl').srcObject = TR.videoStream;
+   document.getElementById('trVidCapture').disabled = false;
+   document.getElementById('trVidLive').disabled = false;
+   document.getElementById('trVidStart').classList.add('active');
+  } catch(e) { toast('Camera access denied', 'bad'); }
+}
+function trCaptureFrame() {
+ const video = document.getElementById('trVideoEl');
+ const canvas = document.createElement('canvas');
+ canvas.width = video.videoWidth || 640;
+ canvas.height = video.videoHeight || 480;
+ canvas.getContext('2d').drawImage(video, 0, 0);
+ TR.imageData = canvas.toDataURL('image/jpeg', 0.85);
+ TR.mode = 'image'; // temporarily treat as image
+ trTranslate();
+}
+let _liveActive = false;
+function trToggleLive() {
+  _liveActive = !_liveActive;
+ const btn = document.getElementById('trVidLive');
+ btn.classList.toggle('active', _liveActive);
+ document.getElementById('trLiveBadge').style.display = _liveActive ? '' : 'none';
+ if (_liveActive) {
+   TR.videoLiveTimer = setInterval(trCaptureFrame, 2000);
+  } else {
+   clearInterval(TR.videoLiveTimer);
+  }
+}
+
+// ── MAIN TRANSLATE ──
+async function trTranslate() {
+ const langCode = document.getElementById('trLangSel').value;
+ const lang = LANG_MORSE[langCode];
+ let text = '';
+
+ const mode = TR.mode;
+
+ if (mode === 'text') {
+   text = document.getElementById('trTextInput').value.trim();
+   if (!text) { toast('Enter some text first', 'info'); return; }
+  } else if (mode === 'audio') {
+   text = document.getElementById('trRecText').value.trim();
+   if (!text) { toast('Record some speech first', 'info'); return; }
+  } else if (mode === 'image' || mode === 'video') {
+   if (!TR.imageData) { toast('Upload or capture an image first', 'info'); return; }
+    // OCR via Anthropic API
+   trShowLoading('Extracting text from image…');
+   try {
+     text = await trOCR(TR.imageData);
+    } catch(e) {
+     trHideLoading();
+     toast('Image recognition failed', 'bad'); return;
+    }
+   trHideLoading();
+   if (!text) { toast('No text found in image', 'info'); return; }
+  }
+
+  // Translate
+ trShowLoading('Translating to Morse…');
+ const morse = trTranslateText(text, langCode);
+ trHideLoading();
+
+ if (!morse) { toast('No translatable characters found', 'info'); return; }
+ TR.morseResult = morse;
+ trRenderOutput(morse, text, lang);
+}
+
+// ── OCR via Anthropic API ──
+async function trOCR(base64DataUrl) {
+ const base64 = base64DataUrl.split(',')[1];
+ const mediaType = base64DataUrl.match(/data:([^;]+)/)[1];
+ const res = await fetch('https://api.anthropic.com/v1/messages', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+     model: 'claude-sonnet-4-20250514',
+     max_tokens: 1000,
+     messages: [{
+       role: 'user',
+       content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: 'Extract all text visible in this image. Return ONLY the text, no descriptions, no formatting, no commentary. If there is no text, return empty string.' }
+        ]
+      }]
+    })
+  });
+ const data = await res.json();
+ return (data.content?.[0]?.text || '').trim();
+}
+
+// ── LOADING ──
+function trShowLoading(msg) {
+ document.getElementById('trLoadingText').textContent = msg;
+ document.getElementById('trLoading').style.display = 'flex';
+ document.getElementById('trBtn').disabled = true;
+}
+function trHideLoading() {
+ document.getElementById('trLoading').style.display = 'none';
+ document.getElementById('trBtn').disabled = false;
+}
+
+// ── RENDER OUTPUT ──
+function trRenderOutput(morse, originalText, lang) {
+  // Colored Morse text
+ const colored = morse.replace(/[·\.\-]/g, ch =>
+   ch==='.' ? '<span class="dot">·</span>' :
+   ch==='-' ? '<span class="dash">−</span>' :
+   ch===' ' ? ' ' : ch
+  );
+  // Replace dots and dashes with visual
+ const visual = morse.split('').map(ch => {
+   if (ch === '.') return '<span class="dot">·</span>';
+   if (ch === '-') return '<span class="dash">−</span>';
+   return ch;
+  }).join('');
+ document.getElementById('trMorseOut').innerHTML = visual;
+
+  // Generate canvas image
+ trDrawCanvas(morse, originalText, lang.name);
+
+ document.getElementById('trOutput').style.display = 'flex';
+ document.getElementById('trOutput').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ── CANVAS IMAGE ──
+function trDrawCanvas(morse, originalText, langName) {
+ const canvas = document.getElementById('trMorseCanvas');
+ const W = Math.min(window.innerWidth - 40, 860);
+ const PAD = 28, LH = 30, HDR = 90;
+
+  // Wrap morse into lines
+ const segments = morse.split('   ');
+ const allLines = [];
+ const ctx2 = document.createElement('canvas').getContext('2d');
+ ctx2.font = 'bold 16px monospace';
+ for (const seg of segments) {
+   const words = seg.split(' ');
+   let line = '';
+   for (const w of words) {
+     const test = line ? line + ' ' + w : w;
+     if (ctx2.measureText(test).width > W - PAD*2) { allLines.push(line); line = w; }
+     else line = test;
+    }
+   if (line) allLines.push(line);
+   allLines.push('');
+  }
+
+ canvas.width = W;
+ canvas.height = HDR + allLines.length * LH + PAD * 2;
+ const ctx = canvas.getContext('2d');
+
+  // Background
+ const isDark = document.body.getAttribute('data-theme') !== 'light';
+ ctx.fillStyle = isDark ? '#0b0f1a' : '#f0f4f8';
+ ctx.fillRect(0, 0, W, canvas.height);
+
+  // Header bar
+ ctx.fillStyle = isDark ? 'rgba(167,139,250,.1)' : 'rgba(167,139,250,.15)';
+ ctx.fillRect(0, 0, W, HDR);
+ ctx.strokeStyle = isDark ? 'rgba(167,139,250,.3)' : 'rgba(167,139,250,.4)';
+ ctx.lineWidth = 1; ctx.strokeRect(0, 0, W, HDR);
+
+ ctx.font = 'bold 15px sans-serif';
+ ctx.fillStyle = isDark ? '#a78bfa' : '#7c3aed';
+ ctx.fillText('MorseWave — Universal Translator', PAD, 30);
+
+ ctx.font = '12px monospace';
+ ctx.fillStyle = isDark ? '#94a3b8' : '#475569';
+ ctx.fillText('Language: ' + langName + '   |   ' + new Date().toLocaleDateString(), PAD, 52);
+
+ ctx.font = '11px monospace';
+ ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
+ const trunc = originalText.length > 70 ? originalText.slice(0,67)+'…' : originalText;
+ ctx.fillText('Source: "' + trunc + '"', PAD, 72);
+
+  // Morse lines
+ ctx.font = 'bold 16px monospace';
+ allLines.forEach((line, i) => {
+   if (!line) return;
+   const y = HDR + PAD + i * LH;
+   let x = PAD;
+   for (const ch of line) {
+     if (ch === '.' || ch === '·') ctx.fillStyle = '#38bdf8';
+     else if (ch === '-' || ch === '−') ctx.fillStyle = '#fbbf24';
+     else ctx.fillStyle = isDark ? '#4a5568' : '#cbd5e1';
+     ctx.fillText(ch, x, y);
+     x += ctx.measureText(ch).width;
+    }
+  });
+}
+
+// ── COPY / PRINT / DOWNLOAD ──
+function trCopyMorse() {
+ _copyText(TR.morseResult, 'Morse code copied!');
+}
+function trPrintMorse() {
+ const lang = LANG_MORSE[document.getElementById('trLangSel').value];
+ const win = window.open('', '_blank');
+ win.document.write(`<html><head><title>Morse Code</title><style>
+   body{font-family:monospace;padding:2rem;background:#fff;color:#000;}
+   h2{font-size:1.2rem;margin-bottom:.5rem;}
+   p{font-size:1.1rem;line-height:2.2;word-break:break-all;letter-spacing:.12em;}
+   small{color:#666;font-size:.8rem;}
+  /* ── LANGUAGE PICKER ── */
+.lang-picker-overlay{position:fixed;inset:0;z-index:500;background:rgba(11,15,26,.85);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:1rem;}
+[data-theme=light] .lang-picker-overlay{background:rgba(240,244,248,.9);}
+.lang-picker-overlay.show{display:flex;animation:fadeIn .2s ease;}
+.lang-picker{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:460px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;animation:fadeUp .25s ease;}
+.lang-picker-head{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.lang-picker-head h3{font-size:.98rem;font-weight:700;}
+.lang-picker-close{background:none;border:none;color:var(--txt3);font-size:1.2rem;cursor:pointer;padding:.2rem .5rem;border-radius:8px;transition:all .2s;}
+.lang-picker-close:hover{color:var(--rose);background:rgba(248,113,113,.1);}
+.lang-search{margin:.9rem 1.25rem;padding:.7rem 1rem;background:rgba(0,0,0,.22);border:1.5px solid var(--border2);border-radius:12px;color:var(--txt);font-family:inherit;font-size:.9rem;outline:none;transition:border-color .2s;}
+[data-theme=light] .lang-search{background:rgba(0,0,0,.04);}
+.lang-search:focus{border-color:rgba(56,189,248,.5);}
+.lang-list{overflow-y:auto;padding:0 .75rem 1rem;flex:1;}
+.lang-item{display:flex;align-items:center;gap:.75rem;padding:.7rem .85rem;border-radius:11px;cursor:pointer;transition:all .15s;border:1px solid transparent;}
+.lang-item:hover{background:rgba(56,189,248,.08);}
+.lang-item.active{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.3);}
+.lang-item-name{flex:1;font-size:.9rem;font-weight:600;}
+.lang-item-native{font-size:.78rem;color:var(--txt2);}
+.lang-item-check{color:var(--cyan);font-size:.95rem;opacity:0;}
+.lang-item.active .lang-item-check{opacity:1;}
+.lang-empty{text-align:center;padding:2rem;color:var(--txt3);font-size:.85rem;}
+
+/* ── DAILY STREAK BADGE ── */
+.streak-badge{position:fixed;bottom:1.25rem;right:1.25rem;z-index:300;display:flex;align-items:center;gap:.4rem;padding:.5rem .85rem;background:linear-gradient(135deg,rgba(251,146,60,.18),rgba(248,113,113,.14));border:1.5px solid rgba(251,146,60,.4);border-radius:999px;cursor:pointer;backdrop-filter:blur(10px);transition:all .25s;box-shadow:0 4px 20px rgba(251,146,60,.2);}
+.streak-badge:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(251,146,60,.35);}
+.streak-flame{font-size:1.1rem;line-height:1;}
+.streak-count{font-size:1.05rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#fb923c;}
+@media(max-width:600px){.streak-badge{bottom:1rem;right:1rem;}}
+
+
+.di{position:relative;}
+.di-globe{position:absolute;top:4px;right:4px;background:none;border:none;font-size:.8rem;cursor:pointer;opacity:.45;transition:opacity .2s;padding:2px;line-height:1;z-index:2;}
+.di-globe:hover{opacity:1;}
+
+</style></head><body>
+  <h2>Morse Code — ${lang.name}</h2>
+  <small>Generated by MorseWave Universal Translator · ${new Date().toLocaleString()}</small>
+  <p>${TR.morseResult.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</p>
+  </body></html>`);
+ win.document.close();
+ win.print();
+}
+function trPlayMorse() {
+ const wpm = parseInt(document.getElementById('trWpmSel').value);
+ playCode(TR.morseResult, wpm);
+}
+function trDownloadWav() {
+ const wpm = parseInt(document.getElementById('trWpmSel').value);
+ trGenerateAndDownloadWAV(TR.morseResult, wpm);
+}
+function trDownloadImg() {
+ const canvas = document.getElementById('trMorseCanvas');
+ const a = document.createElement('a');
+ a.download = 'morse-' + Date.now() + '.png';
+ a.href = canvas.toDataURL('image/png');
+ a.click();
+}
+
+// ── WAV GENERATION ──
+function trGenerateAndDownloadWAV(morse, wpm=14, freq=680) {
+ const SR = 44100;
+ const u = (1200/wpm)/1000; // unit in seconds
+ const samples = [];
+
+ function addTone(dur) {
+   const n = Math.floor(SR * dur);
+   for (let i=0; i<n; i++) {
+     const env = Math.min(i/Math.floor(SR*0.005), 1, (n-i)/Math.floor(SR*0.005));
+     samples.push(Math.sin(2*Math.PI*freq*(i/SR)) * 0.4 * env);
+    }
+  }
+ function addSilence(dur) {
+   const n = Math.floor(SR * dur);
+   for (let i=0; i<n; i++) samples.push(0);
+  }
+
+ const words = morse.split('   ');
+ for (let wi=0; wi<words.length; wi++) {
+   const chars = words[wi].split(' ');
+   for (let ci=0; ci<chars.length; ci++) {
+     const sym = chars[ci];
+     for (let si=0; si<sym.length; si++) {
+       if (sym[si]==='.') addTone(u);
+       else if (sym[si]==='-') addTone(3*u);
+       if (si<sym.length-1) addSilence(u);
+      }
+     if (ci<chars.length-1) addSilence(3*u);
+    }
+   if (wi<words.length-1) addSilence(7*u);
+  }
+
+  // Encode WAV
+ const buf = new ArrayBuffer(44 + samples.length*2);
+ const view = new DataView(buf);
+ const ws = (o,s) => [...s].forEach((c,i) => view.setUint8(o+i,c.charCodeAt(0)));
+ ws(0,'RIFF'); view.setUint32(4,36+samples.length*2,true);
+ ws(8,'WAVE'); ws(12,'fmt '); view.setUint32(16,16,true);
+ view.setUint16(20,1,true); view.setUint16(22,1,true);
+ view.setUint32(24,SR,true); view.setUint32(28,SR*2,true);
+ view.setUint16(32,2,true); view.setUint16(34,16,true);
+ ws(36,'data'); view.setUint32(40,samples.length*2,true);
+ samples.forEach((s,i) => view.setInt16(44+i*2, Math.max(-1,Math.min(1,s))*0x7FFF, true));
+
+ const blob = new Blob([buf],{type:'audio/wav'});
+ const a = document.createElement('a');
+ a.href = URL.createObjectURL(blob);
+ a.download = 'morse-' + Date.now() + '.wav';
+ a.click();
+ toast('WAV downloaded!', 'ok');
+}
+
+
+
+// ══════════════════════════════════════════
+//   DAILY STREAK
+// ══════════════════════════════════════════
+function _todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function _daysBetween(a, b) {
+  const da = new Date(a + 'T00:00:00'), db = new Date(b + 'T00:00:00');
+  return Math.round((db - da) / 86400000);
+}
+function updateStreak() {
+  let data = JSON.parse(localStorage.getItem('mw_streak') || '{}');
+  const today = _todayStr();
+  if (!data.last) {
+    // First ever visit
+    data = { current: 1, best: 1, last: today, total: 1 };
+  } else if (data.last === today) {
+    // Already counted today — no change
+  } else {
+    const gap = _daysBetween(data.last, today);
+    if (gap === 1) {
+      data.current = (data.current || 0) + 1; // consecutive day
+    } else if (gap > 1) {
+      data.current = 1; // streak broken, restart
+    }
+    data.last = today;
+    data.total = (data.total || 0) + 1;
+    if (data.current > (data.best || 0)) data.best = data.current;
+  }
+  localStorage.setItem('mw_streak', JSON.stringify(data));
+  renderStreak(data);
+}
+function renderStreak(data) {
+  data = data || JSON.parse(localStorage.getItem('mw_streak') || '{}');
+  document.getElementById('streakCount').textContent = data.current || 0;
+}
+function showStreakInfo() {
+  const data = JSON.parse(localStorage.getItem('mw_streak') || '{}');
+  const cur = data.current || 0, best = data.best || 0, total = data.total || 0;
+  toast(`🔥 ${cur} day streak · Best: ${best} · Total days: ${total}`, 'ok', 4000);
+}
+
+
+// ══════════════════════════════════════════
+//   MORSE IN 20 LANGUAGES (cross-reference)
+// ══════════════════════════════════════════
+// 20 languages with distinct scripts for cross-reference
+const XLANG_CODES = ['en','he','ru','el','ar','fa','ja','ko','hi','ka','hy','uk','bg','sr','ta','te','am','yi','mn','th'];
+const _xlangRevCache = {};
+function _xlangReverse(code) {
+  if (_xlangRevCache[code]) return _xlangRevCache[code];
+  const lang = LANG_MORSE[code];
+  if (!lang) return {};
+  const rev = {};
+  for (const [ch, mc] of Object.entries(lang.table)) {
+    if (ch === ' ') continue;
+    if (!rev[mc]) rev[mc] = ch; // first match wins
+  }
+  _xlangRevCache[code] = rev;
+  return rev;
+}
+function showMorseInLanguages(morseCode, sourceChar) {
+  document.getElementById('xlangTitle').textContent = '"' + sourceChar + '" in world languages';
+  document.getElementById('xlangMorse').textContent = fmtCode(morseCode);
+  const list = document.getElementById('xlangList');
+  const rows = [];
+  for (const code of XLANG_CODES) {
+    if (!LANG_MORSE[code]) continue;
+    const rev = _xlangReverse(code);
+    const letter = rev[morseCode];
+    rows.push(`
+      <div class="lang-item" style="cursor:default">
+        <span class="lang-item-name">${LANG_EN_NAMES[code]||code}</span>
+        <span class="lang-item-native" style="font-size:1.15rem;font-weight:700;color:${letter?'var(--txt)':'var(--txt3)'}">${letter || '—'}</span>
+      </div>`);
+  }
+  list.innerHTML = rows.join('');
+  document.getElementById('xlangOverlay').classList.add('show');
+}
+function closeXlang() {
+  document.getElementById('xlangOverlay').classList.remove('show');
+}
+
+/* ══════════════════════════════════════════
+  BOOT
+══════════════════════════════════════════ */
+goPage('home');
+// Init dict on first visit
+dictTab(document.querySelector('.dtab.on'), 'en');
+// Load settings
+loadSettings();
+// Daily streak — count this visit
+updateStreak();
+// Update dictionary language tab label
+(function(){
+  const tab = document.getElementById('dictLangTab');
+  if (tab) {
+    const lc = (currentLang && currentLang!=='en') ? currentLang : 'he';
+    tab.textContent = (LANG_MORSE[lc] && LANG_MORSE[lc].name) || 'Hebrew';
+  }
+})();
+</script>
+</body>
+</html>
