@@ -2,7 +2,7 @@
 <html lang="he" dir="auto">
 <head>
 <link rel="manifest" href="manifest.json">
-<script>if('serviceWorker'in navigator){navigator.serviceWorker.register('./sw.js');}</script>
+<script>if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){});});}</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>MorseWave — לימוד קוד מורס</title>
@@ -805,6 +805,12 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .di{position:relative;}
 .di-globe{position:absolute;top:4px;right:4px;background:none;border:none;font-size:.8rem;cursor:pointer;opacity:.45;transition:opacity .2s;padding:2px;line-height:1;z-index:2;}
 .di-globe:hover{opacity:1;}
+
+
+.lv-jump{margin-top:.6rem;width:100%;padding:.5rem;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);border-radius:9px;color:var(--violet);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;position:relative;z-index:3;}
+.lv-jump:hover{background:rgba(167,139,250,.22);}
+.lv.locked{position:relative;}
+.lv.locked .lv-jump{pointer-events:auto;}
 
 </style>
 </head>
@@ -1819,19 +1825,28 @@ function selectLang(code) {
   closeLangPicker();
   const l = LANG_MORSE[code];
   toast((l.name) + ' ✓', 'ok');
+  const ret = _langPickerReturnPage;
   // Update dictionary language tab label
   const dtab = document.getElementById('dictLangTab');
   if (dtab) dtab.textContent = (code!=='en') ? l.name : 'Hebrew';
-  // Rebuild dictionary if showing the language tab
-  const activeDtab = document.querySelector('.dtab.on');
-  if (activeDtab === dtab) dictTab(dtab, 'heb');
-  // Refresh practice mode buttons + current question
-  refreshPracticeUI();
-  if (currentPage === 'practice') { P.mode = (code==='en'?'letters':(code==='he'?'heb':'lang')); pNext(); }
-  // Refresh Telegraph target if active
-  if (currentPage === 'tap' && typeof tapNextTarget === 'function') tapNextTarget();
-  // Return to the page we were on (NOT always home)
-  goPage(_langPickerReturnPage);
+  // Set practice default mode for the new language
+  if (typeof P !== 'undefined') P.mode = (code==='en'?'letters':(code==='he'?'heb':'lang'));
+  // Go to the page we were on, then force a full live refresh of that page's content
+  goPage(ret);
+  // Live refresh based on which page we're on now
+  if (ret === 'practice') {
+    refreshPracticeUI();
+    pNext(); // new question in the new language
+  } else if (ret === 'dict') {
+    // Re-render whichever dictionary tab is active so letters switch language
+    const onTab = document.querySelector('.dtab.on');
+    const which = onTab ? (onTab.id==='dictLangTab' ? 'heb' : (onTab.textContent.includes('A')||onTab.textContent.includes('1') ? 'en' : 'punc')) : 'en';
+    dictTab(onTab || document.querySelector('.dtab'), which);
+  } else if (ret === 'tap') {
+    if (typeof tapNextTarget === 'function') tapNextTarget();
+  } else if (ret === 'learn') {
+    if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector').style.display !== 'none') renderLevelGrid();
+  }
 }
 
 // Update practice mode buttons to reflect the active language
@@ -2012,7 +2027,7 @@ const LEVELS = [
   {num:7, name:'Hebrew נ–ת',     sub:'Nun through Tav — complete the Hebrew Morse alphabet.',    chars:['נ','ס','ע','פ','צ','ק','ר','ש','ת'], heb:true},
 ];
 
-let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false };
+let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false, session:'level', sessionChars:[], nextLvlIdx:null, placeTarget:null, score:0, total:0 };
 let lvlDone = JSON.parse(localStorage.getItem('mw_lvls') || '{}');
 
 function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem('mw_lvls', JSON.stringify(lvlDone)); }
@@ -2030,6 +2045,74 @@ function buildSteps(lv) {
  weak.forEach(ch => s.push({type:'srs', ch}));
  s.push({type:'done'});
  return s;
+}
+
+// ── Helpers for review & placement sessions ──
+function isHebChar(ch) { return /[\u05D0-\u05EA]/.test(ch); }
+function charsUpTo(lvlIdx) {
+ let arr = [];
+ for (let i = 0; i < lvlIdx; i++) arr = arr.concat(LEVELS[i].chars);
+ return arr;
+}
+// Build a cumulative review session (mix of recog + recall, shuffled)
+function buildReviewSteps(chars) {
+ const s = [{type:'reviewIntro'}];
+ const items = [];
+ chars.forEach(ch => { items.push({type:'recog', ch}); items.push({type:'recall', ch}); });
+ // shuffle
+ for (let i = items.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+ s.push(...items);
+ s.push({type:'reviewDone'});
+ return s;
+}
+// Build a long, accurate placement test: 3 questions per char, mixed, shuffled
+function buildPlacementSteps(chars) {
+ const s = [{type:'placeIntro'}];
+ const items = [];
+ chars.forEach(ch => {
+   items.push({type:'recog', ch});
+   items.push({type:'recall', ch});
+   items.push({type:'recog', ch});
+ });
+ for (let i = items.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [items[i],items[j]]=[items[j],items[i]]; }
+ s.push(...items);
+ s.push({type:'placeDone'});
+ return s;
+}
+
+// Start a cumulative review (after every 2 levels)
+function startReview(chars, nextLvlIdx) {
+ LP.session = 'review';
+ LP.sessionChars = chars;
+ LP.nextLvlIdx = nextLvlIdx;
+ LP.steps = buildReviewSteps(chars);
+ LP.stepIdx = 0; LP.answered = false;
+ document.getElementById('levelSelector').style.display = 'none';
+ document.getElementById('lessonArea').style.display = 'block';
+ document.getElementById('lmTitle').textContent = 'Practice Review';
+ document.getElementById('lmSub').textContent = 'All letters you have learned so far';
+ document.getElementById('lmBadge').textContent = 'REVIEW';
+ document.getElementById('srsChips').innerHTML = '';
+ renderStep();
+}
+
+// Start a placement test to "jump" to a level
+function startPlacement(targetIdx) {
+ const chars = charsUpTo(targetIdx);
+ if (chars.length === 0) { startLevel(0); return; }
+ LP.session = 'placement';
+ LP.sessionChars = chars;
+ LP.placeTarget = targetIdx;
+ LP.score = 0; LP.total = 0;
+ LP.steps = buildPlacementSteps(chars);
+ LP.stepIdx = 0; LP.answered = false;
+ document.getElementById('levelSelector').style.display = 'none';
+ document.getElementById('lessonArea').style.display = 'block';
+ document.getElementById('lmTitle').textContent = 'Placement Test';
+ document.getElementById('lmSub').textContent = 'Prove you know everything up to Level ' + LEVELS[targetIdx].num;
+ document.getElementById('lmBadge').textContent = 'JUMP TEST';
+ document.getElementById('srsChips').innerHTML = '';
+ renderStep();
 }
 
 function initLearn() {
@@ -2053,20 +2136,22 @@ function renderLevelGrid() {
    const done = !!lvlDone[i];
    const locked = i > 0 && !lvlDone[i-1] && !done;
    const isHeb = !!lv.heb;
+   const showJump = locked && i > 0;
    return `<div class="lv${done?' done':''}${locked?' locked':''}"
-     onclick="${locked?'toast(\'Complete Level '+(i)+' first\',\'info\')':'startLevel('+i+')'}"
+     onclick="${locked?'':'startLevel('+i+')'}"
     >
       <div class="lv-num">L${lv.num}</div>
       <div class="lv-name">${lv.name}</div>
       <div class="lv-chars${isHeb?' heb':''}">${lv.chars.join(' ')}</div>
       <div class="lv-star">${done?'✦':locked?'🔒':''}</div>
       <div class="lv-bar"><div class="lv-fill" style="width:${done?100:0}%"></div></div>
+      ${showJump?`<button class="lv-jump" onclick="event.stopPropagation();startPlacement(${i})">⚡ Jump here (test)</button>`:''}
     </div>`;
   }).join('');
 }
 
 function startLevel(i) {
- LP.lvlIdx = i; LP.stepIdx = 0; LP.steps = buildSteps(LEVELS[i]); LP.answered = false;
+ LP.session='level'; LP.lvlIdx = i; LP.stepIdx = 0; LP.steps = buildSteps(LEVELS[i]); LP.answered = false;
  document.getElementById('levelSelector').style.display = 'none';
  document.getElementById('lessonArea').style.display = 'block';
  const lv = LEVELS[i];
@@ -2079,6 +2164,7 @@ function startLevel(i) {
 }
 
 function renderSrsChips() {
+ if (LP.session !== 'level') return;
  const lv = LEVELS[LP.lvlIdx];
  document.getElementById('srsChips').innerHTML = lv.chars.map(ch => {
    const sc = srsScore(ch);
@@ -2091,7 +2177,7 @@ function renderSrsChips() {
 function renderStep() {
  const step = LP.steps[LP.stepIdx];
  document.getElementById('stepInfo').textContent = `Step ${LP.stepIdx+1} / ${LP.steps.length}`;
- document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type).toUpperCase();
+ document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type==='reviewIntro'||step.type==='reviewDone'?'REVIEW':step.type==='placeIntro'||step.type==='placeDone'?'TEST':step.type).toUpperCase();
  document.getElementById('lNextBtn').disabled = true;
  document.getElementById('lBackBtn').style.visibility = LP.stepIdx > 0 ? 'visible' : 'hidden';
  const st = document.getElementById('lstage');
@@ -2106,6 +2192,10 @@ function renderStep() {
      case 'recall': renderRecall(step.ch); break;
      case 'srs':   renderSRS(step.ch); break;
      case 'done':  renderDone(); break;
+     case 'reviewIntro': renderReviewIntro(); break;
+     case 'reviewDone':  renderReviewDone(); break;
+     case 'placeIntro':  renderPlaceIntro(); break;
+     case 'placeDone':   renderPlaceDone(); break;
     }
   }, 230);
 }
@@ -2152,11 +2242,16 @@ function renderFlash(ch) {
 }
 
 function buildOptPool(ch) {
- const lv = LEVELS[LP.lvlIdx];
- let pool = [...lv.chars];
- if (pool.length < 4) {
-   for (let li = LP.lvlIdx-1; li >= 0 && pool.length < 8; li--) pool = pool.concat(LEVELS[li].chars);
-  }
+ let pool;
+ if (LP.session === 'review' || LP.session === 'placement') {
+   pool = [...LP.sessionChars];
+ } else {
+   const lv = LEVELS[LP.lvlIdx];
+   pool = [...lv.chars];
+   if (pool.length < 4) {
+     for (let li = LP.lvlIdx-1; li >= 0 && pool.length < 8; li--) pool = pool.concat(LEVELS[li].chars);
+   }
+ }
  const opts = [ch];
  const shuffled = pool.filter(c=>c!==ch).sort(()=>Math.random()-.5);
  for (const c of shuffled) { if (opts.length >= 4) break; opts.push(c); }
@@ -2165,7 +2260,7 @@ function buildOptPool(ch) {
 
 function renderRecog(ch) {
  const code = getMorse(ch);
- const isHeb = LEVELS[LP.lvlIdx].heb;
+ const isHeb = (LP.session==='level') ? LEVELS[LP.lvlIdx].heb : isHebChar(ch);
  const syms = code.split('').map(s=>`<div class="q-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
  const opts = buildOptPool(ch);
  document.getElementById('lstage').innerHTML = `<div style="text-align:center;width:100%">
@@ -2192,6 +2287,7 @@ function recogAns(correct, btn) {
   });
  showLFb(ok, correct);
  srsRecord(correct, ok); renderSrsChips();
+ if (LP.session==='placement') { LP.total++; if(ok) LP.score++; }
  document.getElementById('lNextBtn').disabled = false;
  if (ok) playCode(getMorse(correct));
  maybeAutoAdvance(ok, lNext);
@@ -2199,7 +2295,7 @@ function recogAns(correct, btn) {
 
 function renderRecall(ch) {
  const code = getMorse(ch);
- const isHeb = LEVELS[LP.lvlIdx].heb;
+ const isHeb = (LP.session==='level') ? LEVELS[LP.lvlIdx].heb : isHebChar(ch);
  const syms = code.split('').map(s=>`<div class="q-sym ${s==='.'?'dot':'dash'}"></div>`).join('');
  document.getElementById('lstage').innerHTML = `<div style="text-align:center;width:100%">
     <div class="q-prompt">Type the letter for this Morse code</div>
@@ -2226,9 +2322,10 @@ function checkRecall(correct) {
  const val = inp.value.trim();
  if (!val) return;
  LP.answered = true;
- const isHeb = LEVELS[LP.lvlIdx].heb;
+ const isHeb = (LP.session==='level') ? LEVELS[LP.lvlIdx].heb : isHebChar(correct);
  const ok = isHeb ? val === correct : val.toUpperCase() === correct.toUpperCase();
- inp.disabled = true; inp.className = `type-inp${LEVELS[LP.lvlIdx].heb?' heb':''} ${ok?'ok':'bad'}`;
+ inp.disabled = true; inp.className = `type-inp${isHeb?' heb':''} ${ok?'ok':'bad'}`;
+ if (LP.session==='placement') { LP.total++; if(ok) LP.score++; }
  showLFb(ok, correct);
  srsRecord(correct, ok); renderSrsChips();
  document.getElementById('lNextBtn').disabled = false;
@@ -2245,6 +2342,70 @@ function showLFb(ok, ch) {
  if (!fb) return;
  fb.className = 'lfb show ' + (ok?'ok':'bad');
  fb.textContent = ok ? `✓ Correct! ${ch} = ${fmtCode(getMorse(ch))}` : `✗ Answer: ${ch} = ${fmtCode(getMorse(ch))}`;
+}
+
+function renderReviewIntro() {
+ const n = LP.sessionChars.length;
+ document.getElementById('lstage').innerHTML = `<div class="intro-wrap">
+    <div class="intro-lnum">PRACTICE REVIEW</div>
+    <div class="intro-title">Let's review what you learned</div>
+    <div class="intro-sub">A quick mix of all ${n} characters so far. No pressure — just reinforcing your memory.</div>
+    <div class="intro-chips">
+      ${LP.sessionChars.map(ch => `<span class="ichip${isHebChar(ch)?' heb':''}">${ch}<span class="icode">${fmtCode(getMorse(ch))}</span></span>`).join('')}
+    </div>
+  </div>`;
+ document.getElementById('lNextBtn').disabled = false;
+}
+
+function renderReviewDone() {
+ document.getElementById('lstage').innerHTML = `<div class="complete-wrap">
+    <div class="complete-icon">✅</div>
+    <div class="complete-title">Review Complete!</div>
+    <div class="complete-sub">Great job keeping those letters fresh.</div>
+  </div>`;
+ const nb = document.getElementById('lNextBtn');
+ nb.disabled = false;
+ nb.textContent = LP.nextLvlIdx != null && LP.nextLvlIdx < LEVELS.length ? 'Continue →' : '🏆 Done!';
+}
+
+function renderPlaceIntro() {
+ const n = LP.sessionChars.length;
+ const tgt = LEVELS[LP.placeTarget];
+ document.getElementById('lstage').innerHTML = `<div class="intro-wrap">
+    <div class="intro-lnum">PLACEMENT TEST</div>
+    <div class="intro-title">Jump to Level ${tgt.num}: ${tgt.name}</div>
+    <div class="intro-sub">You'll be tested on all ${n} characters from the earlier levels (${LP.sessionChars.length*3} questions). Score <strong>85%+</strong> to unlock and skip ahead.</div>
+    <div class="intro-chips">
+      ${LP.sessionChars.map(ch => `<span class="ichip${isHebChar(ch)?' heb':''}">${ch}</span>`).join('')}
+    </div>
+  </div>`;
+ document.getElementById('lNextBtn').disabled = false;
+}
+
+function renderPlaceDone() {
+ const pct = LP.total ? Math.round(LP.score/LP.total*100) : 0;
+ const passed = pct >= 85;
+ const tgt = LEVELS[LP.placeTarget];
+ if (passed) {
+   // Mark all previous levels as done
+   for (let i = 0; i < LP.placeTarget; i++) saveLvl(i, true);
+ }
+ document.getElementById('lstage').innerHTML = `<div class="complete-wrap">
+    <div class="complete-icon">${passed?'🚀':'📚'}</div>
+    <div class="complete-title">${passed?'Test Passed!':'Not quite yet'}</div>
+    <div class="complete-sub">You scored <strong>${pct}%</strong> (${LP.score}/${LP.total})</div>
+    <div class="xp-row">
+      <div class="xp"><div class="xp-v">${LP.score}</div><div class="xp-l">Correct</div></div>
+      <div class="xp"><div class="xp-v">${LP.total-LP.score}</div><div class="xp-l">Missed</div></div>
+      <div class="xp"><div class="xp-v">${pct}%</div><div class="xp-l">Score</div></div>
+    </div>
+    <div class="complete-sub" style="margin-top:1rem">${passed
+      ? 'All earlier levels unlocked — continuing to Level '+tgt.num+'!'
+      : 'You need 85% to jump here. Try again, or start from an earlier level to build up.'}</div>
+  </div>`;
+ const nb = document.getElementById('lNextBtn');
+ nb.disabled = false;
+ nb.textContent = passed ? 'Start Level '+tgt.num+' →' : 'Back to Levels';
 }
 
 function renderDone() {
@@ -2268,10 +2429,33 @@ function renderDone() {
 
 function lNext() {
  const step = LP.steps[LP.stepIdx];
+ // Level completed
  if (step.type === 'done') {
-   if (LP.lvlIdx < LEVELS.length-1) startLevel(LP.lvlIdx+1);
+   const justFinished = LP.lvlIdx;
+   // After every 2 levels (idx 1,3,5 → L2,L4,L6) trigger a cumulative review
+   const isEvenLevel = (justFinished % 2 === 1);
+   const hasNext = justFinished < LEVELS.length-1;
+   if (isEvenLevel) {
+     const learned = charsUpTo(justFinished+1); // include the level just finished
+     startReview(learned, hasNext ? justFinished+1 : null);
+     return;
+   }
+   if (hasNext) startLevel(justFinished+1);
    else renderLevelGrid();
    renderTrack();
+   return;
+  }
+ // Review session completed
+ if (step.type === 'reviewDone') {
+   if (LP.nextLvlIdx != null && LP.nextLvlIdx < LEVELS.length) startLevel(LP.nextLvlIdx);
+   else { renderLevelGrid(); renderTrack(); }
+   return;
+  }
+ // Placement test completed
+ if (step.type === 'placeDone') {
+   const pct = LP.total ? Math.round(LP.score/LP.total*100) : 0;
+   if (pct >= 85) { startLevel(LP.placeTarget); renderTrack(); }
+   else { LP.session='level'; renderLevelGrid(); renderTrack(); }
    return;
   }
  LP.stepIdx = Math.min(LP.stepIdx+1, LP.steps.length-1);
@@ -2279,6 +2463,11 @@ function lNext() {
 }
 
 function lBack() {
+ if (LP.session !== 'level') {
+   // From a review/placement, back exits to the level grid
+   if (LP.stepIdx > 0 && !confirm('Exit this session? Progress in it will be lost.')) return;
+   LP.session = 'level'; renderLevelGrid(); renderTrack(); return;
+ }
  if (LP.stepIdx > 0) { LP.stepIdx--; renderStep(); }
  else renderLevelGrid();
 }
@@ -3760,6 +3949,12 @@ function trPrintMorse() {
 .di{position:relative;}
 .di-globe{position:absolute;top:4px;right:4px;background:none;border:none;font-size:.8rem;cursor:pointer;opacity:.45;transition:opacity .2s;padding:2px;line-height:1;z-index:2;}
 .di-globe:hover{opacity:1;}
+
+
+.lv-jump{margin-top:.6rem;width:100%;padding:.5rem;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);border-radius:9px;color:var(--violet);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;position:relative;z-index:3;}
+.lv-jump:hover{background:rgba(167,139,250,.22);}
+.lv.locked{position:relative;}
+.lv.locked .lv-jump{pointer-events:auto;}
 
 </style></head><body>
   <h2>Morse Code — ${lang.name}</h2>
