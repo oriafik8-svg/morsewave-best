@@ -48,6 +48,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;height:56px;padding:0 1.25re
 @keyframes ldot{0%,100%{opacity:.35;transform:scale(.75);}50%{opacity:1;transform:scale(1.2);}}
 .nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none;}
 .nav-tabs::-webkit-scrollbar{display:none;}
+#backArrow{position:fixed;top:62px;left:14px;z-index:200;width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:rgba(255,255,255,.06);color:var(--txt2);align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.28);transition:all .2s;}
+#backArrow:hover{color:var(--cyan);border-color:rgba(56,189,248,.4);transform:translateX(-2px);}
+[data-theme=light] #backArrow{background:rgba(0,0,0,.04);}
+@media(max-width:600px){#backArrow{top:58px;left:8px;width:36px;height:36px;}}
 .nt{padding:.35rem .85rem;border:none;background:none;color:var(--txt2);font-family:inherit;font-size:.78rem;font-weight:500;cursor:pointer;border-radius:8px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
 .nt:hover{color:var(--txt);}
 .nt.on{background:rgba(56,189,248,.12);color:var(--cyan);border:1px solid rgba(56,189,248,.2);}
@@ -915,23 +919,27 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 
 <!-- ─── NAV ─── -->
 <nav>
-  <button class="logo" onclick="goPage('home')">
+  <button class="logo" onclick="navTo('home')">
     <span class="logo-dot"></span>MorseWave
   </button>
   <div class="nav-tabs">
-    <button class="nt" onclick="goPage('home')">Home</button>
-    <button class="nt" onclick="goPage('learn')">Learn</button>
-    <button class="nt" onclick="goPage('tap')">Telegraph</button>
-    <button class="nt" onclick="goPage('practice')">Practice</button>
-    <button class="nt" onclick="goPage('dict')">Dictionary</button>
-    <button class="nt" onclick="goPage('translate')">Translate</button>
-    <button class="nt" onclick="goPage('games')">Games</button>
-    <button class="nt" onclick="goPage('settings')">⚙ Settings</button>
+    <button class="nt" onclick="navTo('home')">Home</button>
+    <button class="nt" onclick="navTo('learn')">Learn</button>
+    <button class="nt" onclick="navTo('tap')">Telegraph</button>
+    <button class="nt" onclick="navTo('practice')">Practice</button>
+    <button class="nt" onclick="navTo('dict')">Dictionary</button>
+    <button class="nt" onclick="navTo('translate')">Translate</button>
+    <button class="nt" onclick="navTo('games')">Games</button>
+    <button class="nt" onclick="navTo('settings')">⚙ Settings</button>
   </div>
   <div class="nav-actions">
     <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</button>
   </div>
 </nav>
+<button id="backArrow" onclick="navBack()" title="Back to Home" aria-label="Back to Home" style="display:none">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</button>
+
 
 <!-- ─── LANGUAGE PICKER ─── -->
 <div id="langPickerOverlay" class="lang-picker-overlay" onclick="if(event.target===this)closeLangPicker()">
@@ -1810,19 +1818,15 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 
       <!-- ── Interface / Letter-conversion Language ── -->
       <div class="sgroup">
-        <div class="sgroup-header" onclick="toggleLangGroup(this)">
+        <div class="sgroup-header" onclick="openLangPicker()">
           <span class="sgroup-title">Interface Language</span>
-          <span class="sgroup-arrow" id="settingsLangArrow">▶</span>
+          <span class="sgroup-arrow">▶</span>
         </div>
-        <div class="sgroup-body" id="langGroupBody">
-          <div class="srow" style="border:none;cursor:default;padding-bottom:.5rem">
-            <div class="srow-left">
-              <span class="srow-label">Change letter conversion from Morse to…</span>
-              <span class="srow-sub" id="settingsLangCurrent">Currently: English</span>
-            </div>
+        <div class="srow" style="border:none;cursor:default">
+          <div class="srow-left">
+            <span class="srow-label">Letter conversion</span>
+            <span class="srow-sub" id="settingsLangCurrent">Currently: English</span>
           </div>
-          <input type="text" id="settingsLangSearch" class="lang-search" style="margin:.4rem 0 .6rem;width:100%;box-sizing:border-box" placeholder="🔍 Search language…" oninput="filterSettingsLangs()" autocomplete="off">
-          <div class="lang-list" id="settingsLangList" style="max-height:300px"></div>
         </div>
       </div>
 
@@ -1874,7 +1878,15 @@ function fmtCode(code) {
 // ── REVERSE LOOKUP ──
 const MORSE_REV = {};
 for (const [ch, code] of Object.entries(MORSE_ALL)) MORSE_REV[code] = ch;
-function decodeCode(code) { return MORSE_REV[code] || '?'; }
+function decodeCode(code) {
+ // Decode into the currently selected language first (Telegraph, etc.),
+ // so a Russian/Greek/Arabic learner sees their own letters — not English.
+ if (typeof currentLang !== 'undefined' && currentLang && typeof LANG_MORSE !== 'undefined' && LANG_MORSE[currentLang]) {
+   const rev = _xlangReverse(currentLang);
+   if (rev[code]) return rev[code];
+ }
+ return MORSE_REV[code] || '?';
+}
 
 // ── GAME COMPAT SHIMS ──
 const MORSE = Object.assign({}, MORSE_EN, MORSE_HEB, MORSE_PUNC);
@@ -1910,28 +1922,40 @@ function isHebLang() {
   return lang && lang.dir === 'rtl';
 }
 // Pool of letter-characters for the active language (excludes space/digits/punctuation)
+// Latin-family = basic Latin + accented Latin (Latin-1 Supplement, Extended-A/B, Additional).
+// Accented letters like ä, é, č are still "Latin"; Hebrew/Cyrillic/Greek/Arabic are NOT.
+function _isLatinFamily(ch){ return /[A-Za-z\u00C0-\u024F\u1E00-\u1EFF]/.test(ch); }
+
 function getLangLetters(langCode) {
   const lang = LANG_MORSE[langCode] || LANG_MORSE.en;
-  const all = [];
-  const seen = new Set();
+  // 1) Collect candidate letters (only real letters — no digits, punctuation or symbols)
+  const cand = [];
+  const seenChar = new Set();
   for (const ch of Object.keys(lang.table)) {
     if (ch === ' ') continue;
-    if (/[0-9]/.test(ch)) continue;
-    if (/[.,?!:;'"()\/@&=+\-]/.test(ch) && ch.length === 1) continue;
+    if (!/\p{L}/u.test(ch)) continue;   // must be a Unicode letter
     const up = ch.toUpperCase();
-    if (seen.has(up)) continue;
-    seen.add(up);
-    all.push(ch);
+    if (seenChar.has(up)) continue;
+    seenChar.add(up);
+    cand.push(ch);
   }
-  // Count ASCII (Latin A–Z) vs non-ASCII letters
-  const isAscii = ch => /^[A-Za-z]$/.test(ch);
-  const asciiCount = all.filter(isAscii).length;
-  const nonAsciiCount = all.length - asciiCount;
-  // Non-Latin language (e.g. Hebrew, Russian): drop the Latin fallback letters
-  if (nonAsciiCount >= asciiCount && nonAsciiCount > 0) {
-    return all.filter(ch => !isAscii(ch));
+  // 2) Detect the primary script. If the language has a real non-Latin alphabet
+  //    (>= 8 non-Latin-family letters), it is a non-Latin language: use ONLY that
+  //    script and drop any Latin fallback (fixes Hebrew showing English A–Z).
+  const nonLatin = cand.filter(ch => !_isLatinFamily(ch));
+  const pool = (nonLatin.length >= 8) ? nonLatin : cand;
+  // 3) De-dupe by Morse CODE — keep the first (base) letter per code so practice
+  //    never shows two "correct" options for the same sound (fixes E/Ê, C/Č, etc.)
+  const seenCode = new Set();
+  const out = [];
+  for (const ch of pool) {
+    const code = lang.table[ch] || lang.table[ch.toUpperCase()] || '';
+    if (!code) continue;
+    if (seenCode.has(code)) continue;
+    seenCode.add(code);
+    out.push(ch);
   }
-  return all;
+  return out;
 }
 
 let _langPickerReturnPage = 'home';
@@ -2096,6 +2120,66 @@ const LANG_EN_NAMES = {
 // ── NAVIGATION ──
 let currentPage = 'home';
 const pageInits = {};
+// ── NAVIGATION GUARD (back arrow + unsaved-progress warning) ──
+const SCREEN_NAMES = {
+  learn:'Learn', tap:'Telegraph', practice:'Practice', dict:'Dictionary',
+  translate:'Translate', games:'Games', settings:'Settings',
+  crossword:'Crossword', wordle:'Wordle', speed:'Speed Decode', home:'Home'
+};
+// Does the given screen currently hold progress that would be lost on leaving?
+function screenIsDirty(id) {
+  try {
+    if (id === 'learn') {
+      const la = document.getElementById('lessonArea');
+      return !!(la && la.style.display !== 'none');
+    }
+    if (id === 'tap') {
+      return !!(typeof TAP !== 'undefined' && (TAP.liveWord || TAP.liveSymbols));
+    }
+    if (id === 'speed') {
+      return !!(typeof SD !== 'undefined' && SD.running);
+    }
+    if (id === 'crossword') {
+      return !!document.querySelector('#page-crossword .cell-input[value]') ||
+             [...document.querySelectorAll('#page-crossword .cell-input')].some(i => i.value);
+    }
+    if (id === 'wordle') {
+      return [...document.querySelectorAll('#page-wordle .tile .tile-letter')].some(s => (s.textContent || '').trim());
+    }
+  } catch (e) {}
+  return false;
+}
+// Stop timers / reset transient state when actually leaving a screen
+function cleanupScreen(id) {
+  try {
+    if (id === 'speed' && typeof SD !== 'undefined' && SD.running) {
+      clearInterval(SD.timer); SD.running = false;
+    }
+    if (id === 'tap' && typeof TAP !== 'undefined') {
+      clearTimeout(TAP.liveDecodeTimer);
+      TAP.liveSymbols = ''; TAP.liveWord = '';
+      const w = document.getElementById('tdWord'); if (w) w.textContent = '';
+      const s = document.getElementById('tdSymbols'); if (s) s.textContent = '—';
+    }
+    if (id === 'learn' && typeof renderLevelGrid === 'function') {
+      renderLevelGrid(); // return to the level list so re-entry is clean
+    }
+  } catch (e) {}
+}
+// User-initiated navigation: warns before discarding unsaved progress
+function navTo(id) {
+  if (id !== currentPage && screenIsDirty(currentPage)) {
+    const name = SCREEN_NAMES[currentPage] || 'this screen';
+    const ok = confirm('Warning! If you return to the home screen of ' + name +
+      ', the details will not be saved, do you want to return anyway?');
+    if (!ok) return;
+    cleanupScreen(currentPage);
+  }
+  goPage(id);
+}
+// Back arrow → go home (guarded)
+function navBack() { navTo('home'); }
+
 function goPage(id) {
  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
  document.getElementById('page-' + id).classList.add('on');
@@ -2104,6 +2188,9 @@ function goPage(id) {
    t.classList.toggle('on', t.textContent.trim() === map[id]);
   });
  currentPage = id;
+ // Show the floating back arrow on every screen except Home
+ const _bk = document.getElementById('backArrow');
+ if (_bk) _bk.style.display = (id === 'home') ? 'none' : 'flex';
  if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
  if (id==='dict' && pageInits['dict']) { const dt=document.getElementById('dictLangTab'); if(dt){ const lc=(currentLang&&currentLang!=='en')?currentLang:'he'; dt.textContent=(currentLang!=='en')?(LANG_MORSE[lc].name):'Hebrew'; } }
  if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; }
@@ -2290,17 +2377,40 @@ function charsUpTo(lvlIdx) {
 function buildReviewSteps(chars) {
  const s = [{type:'reviewIntro'}];
  const items = [];
+ // Overall mastery → how big the review should be.
+ const scores = chars.map(ch => srsScore(ch));
+ const avg = scores.reduce((a,b)=>a+b,0) / (scores.length || 1);
+ const weakCount = scores.filter(x => x < 0).length;
+ const weakRatio = weakCount / (chars.length || 1);
+ // Strong overall (high avg, few weak) → short & light.
+ // Weak overall → longer, with heavy focus on the struggling letters.
  chars.forEach(ch => {
    const sc = srsScore(ch);
-   // Everyone gets one recog + one recall
-   items.push({type:'recog', ch});
-   items.push({type:'recall', ch});
-   // Weak chars (struggling) get extra repetitions
-   if (sc < 0) { items.push({type:'recall', ch}); items.push({type:'recog', ch}); }
-   else if (sc < 2) { items.push({type:'recog', ch}); }
+   if (sc >= 3) {
+     // Mastered: only include sometimes (light touch), 1 quick question
+     if (weakRatio > 0.4 || Math.random() < 0.4) items.push({type:'recog', ch});
+   } else if (sc >= 1) {
+     // Decent: one recall
+     items.push({type:'recall', ch});
+     if (weakRatio > 0.5) items.push({type:'recog', ch});
+   } else if (sc >= 0) {
+     // New/neutral: recog + recall
+     items.push({type:'recog', ch});
+     items.push({type:'recall', ch});
+   } else {
+     // Weak/struggling: the main focus — 3–4 mixed questions
+     items.push({type:'recall', ch});
+     items.push({type:'recog', ch});
+     items.push({type:'recall', ch});
+     if (avg < -0.5) items.push({type:'recog', ch});
+   }
  });
+ // Guarantee a minimum and cap a maximum so it always feels right-sized
+ if (items.length < 4) { chars.slice(0,4).forEach(ch => items.push({type:'recog', ch})); }
  _shuffle(items);
- s.push(...items);
+ const MAX = 40;
+ const trimmed = items.slice(0, MAX);
+ s.push(...trimmed);
  s.push({type:'reviewDone'});
  return s;
 }
@@ -3004,6 +3114,35 @@ document.addEventListener('keyup', e => {
  if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
    if (TAP.pressed) tapPressEnd();
   }
+});
+
+// ── DESKTOP KEYBOARD SHORTCUTS (computer view only) ──
+// Only attach behaviour on devices with a real mouse/keyboard, not touch phones.
+const _IS_DESKTOP = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+document.addEventListener('keydown', e => {
+ if (!_IS_DESKTOP) return;
+ if (e.ctrlKey || e.metaKey || e.altKey) return;
+ if (inputHasFocus()) return;            // let focused inputs handle their own keys
+ // ENTER → press the visible, enabled "Continue / Next" button in Learn
+ if (e.key === 'Enter') {
+   if (currentPage === 'learn') {
+     const nb = document.getElementById('lNextBtn');
+     if (nb && nb.offsetParent !== null && !nb.disabled) { e.preventDefault(); nb.click(); }
+   }
+   return;
+ }
+ // LETTER / DIGIT → select the matching multiple-choice option in Learn recognition
+ if (currentPage === 'learn' && /^[a-z0-9]$/i.test(e.key)) {
+   const opts = document.getElementById('lOpts');
+   if (!opts) return;
+   const want = e.key.toUpperCase();
+   const btns = opts.querySelectorAll('.opt');
+   for (const b of btns) {
+     if (!b.disabled && (b.dataset.ch || '').toUpperCase() === want) {
+       e.preventDefault(); b.click(); return;
+     }
+   }
+ }
 });
 
 /* ══════════════════════════════════════════
@@ -3718,8 +3857,9 @@ const SD = {
 const CIRCUMFERENCE = 2 * Math.PI * 54; // 339.3
 
 function speedPool() {
- const pool = [...Object.keys(MORSE_EN).filter(k => /[A-Z]/.test(k))];
- return pool;
+ // Use the currently selected language's letters, like Practice/Telegraph do
+ if (currentLang === 'en') return Object.keys(MORSE_EN).filter(k => /[A-Z]/.test(k));
+ return getLangLetters(currentLang);
 }
 
 function speedNext() {
@@ -3782,7 +3922,7 @@ function speedCheck() {
  const val = document.getElementById('speedInp').value.trim().toUpperCase();
  if (!val) return;
  SD.answered = true;
- const ok = val === SD.current;
+ const ok = val === (SD.current || '').toUpperCase();
  const inp = document.getElementById('speedInp');
  inp.disabled = true;
  inp.className = 'speed-inp ' + (ok ? 'ok' : 'bad');
