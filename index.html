@@ -811,6 +811,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .di-globe:hover{opacity:1;}
 
 
+.lv.resume{border-color:rgba(56,189,248,.45);box-shadow:0 0 0 1px rgba(56,189,248,.22),0 6px 18px rgba(56,189,248,.12);}
 .lv-jump{margin-top:.6rem;width:100%;padding:.5rem;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);border-radius:9px;color:var(--violet);font-family:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;position:relative;z-index:3;}
 .lv-jump:hover{background:rgba(167,139,250,.22);}
 .lv.locked{position:relative;}
@@ -1069,7 +1070,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
         </div>
         <div class="lstage" id="lstage"></div>
         <div class="lc-foot">
-          <button class="lbtn ghost" id="lBackBtn" onclick="lBack()">← Back</button>
+          <button class="lbtn ghost" id="lBackBtn" onclick="lBack()">← Levels</button>
           <button class="lbtn prime" id="lNextBtn" onclick="lNext()" disabled>Continue →</button>
         </div>
       </div>
@@ -2166,18 +2167,22 @@ function cleanupScreen(id) {
     }
   } catch (e) {}
 }
-// User-initiated navigation: warns before discarding unsaved progress
+// Silently persist any in-progress work for the screen we're leaving
+function autoSaveCurrent(id) {
+  try {
+    if (id === 'learn') saveResume();
+    // Games/Speed keep their in-memory state during the session; nothing to persist here.
+  } catch (e) {}
+}
+// User-initiated navigation: auto-saves progress (no disruptive warnings)
 function navTo(id) {
-  if (id !== currentPage && screenIsDirty(currentPage)) {
-    const name = SCREEN_NAMES[currentPage] || 'this screen';
-    const ok = confirm('Warning! If you return to the home screen of ' + name +
-      ', the details will not be saved, do you want to return anyway?');
-    if (!ok) return;
-    cleanupScreen(currentPage);
+  if (id !== currentPage) {
+    autoSaveCurrent(currentPage); // save clean progress first
+    cleanupScreen(currentPage);   // stop timers / return Learn to its level list
   }
   goPage(id);
 }
-// Back arrow → go home (guarded)
+// Back arrow → go home (auto-saves on the way)
 function navBack() { navTo('home'); }
 
 function goPage(id) {
@@ -2350,6 +2355,46 @@ let lvlDone = JSON.parse(localStorage.getItem('mw_lvls_en') || localStorage.getI
 
 function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem(lvlKey(currentLang), JSON.stringify(lvlDone)); }
 
+// ── AUTO-SAVE / RESUME (Learn) ──
+// Silently remembers the level + clean step position so a learner can leave
+// mid-level and resume exactly where they were. Only LEVEL sessions are saved,
+// and only at clean step boundaries (never mid-answer).
+function resumeKey(code){ return 'mw_resume_' + (code||'en'); }
+function saveResume() {
+  if (LP.session !== 'level' || LP.lvlIdx == null) return;
+  const cur = LP.steps[LP.stepIdx];
+  if (!cur || cur.type === 'done') { clearResume(); return; }   // finished → nothing to resume
+  try {
+    localStorage.setItem(resumeKey(currentLang),
+      JSON.stringify({ lvlIdx: LP.lvlIdx, stepIdx: LP.stepIdx, t: Date.now() }));
+  } catch(e){}
+}
+function loadResume() {
+  try { return JSON.parse(localStorage.getItem(resumeKey(currentLang)) || 'null'); }
+  catch(e){ return null; }
+}
+function clearResume() { try { localStorage.removeItem(resumeKey(currentLang)); } catch(e){} }
+// Resume a previously-saved level at its clean step boundary
+function resumeLevel(i) {
+  const r = loadResume();
+  if (!r || r.lvlIdx !== i) { startLevel(i); return; }
+  if (i==null || i<0 || i>=LEVELS.length || !LEVELS[i]) { clearResume(); renderLevelGrid(); return; }
+  LP.session='level'; LP.lvlIdx=i; LP.steps=buildSteps(LEVELS[i]); LP.answered=false;
+  // Clamp to a valid, non-final step (re-show that step fresh)
+  let idx = (typeof r.stepIdx === 'number') ? r.stepIdx : 0;
+  if (idx < 0) idx = 0;
+  if (idx > LP.steps.length-1) idx = LP.steps.length-1;
+  if (LP.steps[idx] && LP.steps[idx].type === 'done') idx = Math.max(0, idx-1);
+  LP.stepIdx = idx;
+  document.getElementById('levelSelector').style.display='none';
+  document.getElementById('lessonArea').style.display='block';
+  const lv = LEVELS[i];
+  document.getElementById('lmTitle').textContent = `Level ${lv.num}: ${lv.name}`;
+  document.getElementById('lmSub').textContent = lv.sub;
+  document.getElementById('lmBadge').textContent = `LEVEL ${lv.num} / ${LEVELS.length}`;
+  renderTrack(); renderSrsChips(); renderStep();
+}
+
 function buildSteps(lv) {
  const s = [];
  s.push({type:'intro'});
@@ -2503,21 +2548,31 @@ function renderLevelGrid() {
  document.getElementById('lessonArea').style.display = 'none';
  document.getElementById('lmTitle').textContent = 'Choose a Level';
  document.getElementById('lmSub').textContent = 'Pick up where you left off';
- document.getElementById('lmBadge').textContent = '7 LEVELS';
+ document.getElementById('lmBadge').textContent = LEVELS.length + ' LEVELS';
+ const resume = loadResume();   // { lvlIdx, stepIdx } or null
  const g = document.getElementById('levelGrid');
  g.innerHTML = LEVELS.map((lv, i) => {
    const done = !!lvlDone[i];
    const locked = i > 0 && !lvlDone[i-1] && !done;
    const isHeb = !!lv.heb;
    const showJump = locked && i > 0;
-   return `<div class="lv${done?' done':''}${locked?' locked':''}"
-     onclick="${locked?'':'startLevel('+i+')'}"
+   const isResume = resume && resume.lvlIdx === i && !done;
+   // progress % for the resume card (based on saved step position)
+   let pct = done ? 100 : 0;
+   if (isResume) {
+     const total = buildSteps(lv).length || 1;
+     pct = Math.max(6, Math.min(96, Math.round((resume.stepIdx / total) * 100)));
+   }
+   const onclick = locked ? '' : (isResume ? 'resumeLevel('+i+')' : 'startLevel('+i+')');
+   return `<div class="lv${done?' done':''}${locked?' locked':''}${isResume?' resume':''}"
+     onclick="${onclick}"
     >
       <div class="lv-num">L${lv.num}</div>
       <div class="lv-name">${lv.name}</div>
       <div class="lv-chars${isHeb?' heb':''}">${lv.chars.join(' ')}</div>
-      <div class="lv-star">${done?'✦':locked?'🔒':''}</div>
-      <div class="lv-bar"><div class="lv-fill" style="width:${done?100:0}%"></div></div>
+      <div class="lv-star">${done?'✦':locked?'🔒':isResume?'▶':''}</div>
+      <div class="lv-bar"><div class="lv-fill" style="width:${pct}%"></div></div>
+      ${isResume?`<button class="lv-jump" style="background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.4);color:var(--cyan)" onclick="event.stopPropagation();resumeLevel(${i})">▶ Resume</button>`:''}
       ${showJump?`<button class="lv-jump" onclick="event.stopPropagation();startPlacement(${i})">⚡ Jump here (test)</button>`:''}
     </div>`;
   }).join('');
@@ -2550,10 +2605,11 @@ function renderSrsChips() {
 
 function renderStep() {
  const step = LP.steps[LP.stepIdx];
+ saveResume(); // persist this clean step position (level sessions only)
  document.getElementById('stepInfo').textContent = `Step ${LP.stepIdx+1} / ${LP.steps.length}`;
  document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type==='reviewIntro'||step.type==='reviewDone'?'REVIEW':step.type==='placeIntro'||step.type==='placeDone'?'TEST':step.type==='transBox'?'TRANSLATE':step.type).toUpperCase();
  document.getElementById('lNextBtn').disabled = true;
- document.getElementById('lBackBtn').style.visibility = LP.stepIdx > 0 ? 'visible' : 'hidden';
+ document.getElementById('lBackBtn').style.visibility = 'visible';
  const st = document.getElementById('lstage');
  LP.answered = false;
  st.classList.add('fade');
@@ -2868,6 +2924,7 @@ function checkTransBox() {
 function renderDone() {
  const lv = LEVELS[LP.lvlIdx]; if (!lv) { renderLevelGrid(); renderTrack(); return; }
  saveLvl(LP.lvlIdx, true);
+ clearResume(); // level finished → no resume needed
  const strong = lv.chars.filter(ch => srsScore(ch) >= 3).length;
  document.getElementById('lstage').innerHTML = `<div class="complete-wrap">
     <div class="complete-icon">🎉</div>
@@ -2928,13 +2985,12 @@ function lNext() {
 }
 
 function lBack() {
- if (LP.session !== 'level') {
-   // From a review/placement, back exits to the level grid
-   if (LP.stepIdx > 0 && !confirm('Exit this session? Progress in it will be lost.')) return;
-   LP.session = 'level'; renderLevelGrid(); renderTrack(); return;
- }
- if (LP.stepIdx > 0) { LP.stepIdx--; renderStep(); }
- else renderLevelGrid();
+ // Backward sub-step navigation is disabled. "Back" now saves clean progress
+ // and returns to the level list, so the user can resume exactly here later.
+ if (LP.session === 'level') saveResume();
+ LP.session = 'level';
+ renderLevelGrid();
+ renderTrack();
 }
 
 /* ══════════════════════════════════════════
