@@ -64,6 +64,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:300;height:56px;padding:0 1.25re
 .page{display:none;position:relative;z-index:1;min-height:100vh;padding-top:56px;}
 .page.on{display:block;}
 main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
+/* Bulletproof horizontal centering for the Learn & Practice cards on desktop.
+   Scoped to .on so the page show/hide system is untouched, and games pages
+   (which set their own #page-x main) are unaffected. */
+#page-learn.on, #page-practice.on{display:flex;flex-direction:column;align-items:center;}
+#page-learn.on > main, #page-practice.on > main{width:100%;max-width:860px;margin-left:auto;margin-right:auto;}
+#page-learn .learn-card, #page-practice .pcard{width:100%;margin-left:auto;margin-right:auto;}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
@@ -909,6 +915,76 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .tb-input:focus{border-color:rgba(56,189,248,.5);}
 .tb-input.heb{font-family:inherit;direction:rtl;text-align:right;}
 
+/* ── ACCESSIBILITY SIMULATION GUIDE ── */
+.sim-wrap{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:560px;margin:0 auto;}
+.sim-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:clamp(1rem,4vw,1.5rem);width:100%;animation:fadeUp .35s ease both;}
+.sim-intro-p{color:var(--txt2);font-size:clamp(.86rem,2.4vw,.95rem);line-height:1.65;margin-bottom:1.1rem;}
+.sim-progress{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;}
+.sim-pill{font-size:.72rem;font-weight:700;letter-spacing:.05em;color:var(--txt2);text-transform:uppercase;}
+.sim-dots{display:flex;gap:6px;flex-wrap:wrap;}
+.sim-dot{width:9px;height:9px;border-radius:50%;background:var(--border2);transition:background .3s,transform .3s;}
+.sim-dot.active{background:var(--cyan);transform:scale(1.25);}
+.sim-dot.done{background:var(--mint);}
+.sim-step-title{font-size:clamp(1rem,3.2vw,1.18rem);font-weight:700;line-height:1.4;margin-bottom:.3rem;overflow-wrap:anywhere;}
+.sim-step-hint{color:var(--txt2);font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.6;margin-bottom:1.15rem;overflow-wrap:anywhere;}
+/* simulated Android settings surface */
+.sim-screen{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:.5rem;display:flex;flex-direction:column;gap:.4rem;}
+[data-theme=light] .sim-screen{background:var(--bg4);}
+.sim-row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;padding:.95rem 1.05rem;background:var(--bg2);border:1.5px solid var(--border);border-radius:11px;cursor:pointer;transition:all .2s;width:100%;text-align:start;font-family:inherit;color:var(--txt);}
+.sim-row-label{font-size:clamp(.9rem,2.6vw,1rem);font-weight:600;overflow-wrap:anywhere;min-width:0;flex:1;}
+.sim-row-sub{font-size:.74rem;color:var(--txt3);}
+.sim-chevron{color:var(--txt3);font-size:1.1rem;flex-shrink:0;}
+/* the ACTIVE interactive item glows + pulses */
+.sim-active{border-color:rgba(56,189,248,.55)!important;box-shadow:0 0 0 3px rgba(56,189,248,.18),0 6px 20px rgba(56,189,248,.14);animation:simPulse 1.8s ease-in-out infinite;}
+.sim-active:hover{transform:translateY(-1px);}
+@keyframes simPulse{0%,100%{box-shadow:0 0 0 3px rgba(56,189,248,.16),0 6px 18px rgba(56,189,248,.10);}50%{box-shadow:0 0 0 5px rgba(56,189,248,.26),0 8px 26px rgba(56,189,248,.20);}}
+.sim-done-row{opacity:.55;cursor:default;}
+.sim-done-row .sim-chevron{color:var(--mint);}
+/* simulated toggle switch */
+.sim-switch{position:relative;width:50px;height:28px;border-radius:999px;background:var(--border2);transition:background .25s;flex-shrink:0;border:none;cursor:pointer;}
+.sim-switch::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.35);}
+.sim-switch.on{background:var(--cyan);}
+.sim-switch.on::after{transform:translateX(22px);}
+.sim-switch-state{font-size:.78rem;font-weight:700;color:var(--txt3);min-width:34px;text-align:end;}
+/* micro explanation bubble */
+.sim-micro{margin-top:.95rem;padding:.85rem 1rem;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.22);border-radius:11px;font-size:clamp(.82rem,2.4vw,.9rem);line-height:1.6;color:var(--txt);overflow-wrap:anywhere;animation:fadeUp .25s ease both;}
+[data-theme=light] .sim-micro{background:rgba(56,189,248,.1);}
+/* footer buttons */
+.sim-foot{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem;}
+.sim-btn{flex:1;min-width:130px;padding:.85rem 1.1rem;border-radius:12px;font-family:inherit;font-size:clamp(.86rem,2.4vw,.94rem);font-weight:700;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--txt);transition:all .2s;overflow-wrap:anywhere;}
+.sim-btn.prime{background:linear-gradient(120deg,var(--cyan),var(--mint));border:none;color:#04121f;}
+.sim-btn.prime:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.3);}
+.sim-btn.start{background:linear-gradient(120deg,var(--mint),var(--cyan));border:none;color:#04121f;font-size:clamp(.95rem,3vw,1.05rem);padding:1rem;width:100%;flex:1 1 100%;animation:fadeUp .3s ease both;box-shadow:0 8px 28px rgba(52,211,153,.25);}
+.sim-done-icon{font-size:2.2rem;text-align:center;margin-bottom:.5rem;}
+.sim-done-title{font-size:clamp(1.05rem,3.4vw,1.25rem);font-weight:800;text-align:center;margin-bottom:.4rem;}
+.sim-done-body{color:var(--txt2);font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.6;text-align:center;margin-bottom:1.1rem;overflow-wrap:anywhere;}
+.sim-restart{background:none;border:none;color:var(--txt3);font-family:inherit;font-size:.8rem;cursor:pointer;text-decoration:underline;margin-top:.85rem;align-self:center;}
+
+/* ── MOBILE RESPONSIVENESS HARDENING (additive, safe) ── */
+/* Long text labels should wrap instead of clipping or overflowing */
+.srow-label,.srow-sub,.sgroup-title,.lm-title,.lm-sub,.feat-title,.feat-desc,
+.lv-name,.hud-label,.tap-label,.pfb-title,.complete-title,.complete-sub,
+.intro-title,.intro-sub,.di-code{overflow-wrap:anywhere;}
+/* Action buttons: let text wrap on tiny screens rather than overflow the card */
+.lbtn,.btn-prime,.btn-ghost,.pbtn,.tap-btn,.sim-btn{overflow-wrap:anywhere;}
+/* Settings rows: stack label + control when space is tight */
+.srow{flex-wrap:wrap;}
+.srow-left{min-width:0;flex:1 1 60%;}
+@media (max-width:600px){
+  main{padding-left:1rem;padding-right:1rem;}
+  /* Footer / header button groups never clip — they wrap */
+  .lc-foot,.pcard-head,.segs,.tap-btns,.sim-foot,.complete-actions,.xp-row{flex-wrap:wrap;}
+  .lc-foot .lbtn{flex:1 1 auto;}
+  /* Allow multi-line button text on narrow phones */
+  .lbtn,.btn-prime,.btn-ghost,.pbtn,.sim-btn{white-space:normal;}
+  /* Settings control drops below its label cleanly */
+  .srow{gap:.5rem;}
+}
+@media (max-width:380px){
+  main{padding-left:.85rem;padding-right:.85rem;}
+  .sim-card{padding:1rem;}
+}
+
 </style>
 </head>
 <body>
@@ -930,8 +1006,9 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <button class="nt" onclick="navTo('practice')">Practice</button>
     <button class="nt" onclick="navTo('dict')">Dictionary</button>
     <button class="nt" onclick="navTo('translate')">Translate</button>
+    <button class="nt" onclick="navTo('translation')">Translation</button>
     <button class="nt" onclick="navTo('games')">Games</button>
-    <button class="nt" onclick="navTo('settings')">⚙ Settings</button>
+    <button class="nt" onclick="navTo('settings')">Settings</button>
   </div>
   <div class="nav-actions">
     <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">🌙</button>
@@ -1009,12 +1086,12 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 <!-- ─── HOME ─── -->
 <div id="page-home" class="page on">
   <div class="hero">
-    <div class="hero-badge">✦ MORSE WAVE 2.0 — UPGRADED</div>
+    <div class="hero-badge">MORSE WAVE 2.0 — UPGRADED</div>
     <h1>Learn Morse Code<br><span class="grad">the right way.</span></h1>
     <p class="hero-sub">7-level curriculum · Spaced repetition · Hebrew & English · Telegraph tap key · Pure Web Audio API</p>
     <div class="hero-btns">
       <button class="btn-prime" onclick="goPage('learn')">Start Learning →</button>
-      <button class="btn-ghost" onclick="goPage('tap')">⚡ Try Telegraph</button>
+      <button class="btn-ghost" onclick="goPage('tap')">Try Telegraph</button>
       <button class="btn-ghost" onclick="goPage('translate')" style="background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--violet)">Universal Translator</button>
     </div>
     <div class="morse-strip">
@@ -1139,7 +1216,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
       </div>
       <div class="tap-btns">
         <button class="tap-btn ghost" onclick="tapSkip()">Skip</button>
-        <button class="tap-btn prime" onclick="tapPlayTarget()">▶ Play Target</button>
+        <button class="tap-btn prime" onclick="tapPlayTarget()">Play Target</button>
       </div>
     </div>
   </main>
@@ -1204,7 +1281,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
         </div>
       </div>
       <div class="pctrl">
-        <button class="pbtn pbtn-check" id="pCheckBtn" onclick="pCheck()">✓ Check</button>
+        <button class="pbtn pbtn-check" id="pCheckBtn" onclick="pCheck()">Check</button>
         <button class="pbtn pbtn-next" id="pNextBtn" style="display:none" onclick="pNext()">Next →</button>
         <button class="pbtn pbtn-skip" onclick="pSkip()">Skip</button>
       </div>
@@ -1509,7 +1586,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
       <button class="speed-start-btn" onclick="speedStart()">Play Again</button>
     </div>
 
-    <button class="speed-start-btn" id="speedStartBtn" onclick="speedStart()">▶ Start Game</button>
+    <button class="speed-start-btn" id="speedStartBtn" onclick="speedStart()">Start Game</button>
   </main>
 </div>
 
@@ -1763,6 +1840,15 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 </div>
 
 
+<!-- ─── SYSTEM TRANSLATION ─── -->
+<div id="page-translation" class="page">
+  <main>
+    <h2 style="font-size:1.45rem;font-weight:700;margin-bottom:.35rem">Translation</h2>
+    <p style="color:var(--txt2);font-size:.85rem;margin-bottom:1.5rem">Website and App Translation</p>
+    <div id="simWrap" class="sim-wrap"></div>
+  </main>
+</div>
+
 <!-- ─── SETTINGS ─── -->
 <div id="page-settings" class="page">
   <main>
@@ -1773,7 +1859,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
       <!-- ── Correct Answers ── -->
       <div class="sgroup">
         <div class="sgroup-header" onclick="toggleSGroup(this)">
-          <span class="sgroup-title">✓ Correct Answers</span>
+          <span class="sgroup-title">Correct Answers</span>
           <span class="sgroup-arrow">▶</span>
         </div>
         <div class="sgroup-body">
@@ -2055,6 +2141,8 @@ function applyLangChange(code, ret, l) {
     if (typeof tapNextTarget === 'function') tapNextTarget();
   } else if (ret === 'learn') {
     if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector') && document.getElementById('levelSelector').style.display !== 'none') renderLevelGrid();
+  } else if (ret === 'translation') {
+    if (typeof initSim === 'function') initSim();
   }
 }
 
@@ -2124,7 +2212,7 @@ const pageInits = {};
 // ── NAVIGATION GUARD (back arrow + unsaved-progress warning) ──
 const SCREEN_NAMES = {
   learn:'Learn', tap:'Telegraph', practice:'Practice', dict:'Dictionary',
-  translate:'Translate', games:'Games', settings:'Settings',
+  translate:'Translate', translation:'Translation', games:'Games', settings:'Settings',
   crossword:'Crossword', wordle:'Wordle', speed:'Speed Decode', home:'Home'
 };
 // Does the given screen currently hold progress that would be lost on leaving?
@@ -2185,11 +2273,22 @@ function navTo(id) {
 // Back arrow → go home (auto-saves on the way)
 function navBack() { navTo('home'); }
 
+// ── NATIVE BRIDGE TRIGGER (Android) ──
+// Opens Android's Accessibility settings via the AndroidBridge interface.
+// In a normal browser the bridge doesn't exist, so we show a friendly note.
+function requestBrowserAccess() {
+  if (window.AndroidBridge && typeof window.AndroidBridge.openAccessibilitySettings === 'function') {
+    window.AndroidBridge.openAccessibilitySettings();
+  } else {
+    alert('This feature is only available in the MorseWave Android app.');
+  }
+}
+
 function goPage(id) {
  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
  document.getElementById('page-' + id).classList.add('on');
  document.querySelectorAll('.nt').forEach(t => {
-   const map = {home:'Home',learn:'Learn',tap:'Telegraph',practice:'Practice',dict:'Dictionary',translate:'Translate',games:'Games',settings:'⚙ Settings',crossword:'Crossword',wordle:'Wordle',speed:'Speed Decode'};
+   const map = {home:'Home',learn:'Learn',tap:'Telegraph',practice:'Practice',dict:'Dictionary',translate:'Translate',translation:'Translation',games:'Games',settings:'⚙ Settings',crossword:'Crossword',wordle:'Wordle',speed:'Speed Decode'};
    t.classList.toggle('on', t.textContent.trim() === map[id]);
   });
  currentPage = id;
@@ -2197,6 +2296,7 @@ function goPage(id) {
  const _bk = document.getElementById('backArrow');
  if (_bk) _bk.style.display = (id === 'home') ? 'none' : 'flex';
  if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
+ if (id==='translation' && typeof initSim==='function') initSim();
  if (id==='dict' && pageInits['dict']) { const dt=document.getElementById('dictLangTab'); if(dt){ const lc=(currentLang&&currentLang!=='en')?currentLang:'he'; dt.textContent=(currentLang!=='en')?(LANG_MORSE[lc].name):'Hebrew'; } }
  if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; }
  if (id==='settings') { const sc=document.getElementById('settingsLangCurrent'); if(sc&&typeof LANG_MORSE!=='undefined'){ sc.textContent='Currently: '+((LANG_MORSE[currentLang]||LANG_MORSE.en).name); } } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } if (id==='speed') { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; } } }
@@ -2572,8 +2672,8 @@ function renderLevelGrid() {
       <div class="lv-chars${isHeb?' heb':''}">${lv.chars.join(' ')}</div>
       <div class="lv-star">${done?'✦':locked?'🔒':isResume?'▶':''}</div>
       <div class="lv-bar"><div class="lv-fill" style="width:${pct}%"></div></div>
-      ${isResume?`<button class="lv-jump" style="background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.4);color:var(--cyan)" onclick="event.stopPropagation();resumeLevel(${i})">▶ Resume</button>`:''}
-      ${showJump?`<button class="lv-jump" onclick="event.stopPropagation();startPlacement(${i})">⚡ Jump here (test)</button>`:''}
+      ${isResume?`<button class="lv-jump" style="background:rgba(56,189,248,.14);border-color:rgba(56,189,248,.4);color:var(--cyan)" onclick="event.stopPropagation();resumeLevel(${i})">Resume</button>`:''}
+      ${showJump?`<button class="lv-jump" onclick="event.stopPropagation();startPlacement(${i})">Jump here (test)</button>`:''}
     </div>`;
   }).join('');
 }
@@ -4792,6 +4892,156 @@ function showMorseInLanguages(morseCode, sourceChar) {
 function closeXlang() {
   document.getElementById('xlangOverlay').classList.remove('show');
 }
+
+
+/* ══════════════════════════════════════════
+  ACCESSIBILITY SIMULATION GUIDE (localized)
+══════════════════════════════════════════ */
+// Each language entry:
+//  intro, start(begin button), stepW, ofW, next, tap(hint), doneT, doneB, go(real Start)
+//  s: 4 steps. Steps 0,1,3 = [label, micro]. Step 2 = [offLabel, onLabel, micro] (the switch).
+// App name "MorseWave Translation" stays untranslated (proper noun).
+const SIM_I18N = {
+  en:{intro:"A quick 4-step practice so you'll know exactly what to tap in your phone's settings. Tap each highlighted item, then continue.",start:"Start the guide",stepW:"Step",ofW:"of",next:"Next step",tap:"Tap the highlighted item",doneT:"You're ready!",doneB:"Now do it for real. Tap Start to open your phone's accessibility settings.",go:"Start",
+    s:[["Installed apps","Tap “Installed apps” to see the services you can turn on."],["MorseWave Translation","Find “MorseWave Translation” in the list and tap it."],["Off","On","Flip this switch ON to enable the service."],["Allow","Tap “Allow” to confirm the permission."]]},
+  he:{intro:"תרגול קצר בן 4 שלבים כדי שתדע בדיוק על מה ללחוץ בהגדרות הטלפון. לחץ על כל פריט מודגש, ואז המשך.",start:"התחל את המדריך",stepW:"שלב",ofW:"מתוך",next:"השלב הבא",tap:"לחץ על הפריט המודגש",doneT:"אתה מוכן!",doneB:"עכשיו בצע זאת באמת. לחץ על התחל כדי לפתוח את הגדרות הנגישות בטלפון.",go:"התחל",
+    s:[["אפליקציות מותקנות","לחץ על \"אפליקציות מותקנות\" כדי לראות את השירותים שניתן להפעיל."],["MorseWave Translation","מצא את \"MorseWave Translation\" ברשימה ולחץ עליו."],["כבוי","פועל","העבר את המתג למצב \"פועל\" כדי להפעיל את השירות."],["אפשר","לחץ על \"אפשר\" כדי לאשר את ההרשאה."]]},
+  ar:{intro:"تدريب سريع من 4 خطوات لتعرف بالضبط ما تنقر عليه في إعدادات هاتفك. انقر على كل عنصر مميز ثم تابع.",start:"ابدأ الدليل",stepW:"خطوة",ofW:"من",next:"الخطوة التالية",tap:"انقر على العنصر المميز",doneT:"أنت جاهز!",doneB:"الآن نفّذها فعليًا. انقر على ابدأ لفتح إعدادات إمكانية الوصول في هاتفك.",go:"ابدأ",
+    s:[["التطبيقات المثبتة","انقر على \"التطبيقات المثبتة\" لرؤية الخدمات التي يمكنك تشغيلها."],["MorseWave Translation","ابحث عن \"MorseWave Translation\" في القائمة وانقر عليه."],["معطّل","مفعّل","حرّك المفتاح إلى \"مفعّل\" لتشغيل الخدمة."],["السماح","انقر على \"السماح\" لتأكيد الإذن."]]},
+  es:{intro:"Una práctica rápida de 4 pasos para saber exactamente qué tocar en los ajustes del teléfono. Toca cada elemento resaltado y continúa.",start:"Iniciar la guía",stepW:"Paso",ofW:"de",next:"Siguiente paso",tap:"Toca el elemento resaltado",doneT:"¡Listo!",doneB:"Ahora hazlo de verdad. Toca Iniciar para abrir los ajustes de accesibilidad.",go:"Iniciar",
+    s:[["Aplicaciones instaladas","Toca “Aplicaciones instaladas” para ver los servicios que puedes activar."],["MorseWave Translation","Busca “MorseWave Translation” en la lista y tócalo."],["Desactivado","Activado","Activa este interruptor para habilitar el servicio."],["Permitir","Toca “Permitir” para confirmar el permiso."]]},
+  fr:{intro:"Un exercice rapide en 4 étapes pour savoir exactement quoi toucher dans les réglages du téléphone. Touchez chaque élément en surbrillance, puis continuez.",start:"Démarrer le guide",stepW:"Étape",ofW:"sur",next:"Étape suivante",tap:"Touchez l'élément en surbrillance",doneT:"Vous êtes prêt !",doneB:"Faites-le maintenant pour de vrai. Touchez Démarrer pour ouvrir les réglages d'accessibilité.",go:"Démarrer",
+    s:[["Applications installées","Touchez « Applications installées » pour voir les services à activer."],["MorseWave Translation","Trouvez « MorseWave Translation » dans la liste et touchez-le."],["Désactivé","Activé","Activez cet interrupteur pour activer le service."],["Autoriser","Touchez « Autoriser » pour confirmer l'autorisation."]]},
+  de:{intro:"Eine kurze Übung in 4 Schritten, damit du genau weißt, was du in den Einstellungen antippen musst. Tippe auf jedes hervorgehobene Element und fahre fort.",start:"Anleitung starten",stepW:"Schritt",ofW:"von",next:"Nächster Schritt",tap:"Tippe auf das hervorgehobene Element",doneT:"Du bist bereit!",doneB:"Jetzt echt durchführen. Tippe auf Start, um die Bedienungshilfen zu öffnen.",go:"Start",
+    s:[["Installierte Apps","Tippe auf „Installierte Apps“, um die aktivierbaren Dienste zu sehen."],["MorseWave Translation","Finde „MorseWave Translation“ in der Liste und tippe darauf."],["Aus","Ein","Schalte diesen Schalter auf EIN, um den Dienst zu aktivieren."],["Zulassen","Tippe auf „Zulassen“, um die Berechtigung zu bestätigen."]]},
+  ru:{intro:"Быстрая тренировка из 4 шагов, чтобы вы точно знали, на что нажимать в настройках телефона. Нажимайте каждый выделенный элемент и продолжайте.",start:"Начать руководство",stepW:"Шаг",ofW:"из",next:"Следующий шаг",tap:"Нажмите выделенный элемент",doneT:"Вы готовы!",doneB:"Теперь сделайте это по-настоящему. Нажмите «Начать», чтобы открыть настройки специальных возможностей.",go:"Начать",
+    s:[["Установленные приложения","Нажмите «Установленные приложения», чтобы увидеть службы, которые можно включить."],["MorseWave Translation","Найдите «MorseWave Translation» в списке и нажмите."],["Выкл.","Вкл.","Переведите переключатель в положение «Вкл.», чтобы включить службу."],["Разрешить","Нажмите «Разрешить», чтобы подтвердить разрешение."]]},
+  pt:{intro:"Uma prática rápida de 4 passos para saber exatamente o que tocar nas definições do telemóvel. Toque em cada item destacado e continue.",start:"Iniciar o guia",stepW:"Passo",ofW:"de",next:"Próximo passo",tap:"Toque no item destacado",doneT:"Está pronto!",doneB:"Agora faça a sério. Toque em Iniciar para abrir as definições de acessibilidade.",go:"Iniciar",
+    s:[["Apps instaladas","Toque em “Apps instaladas” para ver os serviços que pode ativar."],["MorseWave Translation","Encontre “MorseWave Translation” na lista e toque."],["Desativado","Ativado","Ative este botão para ativar o serviço."],["Permitir","Toque em “Permitir” para confirmar a permissão."]]},
+  it:{intro:"Un esercizio rapido in 4 passaggi per sapere esattamente cosa toccare nelle impostazioni del telefono. Tocca ogni elemento evidenziato e continua.",start:"Avvia la guida",stepW:"Passaggio",ofW:"di",next:"Passaggio successivo",tap:"Tocca l'elemento evidenziato",doneT:"Sei pronto!",doneB:"Ora fallo davvero. Tocca Avvia per aprire le impostazioni di accessibilità.",go:"Avvia",
+    s:[["App installate","Tocca “App installate” per vedere i servizi che puoi attivare."],["MorseWave Translation","Trova “MorseWave Translation” nell'elenco e toccalo."],["Off","On","Attiva questo interruttore per abilitare il servizio."],["Consenti","Tocca “Consenti” per confermare l'autorizzazione."]]},
+  nl:{intro:"Een korte oefening van 4 stappen zodat je precies weet wat je in de instellingen moet tikken. Tik op elk gemarkeerd item en ga verder.",start:"Gids starten",stepW:"Stap",ofW:"van",next:"Volgende stap",tap:"Tik op het gemarkeerde item",doneT:"Je bent klaar!",doneB:"Doe het nu echt. Tik op Start om de toegankelijkheidsinstellingen te openen.",go:"Start",
+    s:[["Geïnstalleerde apps","Tik op ‘Geïnstalleerde apps’ om de in te schakelen services te zien."],["MorseWave Translation","Zoek ‘MorseWave Translation’ in de lijst en tik erop."],["Uit","Aan","Zet deze schakelaar AAN om de service in te schakelen."],["Toestaan","Tik op ‘Toestaan’ om de toestemming te bevestigen."]]},
+  pl:{intro:"Szybkie ćwiczenie w 4 krokach, abyś wiedział, co dokładnie nacisnąć w ustawieniach telefonu. Naciśnij każdy podświetlony element i kontynuuj.",start:"Rozpocznij przewodnik",stepW:"Krok",ofW:"z",next:"Następny krok",tap:"Naciśnij podświetlony element",doneT:"Gotowe!",doneB:"Teraz zrób to naprawdę. Naciśnij Start, aby otworzyć ustawienia ułatwień dostępu.",go:"Start",
+    s:[["Zainstalowane aplikacje","Naciśnij „Zainstalowane aplikacje”, aby zobaczyć usługi do włączenia."],["MorseWave Translation","Znajdź „MorseWave Translation” na liście i naciśnij."],["Wył.","Wł.","Przełącz ten przełącznik na WŁ., aby włączyć usługę."],["Zezwól","Naciśnij „Zezwól”, aby potwierdzić uprawnienie."]]},
+  tr:{intro:"Telefon ayarlarında tam olarak neye dokunacağını bilmen için 4 adımlık hızlı bir alıştırma. Vurgulanan her öğeye dokun ve devam et.",start:"Kılavuzu başlat",stepW:"Adım",ofW:"/",next:"Sonraki adım",tap:"Vurgulanan öğeye dokun",doneT:"Hazırsın!",doneB:"Şimdi gerçekten yap. Erişilebilirlik ayarlarını açmak için Başlat'a dokun.",go:"Başlat",
+    s:[["Yüklü uygulamalar","Açabileceğin hizmetleri görmek için “Yüklü uygulamalar”a dokun."],["MorseWave Translation","Listede “MorseWave Translation”ı bul ve dokun."],["Kapalı","Açık","Hizmeti etkinleştirmek için bu anahtarı AÇIK konuma getir."],["İzin ver","İzni onaylamak için “İzin ver”e dokun."]]},
+  uk:{intro:"Швидке тренування з 4 кроків, щоб ви точно знали, що натискати в налаштуваннях телефону. Натискайте кожен виділений елемент і продовжуйте.",start:"Почати посібник",stepW:"Крок",ofW:"з",next:"Наступний крок",tap:"Натисніть виділений елемент",doneT:"Ви готові!",doneB:"Тепер зробіть це насправді. Натисніть «Почати», щоб відкрити налаштування доступності.",go:"Почати",
+    s:[["Встановлені застосунки","Натисніть «Встановлені застосунки», щоб побачити служби для ввімкнення."],["MorseWave Translation","Знайдіть «MorseWave Translation» у списку та натисніть."],["Вимк.","Увімк.","Переведіть перемикач в «Увімк.», щоб увімкнути службу."],["Дозволити","Натисніть «Дозволити», щоб підтвердити дозвіл."]]},
+  el:{intro:"Μια γρήγορη άσκηση 4 βημάτων ώστε να ξέρετε ακριβώς τι να πατήσετε στις ρυθμίσεις. Πατήστε κάθε επισημασμένο στοιχείο και συνεχίστε.",start:"Έναρξη οδηγού",stepW:"Βήμα",ofW:"από",next:"Επόμενο βήμα",tap:"Πατήστε το επισημασμένο στοιχείο",doneT:"Είστε έτοιμοι!",doneB:"Τώρα κάντε το στ' αλήθεια. Πατήστε Έναρξη για να ανοίξετε τις ρυθμίσεις προσβασιμότητας.",go:"Έναρξη",
+    s:[["Εγκατεστημένες εφαρμογές","Πατήστε «Εγκατεστημένες εφαρμογές» για να δείτε τις υπηρεσίες."],["MorseWave Translation","Βρείτε το «MorseWave Translation» στη λίστα και πατήστε το."],["Ανενεργό","Ενεργό","Ενεργοποιήστε αυτόν τον διακόπτη για να ενεργοποιήσετε την υπηρεσία."],["Να επιτρέπεται","Πατήστε «Να επιτρέπεται» για επιβεβαίωση."]]},
+  cs:{intro:"Rychlé cvičení o 4 krocích, abyste věděli, na co přesně klepnout v nastavení telefonu. Klepněte na každou zvýrazněnou položku a pokračujte.",start:"Spustit průvodce",stepW:"Krok",ofW:"z",next:"Další krok",tap:"Klepněte na zvýrazněnou položku",doneT:"Jste připraveni!",doneB:"Teď to udělejte doopravdy. Klepnutím na Spustit otevřete nastavení přístupnosti.",go:"Spustit",
+    s:[["Nainstalované aplikace","Klepněte na „Nainstalované aplikace“ a zobrazte služby k zapnutí."],["MorseWave Translation","Najděte v seznamu „MorseWave Translation“ a klepněte."],["Vyp.","Zap.","Přepněte tento přepínač na ZAP. pro zapnutí služby."],["Povolit","Klepnutím na „Povolit“ potvrďte oprávnění."]]},
+  ro:{intro:"Un exercițiu rapid în 4 pași ca să știi exact ce să atingi în setările telefonului. Atinge fiecare element evidențiat și continuă.",start:"Pornește ghidul",stepW:"Pasul",ofW:"din",next:"Pasul următor",tap:"Atinge elementul evidențiat",doneT:"Ești gata!",doneB:"Acum fă-o pe bune. Atinge Pornește pentru a deschide setările de accesibilitate.",go:"Pornește",
+    s:[["Aplicații instalate","Atinge „Aplicații instalate” pentru a vedea serviciile."],["MorseWave Translation","Găsește „MorseWave Translation” în listă și atinge-l."],["Dezactivat","Activat","Activează acest comutator pentru a porni serviciul."],["Permite","Atinge „Permite” pentru a confirma permisiunea."]]},
+  hu:{intro:"Egy gyors, 4 lépéses gyakorlat, hogy pontosan tudd, mire koppints a telefon beállításaiban. Koppints minden kiemelt elemre, majd folytasd.",start:"Útmutató indítása",stepW:"Lépés",ofW:"/",next:"Következő lépés",tap:"Koppints a kiemelt elemre",doneT:"Készen állsz!",doneB:"Most csináld igazából. Koppints az Indításra a kisegítő lehetőségek megnyitásához.",go:"Indítás",
+    s:[["Telepített alkalmazások","Koppints a „Telepített alkalmazások” elemre a szolgáltatásokhoz."],["MorseWave Translation","Keresd meg a „MorseWave Translation” elemet, és koppints rá."],["Ki","Be","Kapcsold BE ezt a kapcsolót a szolgáltatás engedélyezéséhez."],["Engedélyezés","Koppints az „Engedélyezés” gombra a megerősítéshez."]]},
+  sv:{intro:"En snabb övning i 4 steg så att du vet exakt vad du ska trycka på i inställningarna. Tryck på varje markerat objekt och fortsätt.",start:"Starta guiden",stepW:"Steg",ofW:"av",next:"Nästa steg",tap:"Tryck på det markerade objektet",doneT:"Du är redo!",doneB:"Gör det nu på riktigt. Tryck på Starta för att öppna tillgänglighetsinställningarna.",go:"Starta",
+    s:[["Installerade appar","Tryck på ”Installerade appar” för att se tjänsterna."],["MorseWave Translation","Hitta ”MorseWave Translation” i listan och tryck."],["Av","På","Slå PÅ den här reglaget för att aktivera tjänsten."],["Tillåt","Tryck på ”Tillåt” för att bekräfta behörigheten."]]},
+  da:{intro:"En hurtig øvelse i 4 trin, så du ved præcis, hvad du skal trykke på i indstillingerne. Tryk på hvert fremhævet element, og fortsæt.",start:"Start guiden",stepW:"Trin",ofW:"af",next:"Næste trin",tap:"Tryk på det fremhævede element",doneT:"Du er klar!",doneB:"Gør det nu rigtigt. Tryk på Start for at åbne tilgængelighedsindstillingerne.",go:"Start",
+    s:[["Installerede apps","Tryk på “Installerede apps” for at se tjenesterne."],["MorseWave Translation","Find “MorseWave Translation” på listen, og tryk."],["Fra","Til","Slå denne kontakt TIL for at aktivere tjenesten."],["Tillad","Tryk på “Tillad” for at bekræfte tilladelsen."]]},
+  no:{intro:"En rask øvelse i 4 trinn så du vet nøyaktig hva du skal trykke på i innstillingene. Trykk på hvert uthevet element og fortsett.",start:"Start veiledningen",stepW:"Trinn",ofW:"av",next:"Neste trinn",tap:"Trykk på det uthevede elementet",doneT:"Du er klar!",doneB:"Gjør det nå på ordentlig. Trykk på Start for å åpne tilgjengelighetsinnstillingene.",go:"Start",
+    s:[["Installerte apper","Trykk på «Installerte apper» for å se tjenestene."],["MorseWave Translation","Finn «MorseWave Translation» i listen og trykk."],["Av","På","Slå denne bryteren PÅ for å aktivere tjenesten."],["Tillat","Trykk på «Tillat» for å bekrefte tillatelsen."]]},
+  fi:{intro:"Nopea 4 vaiheen harjoitus, jotta tiedät tarkalleen mitä napauttaa puhelimen asetuksissa. Napauta jokaista korostettua kohdetta ja jatka.",start:"Aloita opas",stepW:"Vaihe",ofW:"/",next:"Seuraava vaihe",tap:"Napauta korostettua kohdetta",doneT:"Olet valmis!",doneB:"Tee se nyt oikeasti. Napauta Aloita avataksesi esteettömyysasetukset.",go:"Aloita",
+    s:[["Asennetut sovellukset","Napauta ”Asennetut sovellukset” nähdäksesi palvelut."],["MorseWave Translation","Etsi ”MorseWave Translation” luettelosta ja napauta."],["Pois","Päällä","Kytke tämä kytkin PÄÄLLE ottaaksesi palvelun käyttöön."],["Salli","Napauta ”Salli” vahvistaaksesi luvan."]]},
+  id:{intro:"Latihan singkat 4 langkah agar Anda tahu persis apa yang harus diketuk di setelan ponsel. Ketuk setiap item yang disorot, lalu lanjutkan.",start:"Mulai panduan",stepW:"Langkah",ofW:"dari",next:"Langkah berikutnya",tap:"Ketuk item yang disorot",doneT:"Anda siap!",doneB:"Sekarang lakukan sungguhan. Ketuk Mulai untuk membuka setelan aksesibilitas.",go:"Mulai",
+    s:[["Aplikasi terpasang","Ketuk “Aplikasi terpasang” untuk melihat layanan yang bisa diaktifkan."],["MorseWave Translation","Temukan “MorseWave Translation” di daftar dan ketuk."],["Nonaktif","Aktif","Aktifkan sakelar ini untuk mengaktifkan layanan."],["Izinkan","Ketuk “Izinkan” untuk mengonfirmasi izin."]]},
+  ms:{intro:"Latihan ringkas 4 langkah supaya anda tahu apa yang perlu diketik dalam tetapan telefon. Ketik setiap item yang diserlahkan, kemudian teruskan.",start:"Mulakan panduan",stepW:"Langkah",ofW:"daripada",next:"Langkah seterusnya",tap:"Ketik item yang diserlahkan",doneT:"Anda sudah bersedia!",doneB:"Kini lakukan dengan sebenar. Ketik Mula untuk membuka tetapan kebolehaksesan.",go:"Mula",
+    s:[["Apl dipasang","Ketik “Apl dipasang” untuk melihat perkhidmatan."],["MorseWave Translation","Cari “MorseWave Translation” dalam senarai dan ketik."],["Mati","Hidup","Hidupkan suis ini untuk mengaktifkan perkhidmatan."],["Benarkan","Ketik “Benarkan” untuk mengesahkan kebenaran."]]},
+  vi:{intro:"Bài thực hành nhanh 4 bước để bạn biết chính xác cần chạm vào đâu trong cài đặt điện thoại. Chạm vào từng mục được tô sáng rồi tiếp tục.",start:"Bắt đầu hướng dẫn",stepW:"Bước",ofW:"trên",next:"Bước tiếp theo",tap:"Chạm vào mục được tô sáng",doneT:"Bạn đã sẵn sàng!",doneB:"Giờ hãy làm thật. Chạm Bắt đầu để mở cài đặt trợ năng.",go:"Bắt đầu",
+    s:[["Ứng dụng đã cài đặt","Chạm “Ứng dụng đã cài đặt” để xem các dịch vụ."],["MorseWave Translation","Tìm “MorseWave Translation” trong danh sách và chạm."],["Tắt","Bật","Bật công tắc này để kích hoạt dịch vụ."],["Cho phép","Chạm “Cho phép” để xác nhận quyền."]]},
+  ja:{intro:"スマホの設定で何をタップすればよいか分かるように、4ステップの簡単な練習です。ハイライトされた項目をタップして進みましょう。",start:"ガイドを開始",stepW:"ステップ",ofW:"/",next:"次のステップ",tap:"ハイライトされた項目をタップ",doneT:"準備完了！",doneB:"では実際に行いましょう。「開始」をタップしてユーザー補助設定を開きます。",go:"開始",
+    s:[["インストール済みアプリ","「インストール済みアプリ」をタップして有効化できるサービスを表示します。"],["MorseWave Translation","一覧から「MorseWave Translation」を見つけてタップします。"],["オフ","オン","このスイッチをオンにしてサービスを有効にします。"],["許可","「許可」をタップして権限を確認します。"]]},
+  ko:{intro:"휴대폰 설정에서 무엇을 탭해야 하는지 정확히 알 수 있도록 4단계 빠른 연습입니다. 강조된 항목을 탭한 후 계속하세요.",start:"가이드 시작",stepW:"단계",ofW:"/",next:"다음 단계",tap:"강조된 항목을 탭하세요",doneT:"준비 완료!",doneB:"이제 실제로 해보세요. 시작을 탭하여 접근성 설정을 엽니다.",go:"시작",
+    s:[["설치된 앱","“설치된 앱”을 탭하여 켤 수 있는 서비스를 확인하세요."],["MorseWave Translation","목록에서 “MorseWave Translation”을 찾아 탭하세요."],["꺼짐","켜짐","이 스위치를 켜서 서비스를 활성화하세요."],["허용","“허용”을 탭하여 권한을 확인하세요."]]},
+  zh:{intro:"一个 4 步的快速练习，让你清楚知道在手机设置里要点按什么。点按每个高亮项目，然后继续。",start:"开始指南",stepW:"步骤",ofW:"/",next:"下一步",tap:"点按高亮的项目",doneT:"你准备好了！",doneB:"现在实际操作。点按“开始”以打开手机的无障碍设置。",go:"开始",
+    s:[["已安装的应用","点按“已安装的应用”查看可开启的服务。"],["MorseWave Translation","在列表中找到“MorseWave Translation”并点按。"],["关闭","开启","将此开关打开以启用该服务。"],["允许","点按“允许”确认权限。"]]},
+  hi:{intro:"एक त्वरित 4-चरण अभ्यास ताकि आप जान सकें कि फ़ोन सेटिंग में वास्तव में क्या टैप करना है। प्रत्येक हाइलाइट किए आइटम पर टैप करें, फिर जारी रखें।",start:"गाइड शुरू करें",stepW:"चरण",ofW:"/",next:"अगला चरण",tap:"हाइलाइट किए आइटम पर टैप करें",doneT:"आप तैयार हैं!",doneB:"अब इसे असल में करें। एक्सेसिबिलिटी सेटिंग खोलने के लिए शुरू करें पर टैप करें।",go:"शुरू करें",
+    s:[["इंस्टॉल किए गए ऐप्स","चालू की जा सकने वाली सेवाएं देखने के लिए \"इंस्टॉल किए गए ऐप्स\" टैप करें।"],["MorseWave Translation","सूची में \"MorseWave Translation\" ढूंढें और टैप करें।"],["बंद","चालू","सेवा सक्षम करने के लिए इस स्विच को चालू करें।"],["अनुमति दें","अनुमति की पुष्टि के लिए \"अनुमति दें\" टैप करें।"]]},
+  fa:{intro:"یک تمرین سریع ۴ مرحله‌ای تا دقیقاً بدانید در تنظیمات گوشی روی چه چیزی ضربه بزنید. روی هر مورد برجسته ضربه بزنید و ادامه دهید.",start:"شروع راهنما",stepW:"مرحله",ofW:"از",next:"مرحله بعد",tap:"روی مورد برجسته ضربه بزنید",doneT:"آماده‌اید!",doneB:"حالا واقعی انجامش دهید. برای باز کردن تنظیمات دسترس‌پذیری روی شروع ضربه بزنید.",go:"شروع",
+    s:[["برنامه‌های نصب‌شده","روی «برنامه‌های نصب‌شده» ضربه بزنید تا سرویس‌ها را ببینید."],["MorseWave Translation","«MorseWave Translation» را در فهرست پیدا کنید و ضربه بزنید."],["خاموش","روشن","این کلید را روشن کنید تا سرویس فعال شود."],["اجازه دادن","روی «اجازه دادن» ضربه بزنید تا مجوز تأیید شود."]]}
+};
+function simT(){ return SIM_I18N[currentLang] || SIM_I18N.en; }
+
+const SIM = { started:false, step:0, interacted:false, switchOn:false };
+const SIM_TOTAL = 4;
+
+function initSim(){ SIM.started=false; SIM.step=0; SIM.interacted=false; SIM.switchOn=false; renderSim(); }
+
+function renderSim(){
+  const wrap = document.getElementById('simWrap');
+  if (!wrap) return;
+  const t = simT();
+  // Intro screen
+  if (!SIM.started){
+    wrap.innerHTML =
+      '<div class="sim-card">'+
+        '<p class="sim-intro-p">'+esc(t.intro)+'</p>'+
+        '<div class="sim-foot"><button class="sim-btn prime" onclick="simStart()">'+esc(t.start)+'</button></div>'+
+      '</div>';
+    return;
+  }
+  // Finished screen
+  if (SIM.step >= SIM_TOTAL){
+    wrap.innerHTML =
+      '<div class="sim-card">'+
+        '<div class="sim-done-icon">✅</div>'+
+        '<div class="sim-done-title">'+esc(t.doneT)+'</div>'+
+        '<div class="sim-done-body">'+esc(t.doneB)+'</div>'+
+        '<div class="sim-foot"><button class="sim-btn start" onclick="requestBrowserAccess()">'+esc(t.go)+'</button></div>'+
+        '<button class="sim-restart" onclick="initSim()">↺</button>'+
+      '</div>';
+    return;
+  }
+  // A step screen
+  const i = SIM.step;
+  const dots = Array.from({length:SIM_TOTAL}, (_,k)=>
+    '<span class="sim-dot'+(k<i?' done':k===i?' active':'')+'"></span>').join('');
+  let surface = '';
+  if (i === 2){
+    // switch step
+    const st = SIM.switchOn ? t.s[2][1] : t.s[2][0];
+    surface =
+      '<div class="sim-screen"><div class="sim-row '+(SIM.interacted?'':'sim-active')+'" onclick="simInteract()">'+
+        '<span class="sim-row-label">MorseWave Translation</span>'+
+        '<span class="sim-switch-state">'+esc(st)+'</span>'+
+        '<span class="sim-switch'+(SIM.switchOn?' on':'')+'"></span>'+
+      '</div></div>';
+  } else {
+    const done = SIM.interacted ? ' sim-done-row' : ' sim-active';
+    surface =
+      '<div class="sim-screen"><div class="sim-row'+done+'" onclick="simInteract()">'+
+        '<span class="sim-row-label">'+esc(t.s[i][0])+'</span>'+
+        '<span class="sim-chevron">'+(SIM.interacted?'✓':'›')+'</span>'+
+      '</div></div>';
+  }
+  const micro = t.s[i][i===2?2:1];
+  wrap.innerHTML =
+    '<div class="sim-card">'+
+      '<div class="sim-progress"><span class="sim-pill">'+esc(t.stepW)+' '+(i+1)+' '+esc(t.ofW)+' '+SIM_TOTAL+'</span><span class="sim-dots">'+dots+'</span></div>'+
+      '<div class="sim-step-title">'+esc(t.s[i][0])+'</div>'+
+      '<div class="sim-step-hint">'+esc(SIM.interacted?'':t.tap)+'</div>'+
+      surface+
+      (SIM.interacted ? '<div class="sim-micro">'+esc(micro)+'</div>' : '')+
+      '<div class="sim-foot"><button class="sim-btn prime" id="simNextBtn" onclick="simNext()" '+(SIM.interacted?'':'disabled')+'>'+esc(t.next)+'</button></div>'+
+    '</div>';
+}
+
+function simStart(){ SIM.started=true; SIM.step=0; SIM.interacted=false; SIM.switchOn=false; renderSim(); }
+function simInteract(){
+  if (SIM.interacted) return;
+  if (SIM.step === 2) SIM.switchOn = true; // animate the switch to ON
+  SIM.interacted = true;
+  renderSim();
+}
+function simNext(){
+  if (!SIM.interacted) return;
+  SIM.step++;
+  SIM.interacted = false;
+  renderSim();
+}
+// tiny HTML escaper (labels are localized strings)
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /* ══════════════════════════════════════════
   BOOT
