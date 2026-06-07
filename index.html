@@ -960,6 +960,32 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .sim-done-body{color:var(--txt2);font-size:clamp(.84rem,2.4vw,.92rem);line-height:1.6;text-align:center;margin-bottom:1.1rem;overflow-wrap:anywhere;}
 .sim-restart{background:none;border:none;color:var(--txt3);font-family:inherit;font-size:.8rem;cursor:pointer;text-decoration:underline;margin-top:.85rem;align-self:center;}
 
+/* ── DEVICE-ADAPTIVE WIZARD ── */
+.sim-device{display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;font-size:clamp(.78rem,2.2vw,.86rem);color:var(--txt2);}
+.sim-device.compact{margin-bottom:.7rem;}
+.sim-device-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 3px rgba(52,211,153,.18);flex-shrink:0;}
+.sim-device-name{overflow-wrap:anywhere;}
+.sim-device-name b{color:var(--txt);}
+.sim-path{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem .55rem;margin-bottom:1rem;padding:.6rem .75rem;background:var(--bg3);border:1px solid var(--border);border-radius:10px;}
+[data-theme=light] .sim-path{background:var(--bg4);}
+.sim-path-label{font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--txt3);}
+.sim-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;}
+.sim-crumb{font-size:clamp(.74rem,2.2vw,.82rem);color:var(--txt2);background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:.2rem .5rem;overflow-wrap:anywhere;}
+.sim-crumb.last{color:var(--cyan);border-color:rgba(56,189,248,.4);font-weight:600;}
+.sim-crumb-sep{color:var(--txt3);font-size:.85rem;}
+/* tap ripple that loops on the active row */
+.sim-tap{position:absolute;left:14px;top:50%;width:18px;height:18px;margin-top:-9px;border-radius:50%;background:rgba(56,189,248,.55);pointer-events:none;animation:simTap 1.6s ease-out infinite;}
+[dir] .sim-row{position:relative;}
+@keyframes simTap{0%{transform:scale(.4);opacity:.0;}30%{opacity:.9;}70%{transform:scale(1.8);opacity:0;}100%{opacity:0;}}
+/* vendor look-and-feel for the simulated settings surface */
+.sim-screen.theme-one-ui .sim-row{border-radius:26px;}
+.sim-screen.theme-one-ui .sim-switch.on{background:#1b67e6;}
+.sim-screen.theme-material .sim-row{border-radius:16px;}
+.sim-screen.theme-material .sim-switch.on{background:#6ad08e;}
+.sim-screen.theme-miui .sim-row{border-radius:14px;}
+.sim-screen.theme-miui .sim-switch.on{background:#ff7a45;}
+.sim-screen.theme-stock .sim-row{border-radius:11px;}
+
 /* ── MOBILE RESPONSIVENESS HARDENING (additive, safe) ── */
 /* Long text labels should wrap instead of clipping or overflowing */
 .srow-label,.srow-sub,.sgroup-title,.lm-title,.lm-sub,.feat-title,.feat-desc,
@@ -979,11 +1005,52 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
   .lbtn,.btn-prime,.btn-ghost,.pbtn,.sim-btn{white-space:normal;}
   /* Settings control drops below its label cleanly */
   .srow{gap:.5rem;}
+  /* Compact nav tabs so more labels fit before scrolling */
+  .nt{padding:.3rem .6rem;font-size:.74rem;}
+  /* Flex children holding text must be allowed to shrink, or they force overflow */
+  .hud-cell>div,.tap-target-card>div,.feat,.srow-left,.sim-row-label{min-width:0;}
+  .hud-val,.hud-label{overflow-wrap:anywhere;}
+  /* Simulated phone row may wrap its label/switch on very narrow screens */
+  .sim-row{flex-wrap:wrap;gap:.5rem;}
 }
 @media (max-width:380px){
   main{padding-left:.85rem;padding-right:.85rem;}
   .sim-card{padding:1rem;}
 }
+
+/* ════════ STEP-3 FRONTEND REFINEMENTS ════════ */
+/* (4) Active nav tab: high-contrast text + sleek bottom-line indicator */
+.nt{position:relative;}
+.nt.on{color:#fff;background:rgba(56,189,248,.16);border:1px solid rgba(56,189,248,.28);}
+.nt.on::after{content:"";position:absolute;left:22%;right:22%;bottom:2px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--cyan),var(--mint));}
+/* (5) Custom dropdown look for native selects */
+.mini-sel,.tr-wpm-sel,.tr-lang-sel{-webkit-appearance:none;-moz-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' fill='none' stroke='%2393a4bd' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat:no-repeat;background-position:right .7rem center;padding-right:1.9rem;}
+.mini-sel:focus,.tr-wpm-sel:focus,.tr-lang-sel:focus{border-color:var(--cyan);}
+/* (6) Instant press feedback on interactive controls */
+.nt,.lbtn,.sbtn,.sim-btn,.dtab,.tr-tab,.feat,.lv,.game-card,.audit-btn,.sgroup-header{transition:transform .12s cubic-bezier(.2,.8,.3,1),background .2s,color .2s,border-color .2s,box-shadow .2s;}
+.nt:active,.lbtn:active,.sbtn:active,.sim-btn:active,.dtab:active,.tr-tab:active,.feat:active,.lv:active,.game-card:active,.audit-btn:active,.sgroup-header:active{transform:scale(.97);filter:brightness(1.06);}
+/* (8) Skeleton loading placeholder for the translated text viewport */
+.skel-wrap{display:flex;flex-direction:column;gap:.7rem;padding:1rem;background:var(--bg2);border:1px solid var(--border);border-radius:16px;margin-top:1.25rem;animation:fadeUp .3s ease both;}
+.skel-line{height:14px;border-radius:7px;background:linear-gradient(90deg,var(--border) 25%,var(--border2) 37%,var(--border) 63%);background-size:400% 100%;animation:skelPulse 1.3s ease-in-out infinite;}
+.skel-line.w70{width:70%;}.skel-line.w90{width:90%;}.skel-line.w45{width:45%;}
+.skel-line.tall{height:42px;border-radius:10px;}
+@keyframes skelPulse{0%{background-position:100% 0;}100%{background-position:0 0;}}
+/* (1)(3) App Audit & Feedback button + clicked acknowledgment anchor */
+.audit-btn{width:100%;padding:.9rem;font-size:.92rem;}
+.audit-ack{display:inline-flex;align-items:center;gap:.4rem;color:var(--txt3);font-size:.84rem;text-decoration:none;border-bottom:1px dashed var(--border2);padding-bottom:1px;transition:color .2s;}
+.audit-ack:hover{color:var(--cyan);}
+.audit-ack .audit-tick{color:var(--mint);font-weight:700;}
+/* (2) "System Translation Active" confirmation panel */
+.sim-active-card{text-align:center;}
+.sim-active-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--mint);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.28);border-radius:999px;padding:.4rem .85rem;margin-bottom:1rem;}
+.sim-active-dot{width:8px;height:8px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(52,211,153,.18);animation:simPulse 1.8s ease-in-out infinite;}
+.sim-active-title{font-size:clamp(1.1rem,3.6vw,1.35rem);font-weight:800;margin-bottom:.5rem;overflow-wrap:anywhere;}
+.sim-active-body{color:var(--txt2);font-size:clamp(.85rem,2.4vw,.93rem);line-height:1.6;margin-bottom:.4rem;overflow-wrap:anywhere;}
+/* (10) Extra fluid-wrap safeguards so nothing clips on tight frames */
+.tr-out-head,.tr-tabs,.tr-lang-row,.hero-sub,.kmb-row{flex-wrap:wrap;}
+.tr-out-label,.gc-desc,.hero-sub,.feat p,.kmb-label{overflow-wrap:anywhere;}
 
 </style>
 </head>
@@ -1088,7 +1155,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
   <div class="hero">
     <div class="hero-badge">MORSE WAVE 2.0 — UPGRADED</div>
     <h1>Learn Morse Code<br><span class="grad">the right way.</span></h1>
-    <p class="hero-sub">7-level curriculum · Spaced repetition · Hebrew & English · Telegraph tap key · Pure Web Audio API</p>
+    <p class="hero-sub">7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API</p>
     <div class="hero-btns">
       <button class="btn-prime" onclick="goPage('learn')">Start Learning →</button>
       <button class="btn-ghost" onclick="goPage('tap')">Try Telegraph</button>
@@ -1104,7 +1171,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <div class="feat" onclick="goPage('learn')">
       <div class="feat-icon">📚</div>
       <h3>7-Level Progression</h3>
-      <p>Guided curriculum from E&T to full Hebrew. Unlock levels as you master each stage.</p>
+      <p>Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.</p>
       <span class="feat-tag">STRUCTURED COURSE</span>
     </div>
     <div class="feat" onclick="goPage('learn')" style="--acc:var(--mint)">
@@ -1355,7 +1422,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.09 12.97a1 1 0 0 0 .77 1.65H11l-2 7.38L19.91 11.03A1 1 0 0 0 19.14 9.38H13l2-7.38z"/></svg>
         </div>
         <div class="gc-title">Letter Drill</div>
-        <div class="gc-desc">Random signal plays — type the answer. Build streaks and track accuracy across A–Z, 0–9, and Hebrew.</div>
+        <div class="gc-desc">Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.</div>
         <div class="gc-meta">
           <span class="gc-meta-item">Endless</span>
           <span class="gc-meta-item">Easy → Hard</span>
@@ -1776,6 +1843,7 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     </div>
 
     <!-- Output -->
+    <div id="trSkeletonSlot"></div>
     <div class="tr-output" id="trOutput" style="display:none">
 
       <!-- Morse text -->
@@ -1879,8 +1947,8 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
             <div class="ssub-row">
               <span>Switch after</span>
               <select class="mini-sel" id="selTrigger" onchange="saveSettings()">
-                <option value="correct" selected>✓ Correct</option>
-                <option value="wrong">✗ Wrong</option>
+                <option value="correct" selected>Correct</option>
+                <option value="wrong">Wrong</option>
                 <option value="both">Both</option>
               </select>
               <span>answer, after</span>
@@ -1914,6 +1982,16 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
             <span class="srow-label">Letter conversion</span>
             <span class="srow-sub" id="settingsLangCurrent">Currently: English</span>
           </div>
+        </div>
+      </div>
+
+      <!-- ── App Audit & Feedback ── -->
+      <div class="sgroup">
+        <div class="sgroup-header" style="cursor:default">
+          <span class="sgroup-title">Feedback</span>
+        </div>
+        <div class="sgroup-body open" style="max-height:none;padding:.6rem 1.25rem 1.1rem">
+          <div id="auditSlot"></div>
         </div>
       </div>
 
@@ -2284,11 +2362,46 @@ function requestBrowserAccess() {
   }
 }
 
+// ── TWO-WAY AUTO TRANSLATION (standalone helper) ──
+// Detects whether input is Morse or text, then converts to the opposite,
+// using the currently active language table. Adds NO changes to existing code.
+function autoTranslate(input) {
+  const raw = (input == null ? '' : String(input)).trim();
+  if (!raw) return '';
+  // 1) Detect: is it Morse? (only dots/dashes/separators, ≥2 symbols)
+  const symbols = raw.replace(/[\s/|]/g, '');
+  const isMorse = symbols.length >= 2 && /^[.\-·−]+$/.test(symbols);
+  // 2a) MORSE → TEXT (active language)
+  if (isMorse) {
+    const table = (typeof getActiveLangTable === 'function')
+      ? getActiveLangTable()
+      : (LANG_MORSE[currentLang] && LANG_MORSE[currentLang].table) || {};
+    const rev = {};
+    for (const ch in table) {
+      const code = table[ch];
+      if (code && !(code in rev)) rev[code] = ch;
+    }
+    const norm = raw.replace(/·/g, '.').replace(/−/g, '-');
+    return norm.split(/\s*[/|]\s*|\s{2,}/)
+      .map(word => word.trim().split(/\s+/).map(c => rev[c] || '').join(''))
+      .join(' ')
+      .trim();
+  }
+  // 2b) TEXT → MORSE (active language)
+  return raw.split(/\s+/)
+    .map(word => [...word]
+      .map(ch => (typeof getMorse === 'function' ? getMorse(ch) : null))
+      .filter(Boolean)
+      .join(' '))
+    .filter(Boolean)
+    .join(' / ');
+}
+
 function goPage(id) {
  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
  document.getElementById('page-' + id).classList.add('on');
  document.querySelectorAll('.nt').forEach(t => {
-   const map = {home:'Home',learn:'Learn',tap:'Telegraph',practice:'Practice',dict:'Dictionary',translate:'Translate',translation:'Translation',games:'Games',settings:'⚙ Settings',crossword:'Crossword',wordle:'Wordle',speed:'Speed Decode'};
+   const map = {home:'Home',learn:'Learn',tap:'Telegraph',practice:'Practice',dict:'Dictionary',translate:'Translate',translation:'Translation',games:'Games',settings:'Settings',crossword:'Crossword',wordle:'Wordle',speed:'Speed Decode'};
    t.classList.toggle('on', t.textContent.trim() === map[id]);
   });
  currentPage = id;
@@ -3471,6 +3584,28 @@ function loadSettings() {
    if (s) Object.assign(CFG, s);
   } catch(e) {}
  applySettingsUI();
+ renderAuditButton();
+}
+
+// (1)(3) App Audit & Feedback — opens the form, then persists a subtle acknowledgment.
+const AUDIT_URL = 'https://google.com';
+const AUDIT_KEY = 'mw_feedback_clicked';
+function renderAuditButton(){
+  const slot = document.getElementById('auditSlot'); if (!slot) return;
+  let done = false;
+  try { done = localStorage.getItem(AUDIT_KEY) === '1'; } catch(e){}
+  if (done){
+    slot.innerHTML = '<a class="audit-ack" href="'+AUDIT_URL+'" target="_blank" rel="noopener noreferrer" onclick="openAudit(event)">'+
+      '<span class="audit-tick">✓</span> Thanks for your feedback — reopen the form</a>';
+  } else {
+    slot.innerHTML = '<button class="lbtn prime audit-btn" onclick="openAudit(event)">App Audit &amp; Feedback</button>';
+  }
+}
+function openAudit(ev){
+  if (ev && ev.preventDefault) ev.preventDefault();
+  try { localStorage.setItem(AUDIT_KEY, '1'); } catch(e){}
+  window.open(AUDIT_URL, '_blank', 'noopener,noreferrer');
+  renderAuditButton();
 }
 
 function saveSettings() {
@@ -4498,7 +4633,10 @@ async function trTranslate() {
 
   // Translate
  trShowLoading('Translating to Morse…');
+ trShowSkeleton();
+ await new Promise(r => setTimeout(r, 420));   // let the skeleton register as progress
  const morse = trTranslateText(text, langCode);
+ trHideSkeleton();
  trHideLoading();
 
  if (!morse) { toast('No translatable characters found', 'info'); return; }
@@ -4539,6 +4677,17 @@ function trHideLoading() {
  document.getElementById('trLoading').style.display = 'none';
  document.getElementById('trBtn').disabled = false;
 }
+// (8) Pulsing skeleton placeholder in the translated-text viewport
+function trShowSkeleton(){
+ const slot = document.getElementById('trSkeletonSlot'); if (!slot) return;
+ slot.innerHTML = '<div class="skel-wrap">'+
+   '<div class="skel-line w45"></div>'+
+   '<div class="skel-line tall"></div>'+
+   '<div class="skel-line w90"></div>'+
+   '<div class="skel-line w70"></div>'+
+ '</div>';
+}
+function trHideSkeleton(){ const slot = document.getElementById('trSkeletonSlot'); if (slot) slot.innerHTML = ''; }
 
 // ── RENDER OUTPUT ──
 function trRenderOutput(morse, originalText, lang) {
@@ -4901,6 +5050,22 @@ function closeXlang() {
 //  intro, start(begin button), stepW, ofW, next, tap(hint), doneT, doneB, go(real Start)
 //  s: 4 steps. Steps 0,1,3 = [label, micro]. Step 2 = [offLabel, onLabel, micro] (the switch).
 // App name "MorseWave Translation" stays untranslated (proper noun).
+// ── Canonical Android accessibility terminology (the 10-language object) ──
+// This is the authoritative source for the three system terms. The richer
+// SIM_I18N guide below overlays these for the languages present here.
+const A11Y_I18N = {
+  en: { installedApps: "Installed apps", downloadedApps: "Downloaded apps", serviceName: "MorseWave Translation", microHint: "Tap the service, then turn the switch on to enable it." },
+  he: { installedApps: "אפליקציות מותקנות", downloadedApps: "אפליקציות שהורדו", serviceName: "‏MorseWave Translation", microHint: "הקישו על השירות, ולאחר מכן הפעילו את המתג כדי להפעיל אותו." },
+  ar: { installedApps: "التطبيقات المُثبَّتة", downloadedApps: "التطبيقات التي تم تنزيلها", serviceName: "‏MorseWave Translation", microHint: "انقر على الخدمة، ثم شغّل المفتاح لتفعيلها." },
+  ru: { installedApps: "Установленные приложения", downloadedApps: "Скачанные приложения", serviceName: "MorseWave Translation", microHint: "Нажмите на сервис, затем включите переключатель, чтобы активировать его." },
+  es: { installedApps: "Aplicaciones instaladas", downloadedApps: "Aplicaciones descargadas", serviceName: "MorseWave Translation", microHint: "Toca el servicio y, a continuación, activa el interruptor para habilitarlo." },
+  fr: { installedApps: "Applications installées", downloadedApps: "Applications téléchargées", serviceName: "MorseWave Translation", microHint: "Appuyez sur le service, puis activez le bouton pour l'activer." },
+  de: { installedApps: "Installierte Apps", downloadedApps: "Heruntergeladene Apps", serviceName: "MorseWave Translation", microHint: "Tippe auf den Dienst und aktiviere dann den Schalter, um ihn einzuschalten." },
+  it: { installedApps: "App installate", downloadedApps: "App scaricate", serviceName: "MorseWave Translation", microHint: "Tocca il servizio, quindi attiva l'interruttore per abilitarlo." },
+  pt: { installedApps: "Apps instalados", downloadedApps: "Apps transferidos", serviceName: "MorseWave Translation", microHint: "Toque no serviço e ative o botão para o ativar." },
+  uk: { installedApps: "Установлені додатки", downloadedApps: "Завантажені застосунки", serviceName: "MorseWave Translation", microHint: "Натисніть на службу, а потім увімкніть перемикач, щоб активувати її." }
+};
+
 const SIM_I18N = {
   en:{intro:"A quick 4-step practice so you'll know exactly what to tap in your phone's settings. Tap each highlighted item, then continue.",start:"Start the guide",stepW:"Step",ofW:"of",next:"Next step",tap:"Tap the highlighted item",doneT:"You're ready!",doneB:"Now do it for real. Tap Start to open your phone's accessibility settings.",go:"Start",
     s:[["Installed apps","Tap “Installed apps” to see the services you can turn on."],["MorseWave Translation","Find “MorseWave Translation” in the list and tap it."],["Off","On","Flip this switch ON to enable the service."],["Allow","Tap “Allow” to confirm the permission."]]},
@@ -4961,21 +5126,142 @@ const SIM_I18N = {
   fa:{intro:"یک تمرین سریع ۴ مرحله‌ای تا دقیقاً بدانید در تنظیمات گوشی روی چه چیزی ضربه بزنید. روی هر مورد برجسته ضربه بزنید و ادامه دهید.",start:"شروع راهنما",stepW:"مرحله",ofW:"از",next:"مرحله بعد",tap:"روی مورد برجسته ضربه بزنید",doneT:"آماده‌اید!",doneB:"حالا واقعی انجامش دهید. برای باز کردن تنظیمات دسترس‌پذیری روی شروع ضربه بزنید.",go:"شروع",
     s:[["برنامه‌های نصب‌شده","روی «برنامه‌های نصب‌شده» ضربه بزنید تا سرویس‌ها را ببینید."],["MorseWave Translation","«MorseWave Translation» را در فهرست پیدا کنید و ضربه بزنید."],["خاموش","روشن","این کلید را روشن کنید تا سرویس فعال شود."],["اجازه دادن","روی «اجازه دادن» ضربه بزنید تا مجوز تأیید شود."]]}
 };
-function simT(){ return SIM_I18N[currentLang] || SIM_I18N.en; }
+function simT(){
+  const base = SIM_I18N[currentLang] || SIM_I18N.en;
+  const a = A11Y_I18N[currentLang];
+  if (!a) return base;
+  // Overlay the canonical A11Y_I18N terminology (without mutating SIM_I18N)
+  const t = Object.assign({}, base);
+  t.s = base.s.map(arr => arr.slice());
+  if (a.installedApps) t.s[0][0] = a.installedApps;   // step 1 item: "Installed apps"
+  if (a.serviceName)   t.s[1][0] = a.serviceName;     // step 2 item: service name
+  if (a.microHint)     t.s[2][2] = a.microHint;       // switch step micro-explanation
+  // Device-adaptive: Pixel/Xiaomi/etc. say "Downloaded apps" instead of "Installed apps"
+  try {
+    const prof = deviceProfile();
+    if (prof && prof.usesDownloaded && a.downloadedApps) t.s[0][0] = a.downloadedApps;
+  } catch(e){}
+  return t;
+}
+
+// ── DEVICE-ADAPTIVE DETECTION ──
+// Reads the user-agent (and an optional native bridge hint) to pick a device
+// family, so the wizard can mirror that vendor's real settings layout/terms.
+function detectDevice(){
+  let ua = (navigator.userAgent || '');
+  try { if (window.AndroidBridge && typeof window.AndroidBridge.getDeviceModel === 'function'){ const m = window.AndroidBridge.getDeviceModel(); if (m) ua += ' ' + m; } } catch(e){}
+  let vendor = 'android';
+  if (/SM-|Galaxy|SamsungBrowser/i.test(ua)) vendor = 'samsung';
+  else if (/Pixel/i.test(ua)) vendor = 'pixel';
+  else if (/Redmi|POCO|MIUI|Xiaomi|HyperOS/i.test(ua)) vendor = 'xiaomi';
+  else if (/HUAWEI|Honor|HarmonyOS/i.test(ua)) vendor = 'huawei';
+  else if (/OnePlus/i.test(ua)) vendor = 'oneplus';
+  else if (/OPPO|CPH/i.test(ua)) vendor = 'oppo';
+  else if (/vivo/i.test(ua)) vendor = 'vivo';
+  const minDim = Math.min(screen.width || 0, screen.height || 0);
+  const isTablet = /Tablet|SM-T|Nexus (7|9|10)|Pixel Tablet|Pad/i.test(ua) || minDim >= 600;
+  return { vendor, isTablet };
+}
+const DEVICE_PROFILES = {
+  samsung: { label:'Samsung Galaxy', theme:'one-ui',  usesDownloaded:false, path:['Settings','Accessibility','Installed apps'] },
+  pixel:   { label:'Google Pixel',   theme:'material', usesDownloaded:true,  path:['Settings','Accessibility','Downloaded apps'] },
+  xiaomi:  { label:'Xiaomi',         theme:'miui',     usesDownloaded:true,  path:['Settings','Additional settings','Accessibility','Downloaded apps'] },
+  huawei:  { label:'Huawei',         theme:'material', usesDownloaded:true,  path:['Settings','Accessibility features','Accessibility','Downloaded apps'] },
+  oneplus: { label:'OnePlus',        theme:'material', usesDownloaded:true,  path:['Settings','Additional settings','Accessibility','Downloaded apps'] },
+  oppo:    { label:'OPPO',           theme:'material', usesDownloaded:true,  path:['Settings','Additional settings','Accessibility','Downloaded apps'] },
+  vivo:    { label:'vivo',           theme:'material', usesDownloaded:true,  path:['Settings','Accessibility','Downloaded apps'] },
+  android: { label:'Android',        theme:'stock',    usesDownloaded:false, path:['Settings','Accessibility','Installed apps'] }
+};
+function deviceProfile(){
+  const d = detectDevice();
+  const p = DEVICE_PROFILES[d.vendor] || DEVICE_PROFILES.android;
+  return Object.assign({}, p, { isTablet: d.isTablet });
+}
+// Localized device-UI labels (10 langs, English fallback)
+const SIM_DEV_I18N = {
+  en:{detected:'Detected device',pathLabel:'Where to go',tablet:'Tablet'},
+  he:{detected:'מכשיר שזוהה',pathLabel:'לאן ללכת',tablet:'טאבלט'},
+  ar:{detected:'الجهاز المكتشف',pathLabel:'إلى أين تذهب',tablet:'جهاز لوحي'},
+  ru:{detected:'Обнаружено устройство',pathLabel:'Куда перейти',tablet:'Планшет'},
+  es:{detected:'Dispositivo detectado',pathLabel:'Dónde ir',tablet:'Tablet'},
+  fr:{detected:'Appareil détecté',pathLabel:'Où aller',tablet:'Tablette'},
+  de:{detected:'Erkanntes Gerät',pathLabel:'Wohin',tablet:'Tablet'},
+  it:{detected:'Dispositivo rilevato',pathLabel:'Dove andare',tablet:'Tablet'},
+  pt:{detected:'Dispositivo detetado',pathLabel:'Onde ir',tablet:'Tablet'},
+  uk:{detected:'Виявлено пристрій',pathLabel:'Куди перейти',tablet:'Планшет'}
+};
+function simDevT(){ return SIM_DEV_I18N[currentLang] || SIM_DEV_I18N.en; }
 
 const SIM = { started:false, step:0, interacted:false, switchOn:false };
 const SIM_TOTAL = 4;
 
-function initSim(){ SIM.started=false; SIM.step=0; SIM.interacted=false; SIM.switchOn=false; renderSim(); }
+// (2) Localized "System Translation Active & Secured" panel (10 langs, EN fallback)
+const SIM_ACTIVE_I18N = {
+  en:{status:'Active & Secured',title:'System Translation Active & Secured',body:'MorseWave is already enabled in your accessibility settings. You can switch between apps and the translation overlay will keep working.',redo:'Run the setup guide again'},
+  he:{status:'פעיל ומאובטח',title:'תרגום המערכת פעיל ומאובטח',body:'‏MorseWave כבר מופעל בהגדרות הנגישות שלך. אפשר לעבור בין אפליקציות וכיסוי התרגום ימשיך לפעול.',redo:'הפעל שוב את מדריך ההתקנה'},
+  ar:{status:'نشط ومؤمَّن',title:'ترجمة النظام نشطة ومؤمَّنة',body:'‏MorseWave مُفعّل بالفعل في إعدادات إمكانية الوصول. يمكنك التنقل بين التطبيقات وستظل طبقة الترجمة تعمل.',redo:'تشغيل دليل الإعداد مرة أخرى'},
+  ru:{status:'Активно и защищено',title:'Системный перевод активен и защищён',body:'MorseWave уже включён в настройках специальных возможностей. Переключайтесь между приложениями — наложение перевода продолжит работать.',redo:'Запустить руководство снова'},
+  es:{status:'Activo y protegido',title:'Traducción del sistema activa y protegida',body:'MorseWave ya está habilitado en tus ajustes de accesibilidad. Puedes cambiar de app y la superposición seguirá funcionando.',redo:'Volver a abrir la guía'},
+  fr:{status:'Actif et sécurisé',title:'Traduction système active et sécurisée',body:'MorseWave est déjà activé dans vos réglages d\'accessibilité. Changez d\'application : la superposition continuera de fonctionner.',redo:'Relancer le guide d\'installation'},
+  de:{status:'Aktiv & gesichert',title:'Systemübersetzung aktiv & gesichert',body:'MorseWave ist bereits in deinen Bedienungshilfen aktiviert. Du kannst zwischen Apps wechseln, das Übersetzungs-Overlay läuft weiter.',redo:'Einrichtungsanleitung erneut starten'},
+  it:{status:'Attivo e protetto',title:'Traduzione di sistema attiva e protetta',body:'MorseWave è già abilitato nelle impostazioni di accessibilità. Puoi cambiare app e l\'overlay di traduzione continuerà a funzionare.',redo:'Riavvia la guida'},
+  pt:{status:'Ativo e protegido',title:'Tradução do sistema ativa e protegida',body:'O MorseWave já está ativado nas definições de acessibilidade. Pode alternar entre apps e a sobreposição continuará a funcionar.',redo:'Abrir o guia novamente'},
+  uk:{status:'Активно та захищено',title:'Системний переклад активний і захищений',body:'MorseWave вже ввімкнено в налаштуваннях доступності. Перемикайтеся між застосунками — накладання перекладу працюватиме.',redo:'Запустити посібник знову'}
+};
+function simActiveT(){ return SIM_ACTIVE_I18N[currentLang] || SIM_ACTIVE_I18N.en; }
+// Ask the native bridge whether the accessibility service is already on.
+function simServiceEnabled(){
+  try {
+    const b = window.AndroidBridge; if (!b) return false;
+    if (typeof b.isServiceEnabled === 'function') return !!b.isServiceEnabled();
+    if (typeof b.isAccessibilityServiceEnabled === 'function') return !!b.isAccessibilityServiceEnabled();
+    if (typeof b.isAccessibilityEnabled === 'function') return !!b.isAccessibilityEnabled();
+  } catch(e){}
+  return false;
+}
+function renderSimActive(){
+  const wrap = document.getElementById('simWrap'); if (!wrap) return;
+  const a = simActiveT();
+  wrap.innerHTML =
+    '<div class="sim-card sim-active-card">'+
+      '<div class="sim-active-badge"><span class="sim-active-dot"></span>'+esc(a.status)+'</div>'+
+      '<div class="sim-active-title">'+esc(a.title)+'</div>'+
+      '<div class="sim-active-body">'+esc(a.body)+'</div>'+
+      '<button class="sim-restart" onclick="simForceGuide()">'+esc(a.redo)+'</button>'+
+    '</div>';
+}
+function simForceGuide(){ SIM.started=false; SIM.step=0; SIM.interacted=false; SIM.switchOn=false; renderSim(); }
+
+function initSim(){
+  // (2) If the service is already enabled, skip the whole 4-step guide.
+  if (simServiceEnabled()){ renderSimActive(); return; }
+  SIM.started=false; SIM.step=0; SIM.interacted=false; SIM.switchOn=false; renderSim();
+}
+
+function simDeviceHeader(prof, dv){
+  const tab = prof.isTablet ? ' · ' + esc(dv.tablet) : '';
+  const crumbs = prof.path.map((p,idx)=>
+    '<span class="sim-crumb'+(idx===prof.path.length-1?' last':'')+'">'+esc(p)+'</span>'
+  ).join('<span class="sim-crumb-sep">›</span>');
+  return '<div class="sim-device">'+
+           '<span class="sim-device-dot"></span>'+
+           '<span class="sim-device-name">'+esc(dv.detected)+': <b>'+esc(prof.label)+'</b>'+tab+'</span>'+
+         '</div>'+
+         '<div class="sim-path"><span class="sim-path-label">'+esc(dv.pathLabel)+'</span>'+
+           '<div class="sim-crumbs">'+crumbs+'</div></div>';
+}
 
 function renderSim(){
   const wrap = document.getElementById('simWrap');
   if (!wrap) return;
   const t = simT();
+  const prof = (function(){ try { return deviceProfile(); } catch(e){ return DEVICE_PROFILES.android; } })();
+  const dv = simDevT();
   // Intro screen
   if (!SIM.started){
     wrap.innerHTML =
       '<div class="sim-card">'+
+        simDeviceHeader(prof, dv)+
         '<p class="sim-intro-p">'+esc(t.intro)+'</p>'+
         '<div class="sim-foot"><button class="sim-btn prime" onclick="simStart()">'+esc(t.start)+'</button></div>'+
       '</div>';
@@ -4985,11 +5271,10 @@ function renderSim(){
   if (SIM.step >= SIM_TOTAL){
     wrap.innerHTML =
       '<div class="sim-card">'+
-        '<div class="sim-done-icon">✅</div>'+
         '<div class="sim-done-title">'+esc(t.doneT)+'</div>'+
         '<div class="sim-done-body">'+esc(t.doneB)+'</div>'+
         '<div class="sim-foot"><button class="sim-btn start" onclick="requestBrowserAccess()">'+esc(t.go)+'</button></div>'+
-        '<button class="sim-restart" onclick="initSim()">↺</button>'+
+        '<button class="sim-restart" onclick="initSim()">'+esc(t.start)+'</button>'+
       '</div>';
     return;
   }
@@ -4997,12 +5282,14 @@ function renderSim(){
   const i = SIM.step;
   const dots = Array.from({length:SIM_TOTAL}, (_,k)=>
     '<span class="sim-dot'+(k<i?' done':k===i?' active':'')+'"></span>').join('');
+  const tap = SIM.interacted ? '' : '<span class="sim-tap"></span>';
   let surface = '';
   if (i === 2){
     // switch step
     const st = SIM.switchOn ? t.s[2][1] : t.s[2][0];
     surface =
-      '<div class="sim-screen"><div class="sim-row '+(SIM.interacted?'':'sim-active')+'" onclick="simInteract()">'+
+      '<div class="sim-screen theme-'+prof.theme+'"><div class="sim-row '+(SIM.interacted?'':'sim-active')+'" onclick="simInteract()">'+
+        tap+
         '<span class="sim-row-label">MorseWave Translation</span>'+
         '<span class="sim-switch-state">'+esc(st)+'</span>'+
         '<span class="sim-switch'+(SIM.switchOn?' on':'')+'"></span>'+
@@ -5010,7 +5297,8 @@ function renderSim(){
   } else {
     const done = SIM.interacted ? ' sim-done-row' : ' sim-active';
     surface =
-      '<div class="sim-screen"><div class="sim-row'+done+'" onclick="simInteract()">'+
+      '<div class="sim-screen theme-'+prof.theme+'"><div class="sim-row'+done+'" onclick="simInteract()">'+
+        tap+
         '<span class="sim-row-label">'+esc(t.s[i][0])+'</span>'+
         '<span class="sim-chevron">'+(SIM.interacted?'✓':'›')+'</span>'+
       '</div></div>';
@@ -5018,6 +5306,7 @@ function renderSim(){
   const micro = t.s[i][i===2?2:1];
   wrap.innerHTML =
     '<div class="sim-card">'+
+      '<div class="sim-device compact"><span class="sim-device-dot"></span><span class="sim-device-name"><b>'+esc(prof.label)+'</b></span></div>'+
       '<div class="sim-progress"><span class="sim-pill">'+esc(t.stepW)+' '+(i+1)+' '+esc(t.ofW)+' '+SIM_TOTAL+'</span><span class="sim-dots">'+dots+'</span></div>'+
       '<div class="sim-step-title">'+esc(t.s[i][0])+'</div>'+
       '<div class="sim-step-hint">'+esc(SIM.interacted?'':t.tap)+'</div>'+
