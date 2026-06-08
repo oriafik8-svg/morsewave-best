@@ -743,6 +743,12 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 
 /* Language row */
 .tr-lang-row{display:flex;align-items:center;gap:.55rem;margin:1rem 0;}
+.tr-lang-readonly{flex:1;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.55rem .85rem;border:1.5px dashed var(--border2);border-radius:10px;background:var(--bg2);cursor:pointer;transition:border-color .2s;min-width:0;}
+.tr-lang-readonly:hover{border-color:rgba(56,189,248,.45);}
+[data-theme=light] .tr-lang-readonly{background:var(--bg3);}
+.tr-lang-ro-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--txt3);}
+.tr-lang-ro-value{font-size:.85rem;font-weight:700;color:var(--cyan);overflow-wrap:anywhere;}
+.tr-lang-ro-hint{font-size:.72rem;color:var(--txt3);}
 .tr-lang-sel{flex:1;padding:.55rem .85rem;border:1.5px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--txt);font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;outline:none;transition:border-color .2s;-webkit-appearance:none;}
 .tr-lang-sel:focus{border-color:rgba(167,139,250,.5);}
 [data-theme=light] .tr-lang-sel{background:var(--bg3);}
@@ -1051,10 +1057,62 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 /* (10) Extra fluid-wrap safeguards so nothing clips on tight frames */
 .tr-out-head,.tr-tabs,.tr-lang-row,.hero-sub,.kmb-row{flex-wrap:wrap;}
 .tr-out-label,.gc-desc,.hero-sub,.feat p,.kmb-label{overflow-wrap:anywhere;}
-
+/* ── WELCOME ONBOARDING MODAL ── */
+#mwOnboard{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.25rem;
+  background:rgba(7,11,20,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+#mwOnboard.closing{animation:mwFadeOut .42s ease forwards;}
+.mw-ob-card{background:var(--bg2,#0f1623);border:1px solid var(--border2,#243049);border-radius:22px;
+  width:100%;max-width:460px;max-height:86vh;overflow-y:auto;padding:1.75rem 1.6rem;
+  box-shadow:0 24px 70px rgba(0,0,0,.5);animation:slideInFromLeft .5s cubic-bezier(.2,.9,.3,1) both;}
+#mwOnboard.closing .mw-ob-card{animation:slideOutToRight .42s cubic-bezier(.5,0,.75,.3) forwards;}
+.mw-ob-title{font-size:clamp(1.25rem,4.4vw,1.55rem);font-weight:800;line-height:1.25;margin-bottom:.9rem;overflow-wrap:anywhere;}
+.mw-ob-text{color:var(--txt2,#9fb2c8);font-size:clamp(.9rem,2.6vw,.97rem);line-height:1.65;margin-bottom:1rem;overflow-wrap:anywhere;}
+.mw-ob-sub{color:var(--txt,#e8eef7);font-weight:700;font-size:clamp(.98rem,3vw,1.08rem);margin:1.1rem 0 .5rem;overflow-wrap:anywhere;}
+.mw-ob-link{color:var(--cyan,#38bdf8);text-decoration:none;border-bottom:1px solid rgba(56,189,248,.4);word-break:break-all;}
+.mw-ob-link:hover{color:var(--mint,#34d399);}
+.mw-ob-btn{width:100%;margin-top:1.4rem;padding:.95rem;border:none;border-radius:14px;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:800;color:#06121f;background:linear-gradient(135deg,#38bdf8,#34d399);
+  transition:transform .12s ease,filter .2s;}
+.mw-ob-btn:hover{filter:brightness(1.07);}
+.mw-ob-btn:active{transform:scale(.97);}
+@keyframes slideInFromLeft{from{opacity:0;transform:translateX(-120%) scale(.96);}to{opacity:1;transform:translateX(0) scale(1);}}
+@keyframes slideOutToRight{from{opacity:1;transform:translateX(0) scale(1);}to{opacity:0;transform:translateX(120%) scale(.96);}}
+@keyframes mwFadeOut{from{opacity:1;}to{opacity:0;}}
 </style>
 </head>
 <body>
+
+<!-- ── WELCOME ONBOARDING MODAL (shows once, web + native via localStorage) ── -->
+<div id="mwOnboard" style="display:none">
+  <div class="mw-ob-card" role="dialog" aria-modal="true" aria-labelledby="mwObTitle">
+    <div class="mw-ob-title" id="mwObTitle">Welcome to MorseWave</div>
+    <div class="mw-ob-text">MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games, practice your skills, and even translate entire applications and screens globally by navigating to the Translation tab!</div>
+    <div class="mw-ob-sub">Your Feedback Matters: Help Us Build the Future</div>
+    <div class="mw-ob-text">We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit &amp; Feedback' button inside the Settings screen or use our official review form below.</div>
+    <div class="mw-ob-text"><a class="mw-ob-link" href="https://forms.gle/KZBGedZLykrzEqML8" target="_blank" rel="noopener noreferrer">https://forms.gle/KZBGedZLykrzEqML8</a></div>
+    <button class="mw-ob-btn" onclick="mwCloseOnboard()">Let's get started!</button>
+  </div>
+</div>
+<script>
+// Shows once; if already completed, remove before paint to avoid flicker.
+(function(){
+  var KEY='morsewave_onboarding_completed', done;
+  try{ done = localStorage.getItem(KEY)==='true'; }catch(e){ done=false; }
+  var el=document.getElementById('mwOnboard');
+  if(done){ if(el&&el.parentNode) el.parentNode.removeChild(el); return; }
+  if(el) el.style.display='flex';
+})();
+function mwCloseOnboard(){
+  var el=document.getElementById('mwOnboard');
+  try{ localStorage.setItem('morsewave_onboarding_completed','true'); }catch(e){}
+  if(!el) return;
+  el.classList.add('closing');                       // exit: slide out to the right
+  setTimeout(function(){
+    if(el.parentNode) el.parentNode.removeChild(el);
+    if(typeof navTo==='function') navTo('home');      // route into the home root view
+  }, 430);                                            // matches the .42s exit animation
+}
+</script>
 
 <canvas id="starCanvas"></canvas>
 <div class="glow a"></div>
@@ -1189,8 +1247,8 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <div class="feat" onclick="goPage('dict')" style="--acc:var(--violet)">
       <div class="feat-icon" style="background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.15)">🔤</div>
       <h3>Full Dictionary</h3>
-      <p>Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse, or 🌍 to see it across the world's alphabets.</p>
-      <span class="feat-tag" style="background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.15);color:var(--violet)">עברית / EN</span>
+      <p>Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.</p>
+      <span class="feat-tag" id="dictCardBadge" style="background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.15);color:var(--violet)">English</span>
     </div>
   </div>
 </div>
@@ -1640,6 +1698,10 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
         <input type="text" id="speedInp" class="speed-inp" placeholder="?" maxlength="2"
          autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
       </div>
+      <div style="display:flex;justify-content:center;gap:.5rem;margin-top:.9rem">
+        <button class="lbtn" id="speedPauseBtn" onclick="speedPause()" style="display:none">Pause</button>
+        <button class="lbtn prime" id="speedResumeBtn" onclick="speedResume()" style="display:none">Resume</button>
+      </div>
     </div>
 
     <div id="speedResult" class="speed-result" style="display:none">
@@ -1738,88 +1800,13 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 
     <!-- Language row -->
     <div class="tr-lang-row">
-      <select class="tr-lang-sel" id="trLangSel" onchange="trClearOutput()">
-        <option value="en">English</option>
-        <option value="he">עברית (Hebrew)</option>
-        <option value="de">Deutsch (German)</option>
-        <option value="fr">Français (French)</option>
-        <option value="es">Español (Spanish)</option>
-        <option value="it">Italiano (Italian)</option>
-        <option value="pt">Português (Portuguese)</option>
-        <option value="nl">Nederlands (Dutch)</option>
-        <option value="sv">Svenska (Swedish)</option>
-        <option value="no">Norsk (Norwegian)</option>
-        <option value="da">Dansk (Danish)</option>
-        <option value="fi">Suomi (Finnish)</option>
-        <option value="pl">Polski (Polish)</option>
-        <option value="tr">Türkçe (Turkish)</option>
-        <option value="cs">Čeština (Czech)</option>
-        <option value="ro">Română (Romanian)</option>
-        <option value="hu">Magyar (Hungarian)</option>
-        <option value="ru">Русский (Russian)</option>
-        <option value="ar">العربية (Arabic)</option>
-        <option value="el">Ελληνικά (Greek)</option>
-        <option value="uk">Українська (Ukrainian)</option>
-        <option value="bg">Български (Bulgarian)</option>
-        <option value="sr">Српски (Serbian)</option>
-        <option value="hr">Hrvatski (Croatian)</option>
-        <option value="sk">Slovenčina (Slovak)</option>
-        <option value="sl">Slovenščina (Slovenian)</option>
-        <option value="et">Eesti (Estonian)</option>
-        <option value="lv">Latviešu (Latvian)</option>
-        <option value="lt">Lietuvių (Lithuanian)</option>
-        <option value="sq">Shqip (Albanian)</option>
-        <option value="mk">Македонски (Macedonian)</option>
-        <option value="ca">Català (Catalan)</option>
-        <option value="cy">Cymraeg (Welsh)</option>
-        <option value="is">Íslenska (Icelandic)</option>
-        <option value="mt">Malti (Maltese)</option>
-        <option value="eo">Esperanto</option>
-        <option value="ja">日本語 (Japanese)</option>
-        <option value="ko">한국어 (Korean)</option>
-        <option value="ka">ქართული (Georgian)</option>
-        <option value="vi">Tiếng Việt (Vietnamese)</option>
-        <option value="be">Беларуская (Belarusian)</option>
-        <option value="az">Azərbaycan (Azerbaijani)</option>
-        <option value="kk">Қазақша (Kazakh)</option>
-        <option value="hy">Հայերեն (Armenian)</option>
-        <option value="fa">فارسی (Persian)</option>
-        <option value="ur">اردو (Urdu)</option>
-        <option value="hi">हिन्दी (Hindi)</option>
-        <option value="bn">বাংলা (Bengali)</option>
-        <option value="th">ภาษาไทย (Thai)</option>
-        <option value="sw">Kiswahili (Swahili)</option>
-        <option value="af">Afrikaans</option>
-        <option value="id">Bahasa Indonesia</option>
-        <option value="ms">Bahasa Melayu (Malay)</option>
-        <option value="tl">Filipino (Tagalog)</option>
-        <option value="la">Latina (Latin)</option>
-        <option value="ga">Gaeilge (Irish)</option>
-        <option value="eu">Euskara (Basque)</option>
-        <option value="gl">Galego (Galician)</option>
-        <option value="uz">Oʻzbekcha (Uzbek)</option>
-        <option value="tk">Türkmençe (Turkmen)</option>
-        <option value="ky">Кыргызча (Kyrgyz)</option>
-        <option value="zh">中文 Pinyin (Chinese)</option>
-        <option value="mn">Монгол (Mongolian)</option>
-        <option value="ne">नेपाली (Nepali)</option>
-        <option value="ta">தமிழ் (Tamil)</option>
-        <option value="te">తెలుగు (Telugu)</option>
-        <option value="am">አማርኛ (Amharic)</option>
-        <option value="yi">ייִדיש (Yiddish)</option>
-        <option value="ps">پښتو (Pashto)</option>
-        <option value="tg">Тоҷикӣ (Tajik)</option>
-        <option value="tt">Татарча (Tatar)</option>
-        <option value="ha">Hausa</option>
-        <option value="yo">Yorùbá (Yoruba)</option>
-        <option value="zu">isiZulu (Zulu)</option>
-        <option value="so">Soomaali (Somali)</option>
-        <option value="ht">Kreyòl (Haitian Creole)</option>
-        <option value="lb">Lëtzebuergesch (Luxembourgish)</option>
-        <option value="fo">Føroyskt (Faroese)</option>
-        <option value="gd">Gàidhlig (Scottish Gaelic)</option>
-        <option value="br">Brezhoneg (Breton)</option>
-      </select>
+      <!-- Central language is the single source of truth (set in Settings). -->
+      <input type="hidden" id="trLangSel" value="en">
+      <div class="tr-lang-readonly" id="trLangReadonly" onclick="navTo('settings')" title="Change in Settings">
+        <span class="tr-lang-ro-label">Language</span>
+        <span class="tr-lang-ro-value" id="trLangRoValue">English</span>
+        <span class="tr-lang-ro-hint">· change in Settings</span>
+      </div>
       <button class="tr-swap-btn" id="trSwapBtn" title="Swap direction" onclick="trSwap()">⇄</button>
       <div id="trDirLabel" style="padding:.45rem .85rem;border:1.5px solid var(--border2);border-radius:10px;font-size:.8rem;font-weight:700;color:var(--txt2);white-space:nowrap;">→ Morse</div>
     </div>
@@ -2078,6 +2065,33 @@ let currentLang = localStorage.getItem('mw_lang') || 'en';
 // currentLang holds a LANG_MORSE key (e.g. 'en','he','de'...). Legacy 'heb' maps to 'he'.
 if (currentLang === 'heb') currentLang = 'he';
 
+// ════════════════════════════════════════════════════════════════
+//  CENTRAL LANGUAGE STORE — single source of truth (set in Settings)
+//  • MWLang.get()           → current language code
+//  • MWLang.set(code)       → the ONLY way to change it (routes through selectLang)
+//  • MWLang.subscribe(fn)   → register a screen; fn(code) runs now + on every change
+//  • MWLang.notify()        → fired by applyLangChange so all subscribers re-sync
+//  No screen stores its own language; every screen reads/subscribes to this.
+// ════════════════════════════════════════════════════════════════
+const MWLang = {
+  _subs: [],
+  get() { return currentLang; },
+  subscribe(fn) {
+    if (typeof fn !== 'function') return;
+    this._subs.push(fn);
+    try { fn(currentLang); } catch (e) {}   // sync immediately on registration
+  },
+  notify() {
+    for (const fn of this._subs) { try { fn(currentLang); } catch (e) {} }
+  },
+  set(code) {
+    if (code && code !== currentLang && typeof LANG_MORSE !== 'undefined' && LANG_MORSE[code]
+        && typeof selectLang === 'function') {
+      selectLang(code);   // the existing centralized mutation (loading screen + full sync)
+    }
+  }
+};
+
 function getActiveLangTable() {
   const lang = LANG_MORSE[currentLang] || LANG_MORSE.en;
   return lang.table;
@@ -2198,15 +2212,15 @@ function applyLangChange(code, ret, l) {
     lvlDone = loadLvlDone(code);
     LP.session = 'level'; LP.lvlIdx = null;
   } catch(e){}
-  // Update dictionary language tab label
-  const dtab = document.getElementById('dictLangTab');
-  if (dtab) dtab.textContent = (code!=='en') ? l.name : 'Hebrew';
+  // Update dictionary language tab label / visibility
+  if (typeof updateDictLangTab === 'function') updateDictLangTab();
   // Set practice default mode for the new language
   if (typeof P !== 'undefined') P.mode = (code==='en'?'letters':(code==='he'?'heb':'lang'));
   // Clear cached reverse lookups so cross-ref + decode use new tables
   if (typeof _xlangRevCache !== 'undefined') { for (const k in _xlangRevCache) delete _xlangRevCache[k]; }
   // Go to the page we were on, then force a full live refresh of that page's content
   goPage(ret);
+  if (typeof MWLang !== 'undefined') MWLang.notify();   // sync every subscribed screen
   toast(l.name + ' ✓', 'ok');
   if (ret === 'practice') {
     refreshPracticeUI();
@@ -2319,8 +2333,8 @@ function screenIsDirty(id) {
 // Stop timers / reset transient state when actually leaving a screen
 function cleanupScreen(id) {
   try {
-    if (id === 'speed' && typeof SD !== 'undefined' && SD.running) {
-      clearInterval(SD.timer); SD.running = false;
+    if (id === 'speed' && typeof SD !== 'undefined' && SD.running && !SD.paused) {
+      speedPause();   // leaving mid-game pauses (timer frozen) so it can be resumed
     }
     if (id === 'tap' && typeof TAP !== 'undefined') {
       clearTimeout(TAP.liveDecodeTimer);
@@ -2349,7 +2363,20 @@ function navTo(id) {
   goPage(id);
 }
 // Back arrow → go home (auto-saves on the way)
-function navBack() { navTo('home'); }
+function navBack() {
+  const p = (typeof currentPage !== 'undefined') ? currentPage : 'home';
+  // Inside a mini-game → back to the Games hub (the games tab's own root)
+  if (p === 'crossword' || p === 'wordle' || p === 'speed') { navTo('games'); return; }
+  // Inside a Learn level → back to the level list (Learn's own root), not the app home
+  if (p === 'learn') {
+    const sel = document.getElementById('levelSelector');
+    const inLevel = sel && sel.style.display === 'none';
+    if (inLevel && typeof lBack === 'function') { lBack(); return; }
+    navTo('home'); return;
+  }
+  // Top-level tabs have no deeper view → go home
+  navTo('home');
+}
 
 // ── NATIVE BRIDGE TRIGGER (Android) ──
 // Opens Android's Accessibility settings via the AndroidBridge interface.
@@ -2410,9 +2437,9 @@ function goPage(id) {
  if (_bk) _bk.style.display = (id === 'home') ? 'none' : 'flex';
  if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
  if (id==='translation' && typeof initSim==='function') initSim();
- if (id==='dict' && pageInits['dict']) { const dt=document.getElementById('dictLangTab'); if(dt){ const lc=(currentLang&&currentLang!=='en')?currentLang:'he'; dt.textContent=(currentLang!=='en')?(LANG_MORSE[lc].name):'Hebrew'; } }
+ if (id==='dict' && pageInits['dict']) { if (typeof updateDictLangTab==='function') updateDictLangTab(); }
  if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; }
- if (id==='settings') { const sc=document.getElementById('settingsLangCurrent'); if(sc&&typeof LANG_MORSE!=='undefined'){ sc.textContent='Currently: '+((LANG_MORSE[currentLang]||LANG_MORSE.en).name); } } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } if (id==='speed') { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; } } }
+ if (id==='settings') { const sc=document.getElementById('settingsLangCurrent'); if(sc&&typeof LANG_MORSE!=='undefined'){ sc.textContent='Currently: '+((LANG_MORSE[currentLang]||LANG_MORSE.en).name); } } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } if (id==='speed') { if (SD && SD.running && SD.paused) { document.getElementById('speedStartBtn').style.display='none'; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='block'; const pb=document.getElementById('speedPauseBtn'); if(pb) pb.style.display='none'; const rb=document.getElementById('speedResumeBtn'); if(rb) rb.style.display=''; updateSpeedHud(); updateSpeedTimer(); } else { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; SD.paused=false; } } } }
 }
 
 // ── TOAST ──
@@ -3549,11 +3576,29 @@ function dictTab(btn, tab) {
  const isHeb = tab==='heb' && isHebLang();
  document.getElementById('dictGrid').innerHTML = entries.map(([ch, code]) => `
     <div class="di" onclick="dictPlay('${ch.replace(/'/g,"\\'")}')" title="${fmtCode(code)}">
-      <button class="di-globe" onclick="event.stopPropagation();showMorseInLanguages('${code}','${ch.replace(/'/g,"\\'")}')" title="See in 20 languages">🌍</button>
       <div class="di-ch${isHeb?' heb':''}">${ch}</div>
       <div class="di-syms">${code.split('').map(s=>`<div class="di-s ${s==='.'?'dot':'dash'}"></div>`).join('')}</div>
       <div class="di-code">${fmtCode(code)}</div>
     </div>`).join('');
+}
+
+// Show the dictionary's second tab only when a non-English language is selected
+// in Settings; label it with that language. When English is active, hide it so
+// no unrelated language (e.g. Hebrew) is ever shown.
+function updateDictLangTab(){
+  const dt = document.getElementById('dictLangTab');
+  if (!dt) return;
+  if (currentLang === 'en') {
+    dt.style.display = 'none';
+    // If it was the active tab, fall back to the English tab.
+    if (dt.classList.contains('on')) {
+      const en = document.querySelector('.dtab[onclick*="\'en\'"]') || document.querySelector('.dtab');
+      if (en) dictTab(en, 'en');
+    }
+  } else {
+    dt.style.display = '';
+    dt.textContent = (LANG_MORSE[currentLang] || LANG_MORSE.he).name;
+  }
 }
 
 function dictPlay(ch) {
@@ -3588,7 +3633,7 @@ function loadSettings() {
 }
 
 // (1)(3) App Audit & Feedback — opens the form, then persists a subtle acknowledgment.
-const AUDIT_URL = 'https://google.com';
+const AUDIT_URL = 'https://forms.gle/KZBGedZLykrzEqML8';
 const AUDIT_KEY = 'mw_feedback_clicked';
 function renderAuditButton(){
   const slot = document.getElementById('auditSlot'); if (!slot) return;
@@ -4141,7 +4186,7 @@ function refreshWordleUI(){
 
 // ── SPEED DECODE ──
 const SD = {
- running: false, timeLeft: 60, timer: null,
+ running: false, paused: false, timeLeft: 60, timer: null,
  score: 0, streak: 0, missed: 0, best: parseInt(localStorage.getItem('mw_speed_best')||'0'),
  current: null, answered: false
 };
@@ -4178,6 +4223,7 @@ function speedPlay() {
 
 function speedStart() {
  SD.running = true;
+ SD.paused = false;
  SD.timeLeft = 60;
  SD.score = 0;
  SD.streak = 0;
@@ -4187,6 +4233,8 @@ function speedStart() {
  document.getElementById('speedStartBtn').style.display = 'none';
  document.getElementById('speedResult').style.display = 'none';
  document.getElementById('speedGameCard').style.display = 'block';
+ const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = '';
+ const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = 'none';
 
  updateSpeedHud();
  updateSpeedTimer();
@@ -4239,10 +4287,40 @@ function updateSpeedTimer() {
  fill.style.stroke = t > 20 ? 'var(--cyan)' : t > 10 ? 'var(--gold)' : 'var(--rose)';
 }
 
+// Pause: stop the countdown but keep the game state so it can resume.
+function speedPause() {
+ if (!SD.running || SD.paused) return;
+ SD.paused = true;
+ clearInterval(SD.timer);
+ stopAllOscs();
+ const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = 'none';
+ const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = '';
+ const inp = document.getElementById('speedInp'); if (inp) inp.disabled = true;
+}
+
+// Resume: restart the countdown from where it left off.
+function speedResume() {
+ if (!SD.running || !SD.paused) return;
+ SD.paused = false;
+ const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = '';
+ const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = 'none';
+ const inp = document.getElementById('speedInp');
+ if (inp && !SD.answered) { inp.disabled = false; inp.focus(); }
+ clearInterval(SD.timer);
+ SD.timer = setInterval(() => {
+   SD.timeLeft--;
+   updateSpeedTimer();
+   if (SD.timeLeft <= 0) speedEnd();
+  }, 1000);
+}
+
 function speedEnd() {
  clearInterval(SD.timer);
  SD.running = false;
+ SD.paused = false;
  stopAllOscs();
+ const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = 'none';
+ const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = 'none';
  document.getElementById('speedGameCard').style.display = 'none';
  document.getElementById('speedInp').disabled = true;
  if (SD.score > SD.best) {
@@ -5342,16 +5420,24 @@ goPage('home');
 dictTab(document.querySelector('.dtab.on'), 'en');
 // Load settings
 loadSettings();
+// Translate tab mirrors the central language (read-only; no local override here)
+MWLang.subscribe(function(code){
+  var inp = document.getElementById('trLangSel');
+  if (inp) inp.value = code;
+  var v = document.getElementById('trLangRoValue');
+  if (v) v.textContent = (typeof LANG_EN_NAMES!=='undefined' && LANG_EN_NAMES[code])
+    || (LANG_MORSE[code] && LANG_MORSE[code].name) || code;
+  // Home "Full Dictionary" card badge reflects the Settings language (no hardcoded Hebrew)
+  var badge = document.getElementById('dictCardBadge');
+  if (badge) badge.textContent = (typeof LANG_EN_NAMES!=='undefined' && LANG_EN_NAMES[code])
+    || (LANG_MORSE[code] && LANG_MORSE[code].name) || code;
+  // Dictionary second tab visibility/label
+  if (typeof updateDictLangTab === 'function') updateDictLangTab();
+});
 // Daily streak — count this visit
 updateStreak();
-// Update dictionary language tab label
-(function(){
-  const tab = document.getElementById('dictLangTab');
-  if (tab) {
-    const lc = (currentLang && currentLang!=='en') ? currentLang : 'he';
-    tab.textContent = (LANG_MORSE[lc] && LANG_MORSE[lc].name) || 'Hebrew';
-  }
-})();
+// Update dictionary language tab label / visibility
+if (typeof updateDictLangTab === 'function') updateDictLangTab();
 </script>
 </body>
 </html>
