@@ -146,6 +146,9 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .lc-head{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .phase-pill{font-size:.63rem;font-weight:700;letter-spacing:.13em;padding:.22rem .65rem;border-radius:999px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:var(--cyan);}
 .step-info{font-size:.65rem;color:var(--txt2);font-weight:600;}
+.lprog{width:calc(100% - 2.8rem);height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:.9rem 1.4rem .2rem;}
+[data-theme=light] .lprog{background:rgba(0,0,0,.08);}
+.lprog-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#16a34a,#4ade80);box-shadow:0 0 8px rgba(34,197,94,.55);transition:width .35s cubic-bezier(.4,0,.2,1);}
 .lstage{min-height:300px;padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .22s;}
 .lstage.fade{opacity:0;}
 .lc-foot{padding:1rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.6rem;}
@@ -922,6 +925,9 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 .tb-input.heb{font-family:inherit;direction:rtl;text-align:right;}
 
 /* ── ACCESSIBILITY SIMULATION GUIDE ── */
+/* ===== TODO: FUTURE TRANSLATION FEATURE BACKUP (CSS) — simulation wizard styles below.
+   Preserved verbatim; inert while the Translation tab/page are hidden (no .sim-* elements
+   render). Not wrapped in a single block comment because it contains nested comments. ===== */
 .sim-wrap{display:flex;flex-direction:column;gap:1rem;width:100%;max-width:560px;margin:0 auto;}
 .sim-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:clamp(1rem,4vw,1.5rem);width:100%;animation:fadeUp .35s ease both;}
 .sim-intro-p{color:var(--txt2);font-size:clamp(.86rem,2.4vw,.95rem);line-height:1.65;margin-bottom:1.1rem;}
@@ -1078,6 +1084,26 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
 @keyframes slideInFromLeft{from{opacity:0;transform:translateX(-120%) scale(.96);}to{opacity:1;transform:translateX(0) scale(1);}}
 @keyframes slideOutToRight{from{opacity:1;transform:translateX(0) scale(1);}to{opacity:0;transform:translateX(120%) scale(.96);}}
 @keyframes mwFadeOut{from{opacity:1;}to{opacity:0;}}
+
+/* ── LEARN TAB FIRST-VISIT ONBOARDING (reuses .mw-ob-* card styles) ── */
+#learnOnboard{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:1.25rem;background:rgba(7,11,20,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+#learnOnboard.closing{animation:mwFadeOut .42s ease forwards;}
+#learnOnboard.closing .mw-ob-card{animation:slideOutToRight .42s cubic-bezier(.5,0,.75,.3) forwards;}
+
+/* ── LEVEL OPENED CELEBRATION ── */
+#levelOpened{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:1.25rem;background:rgba(7,11,20,.55);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);}
+#levelOpened.closing{animation:mwFadeOut .42s ease forwards;}
+.lo-card{position:relative;overflow:hidden;background:var(--bg2,#0f1623);border:1px solid var(--border2,#243049);border-radius:22px;width:100%;max-width:420px;padding:2.2rem 1.6rem 1.8rem;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.5);animation:loPop .5s cubic-bezier(.2,.9,.3,1) both;}
+#levelOpened.closing .lo-card{animation:loOut .4s ease forwards;}
+.lo-emoji{font-size:2.6rem;line-height:1;margin-bottom:.6rem;display:inline-block;animation:loBounce .8s ease;}
+.lo-title{font-size:clamp(1.4rem,5vw,1.7rem);font-weight:800;margin-bottom:.5rem;background:linear-gradient(135deg,#38bdf8,#34d399);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.lo-sub{color:var(--txt2,#9fb2c8);font-size:clamp(.9rem,2.6vw,.97rem);line-height:1.6;margin-bottom:.2rem;overflow-wrap:anywhere;}
+@keyframes loPop{from{opacity:0;transform:scale(.8) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes loOut{to{opacity:0;transform:scale(.92) translateY(10px);}}
+@keyframes loBounce{0%{transform:scale(0) rotate(-20deg);}60%{transform:scale(1.25) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
+.lo-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:22px;}
+.lo-confetti i{position:absolute;top:-14px;width:8px;height:14px;opacity:0;border-radius:1px;animation:loFall linear forwards;}
+@keyframes loFall{0%{opacity:1;transform:translateY(-14px) rotate(0deg);}100%{opacity:0;transform:translateY(420px) rotate(720deg);}}
 </style>
 </head>
 <body>
@@ -1091,6 +1117,26 @@ main{max-width:860px;margin:0 auto;padding:1.75rem 1.25rem 5rem;}
     <div class="mw-ob-text">We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit &amp; Feedback' button inside the Settings screen or use our official review form below.</div>
     <div class="mw-ob-text"><a class="mw-ob-link" href="https://forms.gle/KZBGedZLykrzEqML8" target="_blank" rel="noopener noreferrer">https://forms.gle/KZBGedZLykrzEqML8</a></div>
     <button class="mw-ob-btn" onclick="mwCloseOnboard()">Let's get started!</button>
+  </div>
+</div>
+
+<!-- ── LEARN TAB FIRST-VISIT ONBOARDING (shows once via localStorage) ── -->
+<div id="learnOnboard" style="display:none">
+  <div class="mw-ob-card" role="dialog" aria-modal="true" aria-labelledby="learnObTitle">
+    <div class="mw-ob-title" id="learnObTitle">Welcome to the Learning Tab</div>
+    <div class="mw-ob-text">Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.</div>
+    <button class="mw-ob-btn" onclick="learnOnboardClose()">Start learning!</button>
+  </div>
+</div>
+
+<!-- ── LEVEL OPENED CELEBRATION ── -->
+<div id="levelOpened" style="display:none">
+  <div class="lo-card" role="dialog" aria-modal="true" aria-labelledby="loTitle">
+    <div class="lo-confetti" id="loConfetti"></div>
+    <div class="lo-emoji">🎉</div>
+    <div class="lo-title" id="loTitle">Level Opened!</div>
+    <div class="lo-sub" id="loSub">A new level is unlocked. Keep up the great work!</div>
+    <button class="mw-ob-btn" onclick="levelOpenedContinue()">Continue</button>
   </div>
 </div>
 <script>
@@ -1131,7 +1177,9 @@ function mwCloseOnboard(){
     <button class="nt" onclick="navTo('practice')">Practice</button>
     <button class="nt" onclick="navTo('dict')">Dictionary</button>
     <button class="nt" onclick="navTo('translate')">Translate</button>
+    <!-- TODO: FUTURE TRANSLATION FEATURE BACKUP — tab hidden, code preserved
     <button class="nt" onclick="navTo('translation')">Translation</button>
+    -->
     <button class="nt" onclick="navTo('games')">Games</button>
     <button class="nt" onclick="navTo('settings')">Settings</button>
   </div>
@@ -1270,6 +1318,7 @@ function mwCloseOnboard(){
           <span class="phase-pill" id="phasePill">INTRO</span>
           <span class="step-info" id="stepInfo">Step 1 / 1</span>
         </div>
+        <div class="lprog"><div class="lprog-fill" id="lProgFill"></div></div>
         <div class="lstage" id="lstage"></div>
         <div class="lc-foot">
           <button class="lbtn ghost" id="lBackBtn" onclick="lBack()">← Levels</button>
@@ -1564,6 +1613,7 @@ function mwCloseOnboard(){
   <div class="wtoast" id="wtoast"></div>
   <main>
     <div class="wordle-title-row"><h1 class="wordle-title"><span>Morse</span> <span>Wordle</span></h1><p class="wordle-subtitle">Guess the 5-letter word in 6 tries. Each guess plays in Morse.</p></div>
+    <!-- Wordle runs in English only (language picker removed). -->
     <div class="board" id="wboard"></div>
     <div class="wcontrols-row">
       <button class="pill-btn audio" id="replayBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,3 19,12 5,21"/></svg><span>Replay last guess</span></button>
@@ -1686,7 +1736,7 @@ function mwCloseOnboard(){
     </div>
 
     <div id="speedGameCard" class="speed-card" style="display:none">
-      <div class="speed-signal">
+      <div class="speed-signal" id="speedSignal">
         <div class="speed-morse-vis" id="speedVis"></div>
         <div class="speed-morse-txt" id="speedMorseTxt"></div>
         <button class="speed-play-btn" id="speedPlayBtn" onclick="speedPlay()">
@@ -1836,7 +1886,7 @@ function mwCloseOnboard(){
       <!-- Morse text -->
       <div class="tr-out-card">
         <div class="tr-out-head">
-          <span class="tr-out-label">📡 Morse Code</span>
+          <span class="tr-out-label" id="trOutLabel">📡 Morse Code</span>
           <div class="tr-out-actions">
             <button class="tr-act-btn" onclick="trCopyMorse()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy
@@ -1896,6 +1946,7 @@ function mwCloseOnboard(){
 
 
 <!-- ─── SYSTEM TRANSLATION ─── -->
+<!-- TODO: FUTURE TRANSLATION FEATURE BACKUP — page hidden from UI, markup preserved
 <div id="page-translation" class="page">
   <main>
     <h2 style="font-size:1.45rem;font-weight:700;margin-bottom:.35rem">Translation</h2>
@@ -1903,6 +1954,7 @@ function mwCloseOnboard(){
     <div id="simWrap" class="sim-wrap"></div>
   </main>
 </div>
+-->
 
 <!-- ─── SETTINGS ─── -->
 <div id="page-settings" class="page">
@@ -2356,6 +2408,8 @@ function autoSaveCurrent(id) {
 }
 // User-initiated navigation: auto-saves progress (no disruptive warnings)
 function navTo(id) {
+  // Translation feature temporarily hidden — never route to it.
+  if (id === 'translation') id = 'home';
   if (id !== currentPage) {
     autoSaveCurrent(currentPage); // save clean progress first
     cleanupScreen(currentPage);   // stop timers / return Learn to its level list
@@ -2363,6 +2417,23 @@ function navTo(id) {
   goPage(id);
 }
 // Back arrow → go home (auto-saves on the way)
+// Back arrow is shown only "deep" inside content (sub-games, an open learn level),
+// and hidden on tab-root hubs (home, learn list, telegraph, practice, dict, translate,
+// games hub, settings) where the bottom nav is the way around.
+function updateBackArrow() {
+  const bk = document.getElementById('backArrow');
+  if (!bk) return;
+  const SUBGAMES = ['crossword', 'wordle', 'speed'];
+  let show = false;
+  if (SUBGAMES.indexOf(currentPage) !== -1) {
+    show = true;
+  } else if (currentPage === 'learn') {
+    const sel = document.getElementById('levelSelector');
+    show = !!(sel && sel.style.display === 'none');   // inside an open level
+  }
+  bk.style.display = show ? 'flex' : 'none';
+}
+
 function navBack() {
   const p = (typeof currentPage !== 'undefined') ? currentPage : 'home';
   // Inside a mini-game → back to the Games hub (the games tab's own root)
@@ -2432,9 +2503,9 @@ function goPage(id) {
    t.classList.toggle('on', t.textContent.trim() === map[id]);
   });
  currentPage = id;
- // Show the floating back arrow on every screen except Home
- const _bk = document.getElementById('backArrow');
- if (_bk) _bk.style.display = (id === 'home') ? 'none' : 'flex';
+ // Smart back arrow: hidden on tab-root hubs, visible inside sub-games / learn levels
+ if (typeof updateBackArrow === 'function') updateBackArrow();
+ if (id === 'learn' && typeof maybeLearnOnboard === 'function') maybeLearnOnboard();
  if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
  if (id==='translation' && typeof initSim==='function') initSim();
  if (id==='dict' && pageInits['dict']) { if (typeof updateDictLangTab==='function') updateDictLangTab(); }
@@ -2785,6 +2856,7 @@ function renderTrack() {
 
 function renderLevelGrid() {
  document.getElementById('levelSelector').style.display = 'block';
+ if (typeof updateBackArrow === 'function') updateBackArrow();
  document.getElementById('lessonArea').style.display = 'none';
  document.getElementById('lmTitle').textContent = 'Choose a Level';
  document.getElementById('lmSub').textContent = 'Pick up where you left off';
@@ -2843,9 +2915,64 @@ function renderSrsChips() {
   }).join('');
 }
 
+// Green progress bar reflecting position through the current level's steps.
+function updateLevelProgress() {
+  const fill = document.getElementById('lProgFill');
+  if (!fill) return;
+  if (!LP.steps || !LP.steps.length) { fill.style.width = '0%'; return; }
+  const pct = ((LP.stepIdx + 1) / LP.steps.length) * 100;
+  fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+}
+
+// ── Learn tab first-visit onboarding (shows once, gated by localStorage) ──
+function maybeLearnOnboard() {
+  try { if (localStorage.getItem('mw_learn_onboarded') === 'true') return; } catch (e) {}
+  const el = document.getElementById('learnOnboard');
+  if (el) { el.classList.remove('closing'); el.style.display = 'flex'; }
+}
+function learnOnboardClose() {
+  try { localStorage.setItem('mw_learn_onboarded', 'true'); } catch (e) {}
+  const el = document.getElementById('learnOnboard');
+  if (!el) return;
+  el.classList.add('closing');                       // slide-out animation
+  setTimeout(() => { el.style.display = 'none'; el.classList.remove('closing'); }, 440);
+}
+
+// ── "Level Opened!" celebration with confetti burst ──
+function _loConfetti() {
+  const c = document.getElementById('loConfetti'); if (!c) return;
+  c.innerHTML = '';
+  const colors = ['#38bdf8', '#34d399', '#a78bfa', '#fbbf24', '#f472b6', '#4ade80'];
+  for (let i = 0; i < 36; i++) {
+    const p = document.createElement('i');
+    p.style.left = (Math.random() * 100) + '%';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDuration = (0.9 + Math.random() * 1.1) + 's';
+    p.style.animationDelay = (Math.random() * 0.25) + 's';
+    p.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+    c.appendChild(p);
+  }
+}
+function showLevelOpened(nextNum) {
+  const el = document.getElementById('levelOpened'); if (!el) return;
+  const sub = document.getElementById('loSub');
+  if (sub) sub.textContent = nextNum
+    ? ('Level ' + nextNum + ' is unlocked. Keep up the great work!')
+    : 'A new level is unlocked. Keep up the great work!';
+  el.classList.remove('closing'); el.style.display = 'flex';
+  _loConfetti();
+}
+function levelOpenedContinue() {
+  const el = document.getElementById('levelOpened');
+  if (el) { el.classList.add('closing'); setTimeout(() => { el.style.display = 'none'; el.classList.remove('closing'); }, 420); }
+  if (typeof lNext === 'function') lNext();   // smoothly advance the navigation flow
+}
+
 function renderStep() {
  const step = LP.steps[LP.stepIdx];
  saveResume(); // persist this clean step position (level sessions only)
+ if (typeof updateBackArrow === 'function') updateBackArrow();
+ if (typeof updateLevelProgress === 'function') updateLevelProgress();
  document.getElementById('stepInfo').textContent = `Step ${LP.stepIdx+1} / ${LP.steps.length}`;
  document.getElementById('phasePill').textContent = (step.type==='srs'?'REVIEW':step.type==='reviewIntro'||step.type==='reviewDone'?'REVIEW':step.type==='placeIntro'||step.type==='placeDone'?'TEST':step.type==='transBox'?'TRANSLATE':step.type).toUpperCase();
  document.getElementById('lNextBtn').disabled = true;
@@ -3179,6 +3306,11 @@ function renderDone() {
  const nb = document.getElementById('lNextBtn');
  nb.disabled = false;
  nb.textContent = LP.lvlIdx < LEVELS.length-1 ? 'Next Level →' : '🏆 All Done!';
+ // Celebrate the newly unlocked level
+ if (LP.lvlIdx < LEVELS.length-1) {
+   const nextNum = (LEVELS[LP.lvlIdx+1] && LEVELS[LP.lvlIdx+1].num) || (LP.lvlIdx+2);
+   setTimeout(() => { if (typeof showLevelOpened === 'function') showLevelOpened(nextNum); }, 350);
+  }
 }
 
 function lNext() {
@@ -3849,8 +3981,55 @@ function refreshCrosswordUI(){
 
 
 
+// ═══ WORDLE — 10-language data (independent of the Settings language) ═══
+const _WQ = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']];
+const _WES = [['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L','Ñ'],['ENTER','Z','X','C','V','B','N','M','⌫']];
+const WORDLE_LANGS = {
+  en:{name:'English',rows:_WQ,words:['MORSE','RADIO','WAVES','LIGHT','BRAVE','GHOST','PIXEL','SOLAR','TIGER','OCEAN','PLANT','HOUSE','MUSIC','RIVER','CLOUD','STONE','FLAME','GRAPE','HONEY','LEMON','MANGO','PEACH','QUEEN','SNAKE','TABLE','VOICE','WHALE','ZEBRA','APPLE','BREAD','CHAIR','DREAM','EAGLE','FROST','GLOVE']},
+  es:{name:'Español',rows:_WES,words:['CASAS','PERRO','GATOS','LIBRO','VERDE','NOCHE','FELIZ','MUNDO','AGUAS','FUEGO','TIGRE','LECHE','PLAZA','NUBES','SUELO','PLATO','FRUTA','LIMON','MELON','CIELO','CARTA','PUNTO','MESAS','VIDAS','NIÑOS','CAÑON','BAÑOS','SUEÑO','PEÑAS']},
+  fr:{name:'Français',rows:_WQ,words:['ARBRE','MONDE','ROUGE','PORTE','TABLE','CHIEN','FLEUR','PLAGE','NEIGE','LIVRE','VERTE','NUAGE','SUCRE','LUNDI','MARDI','POMME','ROUTE','TIGRE','CARTE','JEUDI','RADIO','SALLE','VILLE','FORME']},
+  de:{name:'Deutsch',rows:_WQ,words:['HUNDE','KATZE','TISCH','STUHL','BLUME','WOLKE','REGEN','SONNE','MONDE','BLATT','APFEL','MILCH','NACHT','LICHT','MUSIK','TIGER','VOGEL','HAUSE','PFERD','BIRNE','ENTEN','HASEN','LAMPE','TASSE']},
+  it:{name:'Italiano',rows:_WQ,words:['GATTO','LIBRO','VERDE','NOTTE','MONDO','FUOCO','TIGRE','LATTE','PASTA','PIZZA','CIELO','CARTA','PUNTO','PONTE','FIORE','RUOTA','PORTA','SEDIA','PANNA','FORNO','CAMPO','DENTE','FESTA','TORTA']},
+  pt:{name:'Português',rows:_WQ,words:['GATOS','CASAS','VERDE','NOITE','MUNDO','FOGOS','TIGRE','LEITE','PRATO','FRUTA','CARTA','PONTO','PORTA','LIVRO','PRAIA','PEIXE','RADIO','MESAS','VIDAS','DENTE','FESTA','CAMPO','PORCO','BARCO']},
+  nl:{name:'Nederlands',rows:_WQ,words:['WATER','BROOD','GROEN','NACHT','LICHT','RADIO','PAARD','FIETS','TAFEL','STOEL','BLOEM','REGEN','APPEL','PEREN','DRUIF','KAARS','BOTER','VOGEL','SLAAP','GRAAG','PLEIN','KATER','MUREN','VLOER']},
+  pl:{name:'Polski',rows:_WQ,words:['RYNEK','DOMEK','PUNKT','BANAN','LAMPA','NOSEK','KONIK','BRZEG','DRZWI','LISTY','KOTKI','RAMKA','SERCE','TORBA','WIATR','KWIAT','NIEBO','CHLEB','MLEKO','RANEK','KOMIN','MAPKA']},
+  tr:{name:'Türkçe',rows:_WQ,words:['KALEM','ARABA','ORMAN','KEMAN','SALON','BALON','LIMON','DOMUZ','KUZEN','MELEK','KALAN','MASAL','KEMAL','ROMAN','DUMAN','KAVUN','ZAMAN','KANAT','BADEM','ELMAS','KABAK','SABAH']},
+  id:{name:'Indonesia',rows:_WQ,words:['BESAR','KECIL','HUJAN','MOBIL','RUMAH','MAKAN','MINUM','TIDUR','PUTIH','HITAM','MERAH','HIJAU','PINTU','KURSI','LAMPU','PISAU','GARAM','TELUR','KAKAK','PADAT','TANAH','BUNGA']}
+};
+let WL = 'en';   // Wordle runs in English only (multi-language picker removed)
+if (!WORDLE_LANGS[WL]) WL = 'en';
+let WORDLE_NEWGAME = null;   // set by initWordle so the lang selector can restart a game
+
+// Morse for a letter in the SELECTED WORDLE language (not the Settings language)
+function wMorse(ch){
+  if (typeof ch !== 'string') return '';
+  const t = (typeof LANG_MORSE!=='undefined' && LANG_MORSE[WL] && LANG_MORSE[WL].table) || {};
+  return t[ch] || t[ch.toUpperCase()] || (typeof MORSE_EN!=='undefined' ? (MORSE_EN[ch.toUpperCase()]||'') : '') || '';
+}
+// The set of typeable letters for the current Wordle language
+function wLetters(){
+  const s = new Set();
+  WORDLE_LANGS[WL].rows.forEach(r => r.forEach(k => { if (k!=='ENTER' && k!=='⌫') s.add(k); }));
+  return s;
+}
+// Valid guess = 5 letters, all on the current language's keyboard (no dictionary needed)
+function isValidWordleGuess(word){
+  if (!word || [...word].length !== 5) return false;
+  const L = wLetters();
+  for (const ch of word) if (!L.has(ch)) return false;
+  return true;
+}
+function setWordleLang(code){
+  if (!WORDLE_LANGS[code]) return;
+  WL = code;
+  try { localStorage.setItem('mw_wordle_lang', code); } catch(e){}
+  if (typeof WORDLE_NEWGAME === 'function') WORDLE_NEWGAME();   // restart with new alphabet + words
+}
+
 // ═══ WORDLE ═══
 function initWordle(){
+ // Within Wordle, MORSE resolves to the SELECTED Wordle language (shadows the global).
+ const MORSE = new Proxy({}, { get: (_, ch) => wMorse(ch) });
  wordleInited=true;
  const $=id=>document.getElementById(id);
   // Valid 5-letter answer words (all exactly 5 letters)
@@ -3968,7 +4147,7 @@ function initWordle(){
     'YEAST','YIELD','YOUNG','YOURS','ZAPPY','ZEBRA','ZIPPY','ZONAL','ZONES'
   ]);;
  const WS={answer:'',guesses:[],current:'',over:false,played:0,wins:0,streak:0,best:0,isPlaying:false,lastGuess:''};
- function newWGame(){WS.answer=WORDS[Math.floor(Math.random()*WORDS.length)];WS.guesses=[];WS.current='';WS.over=false;document.getElementById('wendOverlay').classList.remove('show');buildWBoard();buildWKbd();}
+ function newWGame(){WS.answer=WORDLE_LANGS[WL].words[Math.floor(Math.random()*WORDLE_LANGS[WL].words.length)];WS.guesses=[];WS.current='';WS.over=false;document.getElementById('wendOverlay').classList.remove('show');buildWBoard();buildWKbd();}
  function buildWBoard(){const b=document.getElementById('wboard');b.innerHTML='';for(let r=0;r<6;r++){const row=document.createElement("div");row.className='wrow';for(let c=0;c<5;c++){const tile=document.createElement("div");tile.className='tile';tile.dataset.r=r;tile.dataset.c=c;const mc=MORSE[WS.answer[0]]||'';tile.innerHTML=`<div class="tile-inner"><div class="tile-face front"><span class="tile-letter"></span><div class="tile-morse"></div></div><div class="tile-face back"><span class="tile-letter"></span><div class="tile-morse"></div></div></div>`;row.appendChild(tile);}b.appendChild(row);}}
   // ── Keyboard mode state ──
  let kbdMode='english'; // 'english' | 'morse-display' | 'morse-sound' | 'letter-sound'
@@ -3977,7 +4156,7 @@ function initWordle(){
  function buildWKbd(){
    const kb=document.getElementById('wkeyboard');kb.innerHTML='';
    pendingMorseKey=null;
-   const rows=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['ENTER','Z','X','C','V','B','N','M','⌫']];
+   const rows=WORDLE_LANGS[WL].rows;
    rows.forEach(keys=>{
      const row=document.createElement("div");row.className='kb-row';
      keys.forEach(k=>{
@@ -4095,15 +4274,15 @@ function initWordle(){
        const tile=document.getElementById('wboard').querySelectorAll('.wrow')[r]?.querySelectorAll('.tile')[c];
        if(tile){tile.classList.remove('filled');tile.querySelector('.tile-face.front .tile-letter').textContent='';tile.querySelector('.tile-face.front .tile-morse').innerHTML='';}
       }
-    } else if(/^[A-Z]$/.test(k)&&WS.current.length<5){
+    } else if(wLetters().has(k)&&WS.current.length<5){
      WS.current+=k;
      setWTile(WS.guesses.length,WS.current.length-1,k);
     }
   }
  async function submitWGuess(){
    if(WS.current.length!==5)return;
-    // Validate that the guess is a real word
-   if(!VALID_WORDS.has(WS.current)){
+    // Validate the guess: 5 letters, all on the current language's keyboard
+   if(!isValidWordleGuess(WS.current)){
      const rows=document.getElementById('wboard').querySelectorAll('.wrow');
      const tiles=rows[WS.guesses.length]?.querySelectorAll('.tile');
      if(tiles)tiles.forEach(t=>t.classList.add('wshake'));
@@ -4118,10 +4297,10 @@ function initWordle(){
  document.addEventListener('keydown',e=>{
    if(currentPage!=='wordle')return;
    if(e.ctrlKey||e.metaKey||e.altKey)return;
-   const letter=/^[a-zA-Z]$/.test(e.key)?e.key.toUpperCase():null;
+   const letter=(e.key&&e.key.length===1)?e.key.toUpperCase():null;
    if(e.key==='Enter'){handleWKey('ENTER');}
    else if(e.key==='Backspace'){handleWKey('⌫');}
-   else if(letter){
+   else if(letter && wLetters().has(letter)){
      if(kbdMode==='letter-sound'){handleWKey(letter);playLetterSound(letter);}
      else{handleWKey(letter);}
     }
@@ -4149,6 +4328,14 @@ function initWordle(){
  document.getElementById('helpCloseBtn').addEventListener('click',()=>document.getElementById('helpOverlay').classList.remove('show'));
  document.getElementById('helpOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('helpOverlay'))document.getElementById('helpOverlay').classList.remove('show');});
  document.getElementById('wendOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('wendOverlay'))document.getElementById('wendOverlay').classList.remove('show');});
+ WORDLE_NEWGAME = newWGame;   // let the language selector restart a game
+ (function(){
+   const sel=document.getElementById('wLangSel');
+   if(sel){
+     if(!sel._filled){ sel._filled=true; sel.innerHTML=Object.entries(WORDLE_LANGS).map(([c,L])=>`<option value="${c}">${L.name}</option>`).join(''); }
+     sel.value=WL;
+   }
+ })();
  newWGame();
 }
 function refreshWordleUI(){
@@ -4233,6 +4420,7 @@ function speedStart() {
  document.getElementById('speedStartBtn').style.display = 'none';
  document.getElementById('speedResult').style.display = 'none';
  document.getElementById('speedGameCard').style.display = 'block';
+ const sig0 = document.getElementById('speedSignal'); if (sig0) sig0.style.filter = '';
  const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = '';
  const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = 'none';
 
@@ -4296,12 +4484,15 @@ function speedPause() {
  const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = 'none';
  const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = '';
  const inp = document.getElementById('speedInp'); if (inp) inp.disabled = true;
+ // Anti-cheat: blur the signal so it can't be studied while paused
+ const sig = document.getElementById('speedSignal'); if (sig) sig.style.filter = 'blur(15px)';
 }
 
 // Resume: restart the countdown from where it left off.
 function speedResume() {
  if (!SD.running || !SD.paused) return;
  SD.paused = false;
+ const sig = document.getElementById('speedSignal'); if (sig) sig.style.filter = '';   // clear anti-cheat blur
  const pb = document.getElementById('speedPauseBtn'); if (pb) pb.style.display = '';
  const rb = document.getElementById('speedResumeBtn'); if (rb) rb.style.display = 'none';
  const inp = document.getElementById('speedInp');
@@ -4557,6 +4748,7 @@ function trTranslateText(text, langCode) {
 // ── UI STATE ──
 const TR = {
  mode: 'text',
+ reverse: false,            // false = text→Morse, true = Morse→text
  imageData: null, imageFile: null,
  morseResult: '',
  recActive: false, recSpeech: null,
@@ -4580,6 +4772,64 @@ function trClearOutput() {
 
 function trSwapInfo() {
  toast('Morse is always the output — select your input language on the left 😊', 'info', 3000);
+}
+
+// ── DIRECTION SWAP: flips between [language] → Morse and Morse → [language] ──
+function trSwap() {
+ TR.reverse = !TR.reverse;
+ const tabs      = document.querySelector('.tr-tabs');
+ const panels    = document.querySelectorAll('.tr-panel');
+ const morseWrap = document.getElementById('trMorseInputWrap');
+ const dirLabel  = document.getElementById('trDirLabel');
+ const btn       = document.getElementById('trBtn');
+ const langCode  = document.getElementById('trLangSel').value;
+ const lang      = LANG_MORSE[langCode] || LANG_MORSE.en;
+ const svg       = btn ? (btn.querySelector('svg') ? btn.querySelector('svg').outerHTML : '') : '';
+
+ if (TR.reverse) {
+   // Morse → text: hide the input-source tabs/panels, show the Morse input box
+   if (tabs) tabs.style.display = 'none';
+   panels.forEach(p => p.style.display = 'none');
+   if (morseWrap) morseWrap.style.display = 'block';
+   if (dirLabel) dirLabel.textContent = 'Morse → ' + lang.name;
+   if (btn) btn.innerHTML = svg + ' Translate to Text';
+   // Stop any live camera/mic that an input panel may have started
+   if (typeof trStopVideo === 'function' && TR.videoStream) trStopVideo();
+   if (TR.recActive && typeof trStopRec === 'function') trStopRec();
+  } else {
+   // text → Morse: restore the input-source tabs/panels, hide the Morse input box
+   if (tabs) tabs.style.display = '';
+   panels.forEach(p => p.style.display = '');   // CSS .tr-panel.on takes over again
+   if (morseWrap) morseWrap.style.display = 'none';
+   if (dirLabel) dirLabel.textContent = '→ Morse';
+   if (btn) btn.innerHTML = svg + ' Translate to Morse';
+  }
+ trClearOutput();
+}
+
+// Decode Morse → text using the selected language's table (reverse-mapped).
+function trDecodeMorse(morse, langCode) {
+ const table = (LANG_MORSE[langCode] && LANG_MORSE[langCode].table) || (LANG_MORSE.en && LANG_MORSE.en.table) || {};
+ const rev = {};
+ for (const ch in table) { const c = table[ch]; if (c && !(c in rev)) rev[c] = ch; }
+ const norm = String(morse).replace(/·/g, '.').replace(/[–—−]/g, '-').trim();
+ if (!norm) return '';
+ // Words split on "/" or 3+ spaces; letters split on remaining whitespace.
+ return norm.split(/\s*\/\s*|\s{3,}/).map(word =>
+   word.trim().split(/\s+/).filter(Boolean).map(code => rev[code] || '').join('')
+ ).join(' ').trim();
+}
+
+// Render a decoded-text result (reverse direction) into the existing output card.
+function trRenderTextOutput(text, morseInput, lang) {
+ const label = document.getElementById('trOutLabel');
+ if (label) label.textContent = '📝 Decoded Text';
+ const out = document.getElementById('trMorseOut');
+ if (out) { out.style.letterSpacing = 'normal'; out.textContent = text; }
+ TR.morseResult = String(morseInput).replace(/·/g, '.').replace(/[–—−]/g, '-'); // so audio still plays the Morse
+ try { trDrawCanvas(TR.morseResult, text, lang.name); } catch (e) {}
+ document.getElementById('trOutput').style.display = 'flex';
+ document.getElementById('trOutput').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // ── IMAGE ──
@@ -4687,6 +4937,21 @@ async function trTranslate() {
  const lang = LANG_MORSE[langCode];
  let text = '';
 
+ // Reverse direction: Morse → text
+ if (TR.reverse) {
+   const morseIn = document.getElementById('trMorseInput').value.trim();
+   if (!morseIn) { toast('Enter Morse code first', 'info'); return; }
+   trShowLoading('Translating to text…');
+   trShowSkeleton();
+   await new Promise(r => setTimeout(r, 420));
+   const decoded = trDecodeMorse(morseIn, langCode);
+   trHideSkeleton();
+   trHideLoading();
+   if (!decoded) { toast('No decodable Morse found', 'info'); return; }
+   trRenderTextOutput(decoded, morseIn, lang || LANG_MORSE.en);
+   return;
+  }
+
  const mode = TR.mode;
 
  if (mode === 'text') {
@@ -4769,6 +5034,9 @@ function trHideSkeleton(){ const slot = document.getElementById('trSkeletonSlot'
 
 // ── RENDER OUTPUT ──
 function trRenderOutput(morse, originalText, lang) {
+  // Restore the forward-direction label/styling (reverse mode may have changed them)
+ const _lbl = document.getElementById('trOutLabel'); if (_lbl) _lbl.textContent = '📡 Morse Code';
+ const _out0 = document.getElementById('trMorseOut'); if (_out0) _out0.style.letterSpacing = '';
   // Colored Morse text
  const colored = morse.replace(/[·\.\-]/g, ch =>
    ch==='.' ? '<span class="dot">·</span>' :
@@ -5131,6 +5399,7 @@ function closeXlang() {
 // ── Canonical Android accessibility terminology (the 10-language object) ──
 // This is the authoritative source for the three system terms. The richer
 // SIM_I18N guide below overlays these for the languages present here.
+/* ===== TODO: FUTURE TRANSLATION FEATURE BACKUP (JS) — simulation wizard, device-adaptive engine, localized states. Preserved & inert while Translation is hidden. =====
 const A11Y_I18N = {
   en: { installedApps: "Installed apps", downloadedApps: "Downloaded apps", serviceName: "MorseWave Translation", microHint: "Tap the service, then turn the switch on to enable it." },
   he: { installedApps: "אפליקציות מותקנות", downloadedApps: "אפליקציות שהורדו", serviceName: "‏MorseWave Translation", microHint: "הקישו על השירות, ולאחר מכן הפעילו את המתג כדי להפעיל אותו." },
@@ -5407,6 +5676,7 @@ function simNext(){
   SIM.interacted = false;
   renderSim();
 }
+===== END: FUTURE TRANSLATION FEATURE BACKUP (JS) ===== */
 // tiny HTML escaper (labels are localized strings)
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
