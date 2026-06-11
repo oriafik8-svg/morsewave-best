@@ -4802,36 +4802,41 @@ function trSwapInfo() {
 }
 
 // ── DIRECTION SWAP: flips between [language] → Morse and Morse → [language] ──
+// ── DIRECTION SWAP (no layout movement) ──
+// Flips the translation direction in the background and swaps the actual text
+// values: the current output becomes the new input, then the engine recalculates
+// for the flipped direction. No boxes are shown/hidden, animated, or moved.
 function trSwap() {
- TR.reverse = !TR.reverse;
- const tabs      = document.querySelector('.tr-tabs');
- const panels    = document.querySelectorAll('.tr-panel');
- const morseWrap = document.getElementById('trMorseInputWrap');
- const dirLabel  = document.getElementById('trDirLabel');
- const btn       = document.getElementById('trBtn');
- const langCode  = document.getElementById('trLangSel').value;
- const lang      = LANG_MORSE[langCode] || LANG_MORSE.en;
- const svg       = btn ? (btn.querySelector('svg') ? btn.querySelector('svg').outerHTML : '') : '';
+ const input = document.getElementById('trTextInput');
+ const outEl = document.getElementById('trMorseOut');
+ if (!input) return;
 
- if (TR.reverse) {
-   // Morse → text: hide the input-source tabs/panels, show the Morse input box
-   if (tabs) tabs.style.display = 'none';
-   panels.forEach(p => p.style.display = 'none');
-   if (morseWrap) morseWrap.style.display = 'block';
-   if (dirLabel) dirLabel.textContent = 'Morse → ' + lang.name;
-   if (btn) btn.innerHTML = svg + ' Translate to Text';
-   // Stop any live camera/mic that an input panel may have started
-   if (typeof trStopVideo === 'function' && TR.videoStream) trStopVideo();
-   if (TR.recActive && typeof trStopRec === 'function') trStopRec();
-  } else {
-   // text → Morse: restore the input-source tabs/panels, hide the Morse input box
-   if (tabs) tabs.style.display = '';
-   panels.forEach(p => p.style.display = '');   // CSS .tr-panel.on takes over again
-   if (morseWrap) morseWrap.style.display = 'none';
-   if (dirLabel) dirLabel.textContent = '→ Morse';
-   if (btn) btn.innerHTML = svg + ' Translate to Morse';
-  }
- trClearOutput();
+ // Capture current values before flipping.
+ const oldInput  = input.value;
+ const oldOutput = (TR.morseResult && TR.morseResult.length)
+   ? TR.morseResult
+   : (outEl ? (outEl.textContent || '') : '');
+
+ // Flip direction in the background only.
+ TR.reverse = !TR.reverse;
+
+ // Update the small direction label (text only — does not move any box).
+ const dirLabel = document.getElementById('trDirLabel');
+ const langCode = document.getElementById('trLangSel').value;
+ const lang = LANG_MORSE[langCode] || LANG_MORSE.en;
+ if (dirLabel) dirLabel.textContent = TR.reverse ? ('Morse → ' + lang.name) : '→ Morse';
+
+ // Swap the values: the previous OUTPUT moves into the INPUT field…
+ if (oldOutput && oldOutput.trim()) {
+   input.value = oldOutput.trim();
+   // …then recalculate the translation immediately for the new direction.
+   trTranslate();
+ } else if (oldInput && oldInput.trim()) {
+   // Nothing translated yet: just recompute the current input in the new direction.
+   trTranslate();
+ } else {
+   trClearOutput();
+ }
 }
 
 // Decode Morse → text using the selected language's table (reverse-mapped).
@@ -4964,9 +4969,9 @@ async function trTranslate() {
  const lang = LANG_MORSE[langCode];
  let text = '';
 
- // Reverse direction: Morse → text
+ // Reverse direction: Morse → text (reads the same visible input field)
  if (TR.reverse) {
-   const morseIn = document.getElementById('trMorseInput').value.trim();
+   const morseIn = document.getElementById('trTextInput').value.trim();
    if (!morseIn) { toast('Enter Morse code first', 'info'); return; }
    trShowLoading('Translating to text…');
    trShowSkeleton();
