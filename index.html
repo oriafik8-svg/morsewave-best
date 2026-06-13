@@ -1262,6 +1262,17 @@
     </div>
 </div>
 
+<div id="trLangPickerOverlay" class="lang-picker-overlay" onclick="if(event.target===this)closeTrLangPicker()">
+    <div class="lang-picker">
+        <div class="lang-picker-head">
+            <h3>Translation language</h3>
+            <button class="lang-picker-close" onclick="closeTrLangPicker()">✕</button>
+        </div>
+        <input type="text" id="trLangPickerSearch" class="lang-search" placeholder="🔍 Search language…" oninput="filterTrLangPicker()" autocomplete="off">
+        <div class="lang-list" id="trLangPickerList"></div>
+    </div>
+</div>
+
 
 <!-- ─── MORSE CROSS-LANGUAGE MODAL ─── -->
 <div id="xlangOverlay" class="lang-picker-overlay" onclick="if(event.target===this)closeXlang()">
@@ -1909,8 +1920,11 @@
             <button class="tr-swap-btn" id="trSwapBtn" title="Swap direction" onclick="trSwap()">⇄</button>
             <!-- Target side (right): "Morse" by default -->
             <div class="tr-dir-side" id="trDirTgt"></div>
-            <!-- The language <select> lives here and is moved between sides by JS -->
-            <select id="trLangSel" class="tr-lang-dd" onchange="trLangChanged()" aria-label="Translation language" style="display:none"></select>
+            <!-- The language button (rectangle) lives here and is moved between sides by JS.
+                 Tapping it opens a full searchable picker overlay, like the other language pickers. -->
+            <button type="button" id="trLangSel" class="tr-lang-dd" onclick="openTrLangPicker()" aria-label="Translation language" style="display:none">
+              <span id="trLangSelLabel">English</span><span style="opacity:.6;margin-inline-start:.4rem">▾</span>
+            </button>
         </div>
 
         <!-- Morse decode input (hidden by default) -->
@@ -2290,9 +2304,9 @@
 
     // ── INTERFACE-LANGUAGE PICKER (mirrors the letter-language picker) ──
     // Native display names for every interface language (UI_LANG_NAMES holds these too).
-    const UI_LANG_NATIVE = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt'};
+    const UI_LANG_NATIVE = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt',el:'Ελληνικά',th:'ไทย',uk:'Українська',sv:'Svenska',cs:'Čeština',ro:'Română'};
     // English label for searchability (e.g. typing "spanish" finds Español).
-    const UI_LANG_EN = {en:'English',es:'Spanish',ar:'Arabic',fr:'French',de:'German',pt:'Portuguese',ru:'Russian',it:'Italian',zh:'Chinese',hi:'Hindi',ja:'Japanese',ko:'Korean',tr:'Turkish',nl:'Dutch',pl:'Polish',id:'Indonesian',vi:'Vietnamese'};
+    const UI_LANG_EN = {en:'English',es:'Spanish',ar:'Arabic',fr:'French',de:'German',pt:'Portuguese',ru:'Russian',it:'Italian',zh:'Chinese',hi:'Hindi',ja:'Japanese',ko:'Korean',tr:'Turkish',nl:'Dutch',pl:'Polish',id:'Indonesian',vi:'Vietnamese',el:'Greek',th:'Thai',uk:'Ukrainian',sv:'Swedish',cs:'Czech',ro:'Romanian'};
 
     function _curUILang(){
       try { return window.__uiLang || localStorage.getItem('mw_ui_lang') || 'en'; } catch(e){ return window.__uiLang || 'en'; }
@@ -2736,13 +2750,16 @@
       LEARN
     ══════════════════════════════════════════ */
     const ORIG_LEVELS = [
-      {num:1, name:'First Signals',  sub:'E and T — one symbol each.',                              chars:['E','T']},
-      {num:2, name:'Building Blocks', sub:'I, A, N, M — two-symbol codes built on E and T.',         chars:['I','A','N','M']},
-      {num:3, name:'Three & Four',   sub:'S, U, R, D, K, G, W — longer patterns.',                  chars:['S','U','R','D','K','G','W']},
-      {num:4, name:'Full Alphabet',  sub:'B C F H J L P Q V X Y Z — completing A–Z.',               chars:['B','C','F','H','J','L','P','Q','V','X','Y','Z']},
-      {num:5, name:'Numbers 0–9',    sub:'Every digit is exactly five symbols.',                     chars:['0','1','2','3','4','5','6','7','8','9']},
-      {num:6, name:'Hebrew א–מ',     sub:'Alef through Mem — first half of the Hebrew alphabet.',    chars:['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ל','מ'], heb:true},
-      {num:7, name:'Hebrew נ–ת',     sub:'Nun through Tav — complete the Hebrew Morse alphabet.',    chars:['נ','ס','ע','פ','צ','ק','ר','ש','ת'], heb:true},
+      {num:1,  name:'First Signals',   sub:'E and T — one symbol each.',            chars:['E','T']},
+      {num:2,  name:'Building Blocks', sub:'I A N M — two-symbol codes.',           chars:['I','A','N','M']},
+      {num:3,  name:'Short Codes',     sub:'S U R D',                               chars:['S','U','R','D']},
+      {num:4,  name:'Longer Patterns', sub:'K G W O',                               chars:['K','G','W','O']},
+      {num:5,  name:'Four Symbols',    sub:'B C F H',                               chars:['B','C','F','H']},
+      {num:6,  name:'More Letters',    sub:'J L P Q',                               chars:['J','L','P','Q']},
+      {num:7,  name:'Final Letters',   sub:'V X Y Z — completing A–Z.',             chars:['V','X','Y','Z']},
+      {num:8,  name:'Numbers 0–3',     sub:'Digits are five symbols each.',         chars:['0','1','2','3']},
+      {num:9,  name:'Numbers 4–7',     sub:'4 5 6 7',                               chars:['4','5','6','7']},
+      {num:10, name:'Numbers 8–9',     sub:'8 9',                                   chars:['8','9']},
     ];
 
     // Generate a sensible level curriculum for ANY language
@@ -2760,25 +2777,24 @@
         return ca.localeCompare(cb);
       });
       const levels = [];
-      let num = 1;
-      // Chunk sizes that ramp up gently
-      const chunks = [2, 4, 6];
-      let idx = 0;
-      // First few small chunks
-      for (const sz of chunks) {
-        if (idx >= letters.length) break;
-        const part = letters.slice(idx, idx+sz);
-        idx += sz;
-        levels.push({num:num++, name:'Letters '+(levels.length+1), sub:part.join(' '), chars:part, heb:isHeb});
-      }
-      // Remaining letters in chunks of 8
+      let num = 1, idx = 0;
+      // First lesson: 2 letters (gentle start); every lesson after: 4 letters.
+      let size = 2;
       while (idx < letters.length) {
-        const part = letters.slice(idx, idx+8);
-        idx += 8;
+        const part = letters.slice(idx, idx+size);
+        idx += size;
         levels.push({num:num++, name:'Letters '+(levels.length+1), sub:part.join(' '), chars:part, heb:isHeb});
+        size = 4;
       }
-      // Numbers level (digits are universal Morse)
-      levels.push({num:num++, name:'Numbers 0–9', sub:'Every digit is five symbols.', chars:['0','1','2','3','4','5','6','7','8','9']});
+      // Numbers (universal Morse), also split into groups of 4.
+      const digits = ['0','1','2','3','4','5','6','7','8','9'];
+      const dnames = ['Numbers 0–3','Numbers 4–7','Numbers 8–9'];
+      let di = 0, dn = 0;
+      while (di < digits.length) {
+        const part = digits.slice(di, di+4);
+        di += 4;
+        levels.push({num:num++, name:(dnames[dn++]||'Numbers'), sub:part.join(' '), chars:part});
+      }
       return levels;
     }
 
@@ -2858,41 +2874,30 @@
     // Review focuses MAINLY on weak chars (low SRS), but still touches everything
     function buildReviewSteps(chars) {
      const s = [{type:'reviewIntro'}];
-     const items = [];
-     // Overall mastery → how big the review should be.
      const scores = chars.map(ch => srsScore(ch));
      const avg = scores.reduce((a,b)=>a+b,0) / (scores.length || 1);
-     const weakCount = scores.filter(x => x < 0).length;
-     const weakRatio = weakCount / (chars.length || 1);
-     // Strong overall (high avg, few weak) → short & light.
-     // Weak overall → longer, with heavy focus on the struggling letters.
+     // BASE: one question for EVERY learned character — guarantees the review
+     // covers every letter from every lesson learned so far (all current lessons).
+     const base = [];
+     // EXTRA: additional reinforcement focused on weaker / newer letters.
+     const extra = [];
      chars.forEach(ch => {
        const sc = srsScore(ch);
-       if (sc >= 3) {
-         // Mastered: only include sometimes (light touch), 1 quick question
-         if (weakRatio > 0.4 || Math.random() < 0.4) items.push({type:'recog', ch});
-       } else if (sc >= 1) {
-         // Decent: one recall
-         items.push({type:'recall', ch});
-         if (weakRatio > 0.5) items.push({type:'recog', ch});
-       } else if (sc >= 0) {
-         // New/neutral: recog + recall
-         items.push({type:'recog', ch});
-         items.push({type:'recall', ch});
-       } else {
-         // Weak/struggling: the main focus — 3–4 mixed questions
-         items.push({type:'recall', ch});
-         items.push({type:'recog', ch});
-         items.push({type:'recall', ch});
-         if (avg < -0.5) items.push({type:'recog', ch});
+       base.push({type: (sc >= 1 ? 'recall' : 'recog'), ch});
+       if (sc < 0) {
+         extra.push({type:'recall', ch});
+         extra.push({type:'recog', ch});
+         if (avg < -0.5) extra.push({type:'recall', ch});
+       } else if (sc < 1) {
+         extra.push({type:'recall', ch});
        }
      });
-     // Guarantee a minimum and cap a maximum so it always feels right-sized
-     if (items.length < 4) { chars.slice(0,4).forEach(ch => items.push({type:'recog', ch})); }
-     _shuffle(items);
-     const MAX = 40;
-     const trimmed = items.slice(0, MAX);
-     s.push(...trimmed);
+     _shuffle(base);
+     _shuffle(extra);
+     // Always keep full base coverage; top up with extras to a generous cap.
+     const MAX = 80;
+     const room = Math.max(0, MAX - base.length);
+     s.push(...base.concat(extra.slice(0, room)));
      s.push({type:'reviewDone'});
      return s;
     }
@@ -4875,6 +4880,7 @@
     const TR = {
      mode: 'text',
      reverse: false,            // false = text→Morse, true = Morse→text
+     langCode: 'en',            // the translator's own language (independent of Settings)
      imageData: null, imageFile: null,
      morseResult: '',           // the Morse side of the current result (canonical . and -)
      textResult: '',            // the human-readable side of the current result
@@ -4922,8 +4928,7 @@
     function trUpdateDirLabel() {
       const dirLabel = document.getElementById('trDirLabel');
       if (!dirLabel) return;
-      const sel = document.getElementById('trLangSel');
-      const langCode = sel ? sel.value : 'en';
+      const langCode = trCurLang();
       const lang = LANG_MORSE[langCode] || LANG_MORSE.en;
       const name = (typeof LANG_EN_NAMES !== 'undefined' && LANG_EN_NAMES[langCode]) ? LANG_EN_NAMES[langCode] : (lang ? lang.name : langCode);
       dirLabel.textContent = TR.reverse ? (name + ' ← Morse') : (name + ' → Morse');
@@ -4954,25 +4959,69 @@
       return head.concat(rest);
     }
 
+    // Current translator language (independent of Settings).
+    function trCurLang(){ return (typeof TR !== 'undefined' && TR.langCode) ? TR.langCode : 'en'; }
+
     // ── Populate the translator's own language dropdown (independent of Settings). ──
     function trBuildLangDropdown() {
-      const sel = document.getElementById('trLangSel');
-      if (!sel || sel.options.length) return;   // build once
+      // Initialise the translator-language button label (default English).
+      if (!TR.langCode) TR.langCode = 'en';
+      _trSyncLangLabel();
+    }
+    function _trSyncLangLabel(){
+      const lbl = document.getElementById('trLangSelLabel');
+      if (!lbl) return;
+      const code = trCurLang();
+      lbl.textContent = (typeof LANG_EN_NAMES !== 'undefined' && LANG_EN_NAMES[code])
+        || (LANG_MORSE[code] && LANG_MORSE[code].name) || code;
+    }
+
+    // ── TRANSLATION-LANGUAGE PICKER (full overlay screen + search, like the others) ──
+    function openTrLangPicker(){
+      buildTrLangPickerList();
+      const s = document.getElementById('trLangPickerSearch'); if (s) s.value = '';
+      document.getElementById('trLangPickerOverlay').classList.add('show');
+      setTimeout(() => { const el = document.getElementById('trLangPickerSearch'); if (el) el.focus(); }, 100);
+    }
+    function closeTrLangPicker(){
+      document.getElementById('trLangPickerOverlay').classList.remove('show');
+    }
+    function filterTrLangPicker(){
+      const s = document.getElementById('trLangPickerSearch');
+      buildTrLangPickerList(s ? s.value : '');
+    }
+    function buildTrLangPickerList(filter=''){
+      const list = document.getElementById('trLangPickerList');
+      if (!list) return;
+      const cur = trCurLang();
+      const f = (filter || '').toLowerCase().trim();
       const names = (typeof LANG_EN_NAMES !== 'undefined') ? LANG_EN_NAMES : {};
-      const codes = Object.keys((typeof LANG_MORSE !== 'undefined') ? LANG_MORSE : { en:1 });
-      // English first, then the rest alphabetically by English name.
-      codes.sort((a, b) => {
-        if (a === 'en') return -1; if (b === 'en') return 1;
-        const na = names[a] || a, nb = names[b] || b;
-        return na.localeCompare(nb);
+      // Chronological ordering (current first, then most-recently-used, then rest) — like the other pickers.
+      const ordered = _recentOrder(Object.keys(LANG_MORSE), 'mw_tr_lang_recent', cur);
+      const entries = ordered.filter(code => {
+        const l = LANG_MORSE[code]; if (!l) return false;
+        if (!f) return true;
+        return (l.name||'').toLowerCase().includes(f) || code.includes(f) || (names[code]||'').toLowerCase().includes(f);
       });
-      sel.innerHTML = codes.map(code => {
-        const native = (LANG_MORSE[code] && LANG_MORSE[code].name) || code;
-        const en = names[code] || native;
-        const label = (en === native) ? en : (en + ' (' + native + ')');
-        return '<option value="' + code + '">' + label + '</option>';
+      if (!entries.length){ list.innerHTML = '<div class="lang-empty">No language found</div>'; return; }
+      list.innerHTML = entries.map(code => {
+        const l = LANG_MORSE[code];
+        return `
+        <div class="lang-item${code===cur?' active':''}" onclick="selectTrLangPicker('${code}')">
+          <span class="lang-item-name">${names[code]||l.name}</span>
+          <span class="lang-item-native">${l.name}</span>
+          <span class="lang-item-check">✓</span>
+        </div>`;
       }).join('');
-      sel.value = 'en';   // default English
+    }
+    function selectTrLangPicker(code){
+      TR.langCode = code;
+      try { _recentPush('mw_tr_lang_recent', code); } catch(e){}
+      _trSyncLangLabel();
+      closeTrLangPicker();
+      try { trRenderDirRow(); } catch(e){}
+      const input = document.getElementById('trTextInput');
+      if (input && input.value.trim()) { try { trTranslate(); } catch(e){} }
     }
 
     // Render the two sides: language dropdown on the SOURCE side, "Morse" on the TARGET side.
@@ -5012,7 +5061,7 @@
     function trSwap() {
       const input = document.getElementById('trTextInput');
       if (!input) return;
-      const langCode = (document.getElementById('trLangSel').value) || 'en';
+      const langCode = trCurLang();
       const curInput = (input.value || '').trim();
 
       // Figure out both sides (human text + Morse) of whatever we currently have.
@@ -5115,7 +5164,7 @@
      TR.recSpeech = new SR();
      TR.recSpeech.continuous = true;
      TR.recSpeech.interimResults = true;
-     const langCode = document.getElementById('trLangSel').value;
+     const langCode = trCurLang();
      const bcp47 = {en:'en-US',he:'he-IL',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',pt:'pt-PT',nl:'nl-NL',sv:'sv-SE',no:'nb-NO',da:'da-DK',fi:'fi-FI',pl:'pl-PL',tr:'tr-TR',cs:'cs-CZ',ro:'ro-RO',hu:'hu-HU',ru:'ru-RU',ar:'ar-SA',el:'el-GR'};
      TR.recSpeech.lang = bcp47[langCode] || 'en-US';
      TR.recSpeech.onresult = e => {
@@ -5174,7 +5223,7 @@
 
     // ── MAIN TRANSLATE ──
     async function trTranslate() {
-     const langCode = document.getElementById('trLangSel').value;
+     const langCode = trCurLang();
      const lang = LANG_MORSE[langCode];
      let text = '';
 
@@ -5581,7 +5630,7 @@
      _copyText(TR.morseResult, 'Morse code copied!');
     }
     function trPrintMorse() {
-     const lang = LANG_MORSE[document.getElementById('trLangSel').value];
+     const lang = LANG_MORSE[trCurLang()];
      const win = window.open('', '_blank');
      win.document.write(`<html><head><title>Morse Code</title><style>
        body{font-family:monospace;padding:2rem;background:#fff;color:#000;}
@@ -7763,6 +7812,1218 @@
         "App Audit & Feedback": "Kiểm tra ứng dụng & Phản hồi",
         "🔍 Search translations…": "🔍 Tìm bản dịch…",
       },
+      el: {
+        "Welcome to MorseWave": "Καλώς ήρθατε στο MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "Το MorseWave έχει σχεδιαστεί για να σας βοηθήσει να κατακτήσετε τον κώδικα Μορς με απόλυτη ευκολία. Μόλις μάθετε τα βασικά, μπορείτε να μεταβείτε κατευθείαν στα διαδραστικά μας παιχνίδια και να εξασκήσετε τις δεξιότητές σας!",
+        "Your Feedback Matters: Help Us Build the Future": "Τα σχόλιά σας μετράνε: Βοηθήστε μας να χτίσουμε το μέλλον",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Δεσμευόμαστε για την τελειότητα. Αν συναντήσετε σφάλματα, προβλήματα διάταξης ή απλώς θέλετε να μοιραστείτε τις σκέψεις σας, κάντε κλικ στο κουμπί 'App Audit & Feedback' στην οθόνη Ρυθμίσεων ή χρησιμοποιήστε την επίσημη φόρμα αξιολόγησης παρακάτω.",
+        "Let's get started!": "Ας ξεκινήσουμε!",
+        "Welcome to the Learning Tab": "Καλώς ήρθατε στην καρτέλα Μάθησης",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Γεια! Φτάσατε στην καρτέλα Μάθησης. Σε αυτήν την καρτέλα θα μάθετε όλα τα γράμματα στον Μορς από το A έως το Z (αν θέλετε, μπορείτε να αλλάξετε τη γλώσσα των γραμμάτων στις ρυθμίσεις, ώστε να μάθετε γράμματα από τον Μορς σε άλλη γλώσσα), και έπειτα τους αριθμούς από το 0 έως το 9.",
+        "Start learning!": "Ξεκινήστε τη μάθηση!",
+        "Level Opened!": "Άνοιξε το επίπεδο!",
+        "A new level is unlocked. Keep up the great work!": "Ξεκλειδώθηκε ένα νέο επίπεδο. Συνεχίστε την εξαιρετική δουλειά!",
+        "Continue": "Συνέχεια",
+        "Home": "Αρχική",
+        "Learn": "Μάθηση",
+        "Telegraph": "Τηλέγραφος",
+        "Practice": "Εξάσκηση",
+        "Dictionary": "Λεξικό",
+        "Translate": "Μετάφραση",
+        "Games": "Παιχνίδια",
+        "Settings": "Ρυθμίσεις",
+        "Change letter conversion from Morse to…": "Αλλαγή μετατροπής γραμμάτων από Μορς σε…",
+        "Morse in 20 Languages": "Μορς σε 20 γλώσσες",
+        "Loading letters…": "Φόρτωση γραμμάτων…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — ΑΝΑΒΑΘΜΙΣΜΕΝΟ",
+        "Learn Morse Code": "Μάθετε κώδικα Μορς",
+        "the right way.": "με τον σωστό τρόπο.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "Πρόγραμμα 7 επιπέδων · Επαναλήψεις με διαστήματα · 95 γλώσσες · Πλήκτρο τηλεγράφου · Καθαρό Web Audio API",
+        "Start Learning →": "Ξεκινήστε τη μάθηση →",
+        "Try Telegraph": "Δοκιμάστε τον τηλέγραφο",
+        "Universal Translator": "Παγκόσμιος μεταφραστής",
+        "7-Level Progression": "Εξέλιξη 7 επιπέδων",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Καθοδηγούμενο πρόγραμμα από τα E&T έως το πλήρες αλφάβητό σας. Ξεκλειδώστε επίπεδα καθώς κατακτάτε κάθε στάδιο.",
+        "STRUCTURED COURSE": "ΔΟΜΗΜΕΝΟ ΜΑΘΗΜΑ",
+        "Spaced Repetition": "Επαναλήψεις με διαστήματα",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Παρακολουθεί τα αδύναμα γράμματα και τα εμφανίζει πιο συχνά — σύστημα μνήμης βασισμένο στην επιστήμη.",
+        "SRS ENGINE": "ΜΗΧΑΝΗ SRS",
+        "Telegraph Tap Key": "Πλήκτρο τηλεγράφου",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Πραγματικό διαδραστικό πλήκτρο — κάντε κλικ ή πατήστε το Space. Αποκωδικοποιεί 1,2 δευτ. μετά το τελευταίο πάτημα.",
+        "TAP TO SEND": "ΠΑΤΗΣΤΕ ΓΙΑ ΑΠΟΣΤΟΛΗ",
+        "Full Dictionary": "Πλήρες λεξικό",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Κάθε γράμμα, αριθμός και σημείο στίξης — σε 95 γλώσσες. Πατήστε οποιονδήποτε χαρακτήρα για να ακούσετε τον κώδικα Μορς του.",
+        "English": "Αγγλικά",
+        "Choose a Level": "Επιλέξτε επίπεδο",
+        "Select below to begin": "Επιλέξτε παρακάτω για να ξεκινήσετε",
+        "7 LEVELS": "7 ΕΠΙΠΕΔΑ",
+        "INTRO": "ΕΙΣΑΓΩΓΗ",
+        "← Levels": "← Επίπεδα",
+        "Continue →": "Συνέχεια →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Επαναλήψεις με διαστήματα — Η πρόοδός σας",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Σύντομο πάτημα = τελεία · Παρατεταμένο = παύλα · Αυτόματη αποκωδικοποίηση μετά από 1,2 δευτ. σιωπής",
+        "MORSE TELEGRAPH": "ΤΗΛΕΓΡΑΦΟΣ ΜΟΡΣ",
+        "Press & hold:": "Πατήστε & κρατήστε:",
+        "Space": "Space",
+        "or": "ή",
+        "· Or tap the key above": "· Ή πατήστε το πλήκτρο παραπάνω",
+        "Slow": "Αργά",
+        "Medium": "Μέτρια",
+        "Fast": "Γρήγορα",
+        "Live decode (free-tap mode)": "Ζωντανή αποκωδικοποίηση (λειτουργία ελεύθερου πατήματος)",
+        "Correct": "Σωστά",
+        "Streak": "Σερί",
+        "Total": "Σύνολο",
+        "Skip": "Παράλειψη",
+        "Play Target": "Αναπαραγωγή στόχου",
+        "Wrong": "Λάθος",
+        "Question": "Ερώτηση",
+        "Lang": "Γλώσσα",
+        "Mix": "Μείξη",
+        "Med": "Μέτ",
+        "Listen and decode": "Ακούστε και αποκωδικοποιήστε",
+        "Play Signal": "Αναπαραγωγή σήματος",
+        "Your answer": "Η απάντησή σας",
+        "Enter to check": "Enter για έλεγχο",
+        "Check": "Έλεγχος",
+        "Next →": "Επόμενο →",
+        "Morse Dictionary": "Λεξικό Μορς",
+        "Tap any character to hear it played.": "Πατήστε οποιονδήποτε χαρακτήρα για να τον ακούσετε.",
+        "English A–Z + 0–9": "Αγγλικά A–Z + 0–9",
+        "Current Language": "Τρέχουσα γλώσσα",
+        "Punctuation": "Σημεία στίξης",
+        "Sharpen your decoding instincts through play.": "Ακονίστε το ένστικτο αποκωδικοποίησης μέσα από το παιχνίδι.",
+        "Featured": "Προτεινόμενα",
+        "Morse Crossword": "Σταυρόλεξο Μορς",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "Ένα παζλ 7 λέξεων με διασταυρούμενες απαντήσεις. Κάθε στοιχείο αναπαράγεται σε Μορς — ακούστε, αποκωδικοποιήστε και συμπληρώστε το πλέγμα.",
+        "Play →": "Παίξτε →",
+        "New": "Νέο",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Μαντέψτε τη λέξη 5 γραμμάτων σε 6 προσπάθειες. Κάθε προσπάθεια αναπαράγεται σε ήχο Μορς ώστε να ακούτε την απάντησή σας.",
+        "Quickplay": "Γρήγορο παιχνίδι",
+        "Letter Drill": "Άσκηση γραμμάτων",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Αναπαράγεται ένα τυχαίο σήμα — πληκτρολογήστε την απάντηση. Χτίστε σερί και παρακολουθήστε την ακρίβεια σε γράμματα, αριθμούς και την ενεργή γλώσσα σας.",
+        "Endless": "Ατελείωτο",
+        "Easy → Hard": "Εύκολο → Δύσκολο",
+        "Hard": "Δύσκολο",
+        "Speed Decode": "Γρήγορη αποκωδικοποίηση",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 δευτερόλεπτα. Αποκωδικοποιήστε όσα σήματα μπορείτε. Τρέξτε κόντρα στον χρόνο.",
+        "Morse": "Μορς",
+        "Crossword": "Σταυρόλεξο",
+        "Listen to each clue in Morse and fill the grid.": "Ακούστε κάθε στοιχείο σε Μορς και συμπληρώστε το πλέγμα.",
+        "Filled": "Συμπληρώθηκε",
+        "Solved": "Λύθηκε",
+        "Time": "Χρόνος",
+        "Pick a clue to begin": "Επιλέξτε ένα στοιχείο για να ξεκινήσετε",
+        "Clues": "Στοιχεία",
+        "Across": "Οριζόντια",
+        "Down": "Κάθετα",
+        "Check Answers": "Έλεγχος απαντήσεων",
+        "Reveal Letter": "Αποκάλυψη γράμματος",
+        "Reveal Word": "Αποκάλυψη λέξης",
+        "Reset": "Επαναφορά",
+        "Puzzle Solved!": "Το παζλ λύθηκε!",
+        "You decoded every word. Nicely done, operator.": "Αποκωδικοποιήσατε κάθε λέξη. Μπράβο, χειριστή.",
+        "Hints": "Υποδείξεις",
+        "Plays": "Παίξιμο",
+        "Play Again": "Παίξτε ξανά",
+        "More Games": "Περισσότερα παιχνίδια",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Μαντέψτε τη λέξη 5 γραμμάτων σε 6 προσπάθειες. Κάθε προσπάθεια αναπαράγεται σε Μορς.",
+        "Replay last guess": "Επανάληψη τελευταίας προσπάθειας",
+        "New word": "Νέα λέξη",
+        "Keyboard Mode": "Λειτουργία πληκτρολογίου",
+        "Letter display": "Εμφάνιση γραμμάτων",
+        "Standard A–Z keyboard": "Τυπικό πληκτρολόγιο A–Z",
+        "Morse display": "Εμφάνιση Μορς",
+        "Keys show dots & dashes": "Τα πλήκτρα δείχνουν τελείες & παύλες",
+        "Morse sound": "Ήχος Μορς",
+        "1st click plays sound, 2nd click types letter": "1ο κλικ αναπαράγει ήχο, 2ο κλικ πληκτρολογεί το γράμμα",
+        "Letter + sound": "Γράμμα + ήχος",
+        "Click types & plays Morse simultaneously": "Το κλικ πληκτρολογεί & αναπαράγει Μορς ταυτόχρονα",
+        "Done": "Έτοιμο",
+        "How to play": "Πώς να παίξετε",
+        "Guess the hidden": "Μαντέψτε την κρυφή",
+        "5-letter word": "λέξη 5 γραμμάτων",
+        "in 6 tries.": "σε 6 προσπάθειες.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Μετά από κάθε προσπάθεια, τα πλακίδια γυρίζουν και η λέξη αναπαράγεται σε ήχο Μορς.",
+        "Tile colors": "Χρώματα πλακιδίων",
+        "Green": "Πράσινο",
+        "— right letter, right spot.": "— σωστό γράμμα, σωστή θέση.",
+        "Gold": "Χρυσό",
+        "— letter exists but wrong spot.": "— το γράμμα υπάρχει αλλά σε λάθος θέση.",
+        "Gray": "Γκρι",
+        "— letter not in word.": "— το γράμμα δεν υπάρχει στη λέξη.",
+        "Got it": "Κατάλαβα",
+        "Solved!": "Λύθηκε!",
+        "Nicely decoded.": "Ωραία αποκωδικοποίηση.",
+        "Played": "Παίχτηκαν",
+        "Win %": "% Νικών",
+        "Best": "Καλύτερο",
+        "New Word": "Νέα λέξη",
+        "60 seconds. Decode as many signals as you can.": "60 δευτερόλεπτα. Αποκωδικοποιήστε όσα σήματα μπορείτε.",
+        "Missed": "Χαμένα",
+        "Pause": "Παύση",
+        "Resume": "Συνέχεια",
+        "correct answers in 60 seconds": "σωστές απαντήσεις σε 60 δευτερόλεπτα",
+        "Accuracy": "Ακρίβεια",
+        "Start Game": "Έναρξη παιχνιδιού",
+        "Universal Morse Translator": "Παγκόσμιος μεταφραστής Μορς",
+        "Translate text, images, or speech into Morse code in any language": "Μεταφράστε κείμενο, εικόνες ή ομιλία σε κώδικα Μορς σε οποιαδήποτε γλώσσα",
+        "Text": "Κείμενο",
+        "Image": "Εικόνα",
+        "Audio": "Ήχος",
+        "Video": "Βίντεο",
+        "Drop image here or tap to upload": "Ρίξτε την εικόνα εδώ ή πατήστε για μεταφόρτωση",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Υποστηρίζει JPG, PNG, GIF, WEBP — η AI θα εξαγάγει το κείμενο",
+        "Hold to record": "Κρατήστε για εγγραφή",
+        "Tap to start speech recognition": "Πατήστε για έναρξη αναγνώρισης ομιλίας",
+        "Start Camera": "Έναρξη κάμερας",
+        "Capture & Translate": "Λήψη & μετάφραση",
+        "Auto (2s)": "Αυτόματο (2δ)",
+        "Language": "Γλώσσα",
+        "· change in Settings": "· αλλαγή στις Ρυθμίσεις",
+        "→ Morse": "→ Μορς",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Είσοδος Μορς (· ή . για τελεία, − ή - για παύλα, κενά μεταξύ χαρακτήρων, 3 κενά ή / μεταξύ λέξεων)",
+        "Translate to Morse": "Μετάφραση σε Μορς",
+        "Translating…": "Μετάφραση…",
+        "📡 Morse Code": "📡 Κώδικας Μορς",
+        "Copy": "Αντιγραφή",
+        "Print": "Εκτύπωση",
+        "🔊 Audio Playback": "🔊 Αναπαραγωγή ήχου",
+        "Download WAV": "Λήψη WAV",
+        "Play Morse": "Αναπαραγωγή Μορς",
+        "Slow (8 WPM)": "Αργά (8 WPM)",
+        "Medium (14 WPM)": "Μέτρια (14 WPM)",
+        "Fast (22 WPM)": "Γρήγορα (22 WPM)",
+        "🖼 Morse Image": "🖼 Εικόνα Μορς",
+        "Download PNG": "Λήψη PNG",
+        "Customize your MorseWave experience.": "Προσαρμόστε την εμπειρία σας στο MorseWave.",
+        "Automatically switch between answers": "Αυτόματη εναλλαγή μεταξύ απαντήσεων",
+        "Auto-advance": "Αυτόματη προώθηση",
+        "Automatically move to the next question": "Αυτόματη μετάβαση στην επόμενη ερώτηση",
+        "Switch after": "Εναλλαγή μετά από",
+        "Both": "Και τα δύο",
+        "answer, after": "απάντηση, μετά από",
+        "Custom…": "Προσαρμοσμένο…",
+        "Custom delay:": "Προσαρμοσμένη καθυστέρηση:",
+        "seconds (0.001 – 3)": "δευτερόλεπτα (0,001 – 3)",
+        "Interface Language": "Γλώσσα διεπαφής",
+        "Letter conversion": "Μετατροπή γραμμάτων",
+        "Feedback": "Σχόλια",
+        "App Audit & Feedback": "Έλεγχος εφαρμογής & σχόλια",
+        "🔍 Search translations…": "🔍 Αναζήτηση μεταφράσεων…",
+      },
+      th: {
+        "Welcome to MorseWave": "ยินดีต้อนรับสู่ MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "MorseWave ออกแบบมาเพื่อช่วยให้คุณเชี่ยวชาญรหัสมอร์สได้อย่างง่ายดาย เมื่อเรียนรู้พื้นฐานแล้ว คุณสามารถเข้าสู่เกมแบบโต้ตอบของเราได้ทันทีและฝึกฝนทักษะของคุณ!",
+        "Your Feedback Matters: Help Us Build the Future": "ความคิดเห็นของคุณสำคัญ: ช่วยเราสร้างอนาคต",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "เรามุ่งมั่นสู่ความสมบูรณ์แบบ หากคุณพบข้อบกพร่อง ปัญหาเลย์เอาต์ หรือเพียงต้องการแบ่งปันความคิดเห็น ให้คลิกปุ่ม 'App Audit & Feedback' ในหน้าจอการตั้งค่า หรือใช้แบบฟอร์มรีวิวอย่างเป็นทางการด้านล่าง",
+        "Let's get started!": "มาเริ่มกันเลย!",
+        "Welcome to the Learning Tab": "ยินดีต้อนรับสู่แท็บการเรียนรู้",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "สวัสดี! คุณมาถึงแท็บการเรียนรู้แล้ว ในแท็บนี้คุณจะได้เรียนรู้ตัวอักษรทั้งหมดในรหัสมอร์สตั้งแต่ A ถึง Z (หากต้องการ คุณสามารถเปลี่ยนภาษาตัวอักษรในการตั้งค่า เพื่อเรียนรู้ตัวอักษรจากมอร์สเป็นภาษาอื่น) จากนั้นเป็นตัวเลขตั้งแต่ 0 ถึง 9",
+        "Start learning!": "เริ่มเรียนรู้!",
+        "Level Opened!": "ปลดล็อกด่านแล้ว!",
+        "A new level is unlocked. Keep up the great work!": "ปลดล็อกด่านใหม่แล้ว ทำได้ดีต่อไปนะ!",
+        "Continue": "ดำเนินต่อ",
+        "Home": "หน้าแรก",
+        "Learn": "เรียนรู้",
+        "Telegraph": "โทรเลข",
+        "Practice": "ฝึกฝน",
+        "Dictionary": "พจนานุกรม",
+        "Translate": "แปล",
+        "Games": "เกม",
+        "Settings": "การตั้งค่า",
+        "Change letter conversion from Morse to…": "เปลี่ยนการแปลงตัวอักษรจากมอร์สเป็น…",
+        "Morse in 20 Languages": "มอร์สใน 20 ภาษา",
+        "Loading letters…": "กำลังโหลดตัวอักษร…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — อัปเกรดแล้ว",
+        "Learn Morse Code": "เรียนรู้รหัสมอร์ส",
+        "the right way.": "อย่างถูกวิธี",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "หลักสูตร 7 ระดับ · การทบทวนแบบเว้นช่วง · 95 ภาษา · ปุ่มเคาะโทรเลข · Web Audio API บริสุทธิ์",
+        "Start Learning →": "เริ่มเรียนรู้ →",
+        "Try Telegraph": "ลองใช้โทรเลข",
+        "Universal Translator": "ตัวแปลสากล",
+        "7-Level Progression": "ความคืบหน้า 7 ระดับ",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "หลักสูตรแบบมีคำแนะนำตั้งแต่ E&T จนถึงตัวอักษรครบทั้งหมด ปลดล็อกระดับเมื่อคุณเชี่ยวชาญแต่ละขั้น",
+        "STRUCTURED COURSE": "หลักสูตรที่มีโครงสร้าง",
+        "Spaced Repetition": "การทบทวนแบบเว้นช่วง",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "ติดตามตัวอักษรที่อ่อนและแสดงบ่อยขึ้น — ระบบความจำที่อิงหลักวิทยาศาสตร์",
+        "SRS ENGINE": "เครื่องมือ SRS",
+        "Telegraph Tap Key": "ปุ่มเคาะโทรเลข",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "ปุ่มโต้ตอบจริง — คลิกหรือกด Space ถอดรหัส 1.2 วินาทีหลังจากเคาะครั้งสุดท้าย",
+        "TAP TO SEND": "เคาะเพื่อส่ง",
+        "Full Dictionary": "พจนานุกรมฉบับเต็ม",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "ทุกตัวอักษร ตัวเลข และเครื่องหมายวรรคตอน — ใน 95 ภาษา แตะอักขระใดก็ได้เพื่อฟังรหัสมอร์ส",
+        "English": "อังกฤษ",
+        "Choose a Level": "เลือกระดับ",
+        "Select below to begin": "เลือกด้านล่างเพื่อเริ่ม",
+        "7 LEVELS": "7 ระดับ",
+        "INTRO": "บทนำ",
+        "← Levels": "← ระดับ",
+        "Continue →": "ดำเนินต่อ →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 การทบทวนแบบเว้นช่วง — ความคืบหน้าของคุณ",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "กดสั้น = จุด · กดยาว = ขีด · ถอดรหัสอัตโนมัติหลังเงียบ 1.2 วินาที",
+        "MORSE TELEGRAPH": "โทรเลขมอร์ส",
+        "Press & hold:": "กดค้าง:",
+        "Space": "Space",
+        "or": "หรือ",
+        "· Or tap the key above": "· หรือแตะปุ่มด้านบน",
+        "Slow": "ช้า",
+        "Medium": "ปานกลาง",
+        "Fast": "เร็ว",
+        "Live decode (free-tap mode)": "ถอดรหัสสด (โหมดเคาะอิสระ)",
+        "Correct": "ถูก",
+        "Streak": "สตรีค",
+        "Total": "รวม",
+        "Skip": "ข้าม",
+        "Play Target": "เล่นเป้าหมาย",
+        "Wrong": "ผิด",
+        "Question": "คำถาม",
+        "Lang": "ภาษา",
+        "Mix": "ผสม",
+        "Med": "กลาง",
+        "Listen and decode": "ฟังและถอดรหัส",
+        "Play Signal": "เล่นสัญญาณ",
+        "Your answer": "คำตอบของคุณ",
+        "Enter to check": "กด Enter เพื่อตรวจสอบ",
+        "Check": "ตรวจสอบ",
+        "Next →": "ถัดไป →",
+        "Morse Dictionary": "พจนานุกรมมอร์ส",
+        "Tap any character to hear it played.": "แตะอักขระใดก็ได้เพื่อฟังการเล่น",
+        "English A–Z + 0–9": "อังกฤษ A–Z + 0–9",
+        "Current Language": "ภาษาปัจจุบัน",
+        "Punctuation": "เครื่องหมายวรรคตอน",
+        "Sharpen your decoding instincts through play.": "ฝึกฝนสัญชาตญาณการถอดรหัสผ่านการเล่น",
+        "Featured": "แนะนำ",
+        "Morse Crossword": "ปริศนาอักษรไขว้มอร์ส",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "ปริศนา 7 คำที่มีคำตอบตัดกัน แต่ละคำใบ้เล่นเป็นมอร์ส — ฟัง ถอดรหัส และเติมตาราง",
+        "Play →": "เล่น →",
+        "New": "ใหม่",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "เดาคำ 5 ตัวอักษรใน 6 ครั้ง การเดาแต่ละครั้งเล่นเป็นเสียงมอร์สเพื่อให้คุณได้ยินคำตอบ",
+        "Quickplay": "เล่นด่วน",
+        "Letter Drill": "แบบฝึกตัวอักษร",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "สัญญาณสุ่มเล่น — พิมพ์คำตอบ สร้างสตรีคและติดตามความแม่นยำของตัวอักษร ตัวเลข และภาษาที่ใช้งาน",
+        "Endless": "ไม่รู้จบ",
+        "Easy → Hard": "ง่าย → ยาก",
+        "Hard": "ยาก",
+        "Speed Decode": "ถอดรหัสความเร็ว",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 วินาที ถอดรหัสสัญญาณให้ได้มากที่สุด แข่งกับเวลา",
+        "Morse": "มอร์ส",
+        "Crossword": "อักษรไขว้",
+        "Listen to each clue in Morse and fill the grid.": "ฟังคำใบ้แต่ละข้อเป็นมอร์สและเติมตาราง",
+        "Filled": "เติมแล้ว",
+        "Solved": "แก้แล้ว",
+        "Time": "เวลา",
+        "Pick a clue to begin": "เลือกคำใบ้เพื่อเริ่ม",
+        "Clues": "คำใบ้",
+        "Across": "แนวนอน",
+        "Down": "แนวตั้ง",
+        "Check Answers": "ตรวจคำตอบ",
+        "Reveal Letter": "เปิดตัวอักษร",
+        "Reveal Word": "เปิดคำ",
+        "Reset": "รีเซ็ต",
+        "Puzzle Solved!": "ไขปริศนาสำเร็จ!",
+        "You decoded every word. Nicely done, operator.": "คุณถอดรหัสทุกคำสำเร็จ ทำได้ดีมาก พนักงานวิทยุ",
+        "Hints": "คำใบ้",
+        "Plays": "การเล่น",
+        "Play Again": "เล่นอีกครั้ง",
+        "More Games": "เกมเพิ่มเติม",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "เดาคำ 5 ตัวอักษรใน 6 ครั้ง การเดาแต่ละครั้งเล่นเป็นมอร์ส",
+        "Replay last guess": "เล่นการเดาครั้งล่าสุดอีกครั้ง",
+        "New word": "คำใหม่",
+        "Keyboard Mode": "โหมดแป้นพิมพ์",
+        "Letter display": "การแสดงตัวอักษร",
+        "Standard A–Z keyboard": "แป้นพิมพ์มาตรฐาน A–Z",
+        "Morse display": "การแสดงมอร์ส",
+        "Keys show dots & dashes": "ปุ่มแสดงจุดและขีด",
+        "Morse sound": "เสียงมอร์ส",
+        "1st click plays sound, 2nd click types letter": "คลิกครั้งที่ 1 เล่นเสียง คลิกครั้งที่ 2 พิมพ์ตัวอักษร",
+        "Letter + sound": "ตัวอักษร + เสียง",
+        "Click types & plays Morse simultaneously": "คลิกพิมพ์และเล่นมอร์สพร้อมกัน",
+        "Done": "เสร็จ",
+        "How to play": "วิธีเล่น",
+        "Guess the hidden": "เดาคำที่ซ่อนอยู่",
+        "5-letter word": "คำ 5 ตัวอักษร",
+        "in 6 tries.": "ใน 6 ครั้ง",
+        "After each guess, tiles flip and the word plays in Morse audio.": "หลังการเดาแต่ละครั้ง ช่องจะพลิกและคำจะเล่นเป็นเสียงมอร์ส",
+        "Tile colors": "สีของช่อง",
+        "Green": "เขียว",
+        "— right letter, right spot.": "— ตัวอักษรถูก ตำแหน่งถูก",
+        "Gold": "ทอง",
+        "— letter exists but wrong spot.": "— มีตัวอักษรแต่ตำแหน่งผิด",
+        "Gray": "เทา",
+        "— letter not in word.": "— ไม่มีตัวอักษรในคำ",
+        "Got it": "เข้าใจแล้ว",
+        "Solved!": "แก้สำเร็จ!",
+        "Nicely decoded.": "ถอดรหัสได้ดี",
+        "Played": "เล่นแล้ว",
+        "Win %": "% ชนะ",
+        "Best": "ดีที่สุด",
+        "New Word": "คำใหม่",
+        "60 seconds. Decode as many signals as you can.": "60 วินาที ถอดรหัสสัญญาณให้ได้มากที่สุด",
+        "Missed": "พลาด",
+        "Pause": "หยุดชั่วคราว",
+        "Resume": "เล่นต่อ",
+        "correct answers in 60 seconds": "คำตอบที่ถูกใน 60 วินาที",
+        "Accuracy": "ความแม่นยำ",
+        "Start Game": "เริ่มเกม",
+        "Universal Morse Translator": "ตัวแปลมอร์สสากล",
+        "Translate text, images, or speech into Morse code in any language": "แปลข้อความ รูปภาพ หรือเสียงพูดเป็นรหัสมอร์สในทุกภาษา",
+        "Text": "ข้อความ",
+        "Image": "รูปภาพ",
+        "Audio": "เสียง",
+        "Video": "วิดีโอ",
+        "Drop image here or tap to upload": "วางรูปภาพที่นี่หรือแตะเพื่ออัปโหลด",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "รองรับ JPG, PNG, GIF, WEBP — AI จะดึงข้อความออกมา",
+        "Hold to record": "กดค้างเพื่อบันทึก",
+        "Tap to start speech recognition": "แตะเพื่อเริ่มการรู้จำเสียงพูด",
+        "Start Camera": "เปิดกล้อง",
+        "Capture & Translate": "ถ่ายและแปล",
+        "Auto (2s)": "อัตโนมัติ (2 วิ)",
+        "Language": "ภาษา",
+        "· change in Settings": "· เปลี่ยนในการตั้งค่า",
+        "→ Morse": "→ มอร์ส",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "การป้อนมอร์ส (· หรือ . สำหรับจุด, − หรือ - สำหรับขีด, เว้นวรรคระหว่างอักขระ, 3 ช่องว่างหรือ / ระหว่างคำ)",
+        "Translate to Morse": "แปลเป็นมอร์ส",
+        "Translating…": "กำลังแปล…",
+        "📡 Morse Code": "📡 รหัสมอร์ส",
+        "Copy": "คัดลอก",
+        "Print": "พิมพ์",
+        "🔊 Audio Playback": "🔊 การเล่นเสียง",
+        "Download WAV": "ดาวน์โหลด WAV",
+        "Play Morse": "เล่นมอร์ส",
+        "Slow (8 WPM)": "ช้า (8 WPM)",
+        "Medium (14 WPM)": "ปานกลาง (14 WPM)",
+        "Fast (22 WPM)": "เร็ว (22 WPM)",
+        "🖼 Morse Image": "🖼 รูปภาพมอร์ส",
+        "Download PNG": "ดาวน์โหลด PNG",
+        "Customize your MorseWave experience.": "ปรับแต่งประสบการณ์ MorseWave ของคุณ",
+        "Automatically switch between answers": "สลับระหว่างคำตอบโดยอัตโนมัติ",
+        "Auto-advance": "เลื่อนอัตโนมัติ",
+        "Automatically move to the next question": "ไปยังคำถามถัดไปโดยอัตโนมัติ",
+        "Switch after": "สลับหลังจาก",
+        "Both": "ทั้งสอง",
+        "answer, after": "คำตอบ, หลังจาก",
+        "Custom…": "กำหนดเอง…",
+        "Custom delay:": "หน่วงเวลาที่กำหนดเอง:",
+        "seconds (0.001 – 3)": "วินาที (0.001 – 3)",
+        "Interface Language": "ภาษาของอินเทอร์เฟซ",
+        "Letter conversion": "การแปลงตัวอักษร",
+        "Feedback": "ความคิดเห็น",
+        "App Audit & Feedback": "การตรวจสอบแอปและความคิดเห็น",
+        "🔍 Search translations…": "🔍 ค้นหาคำแปล…",
+      },
+      uk: {
+        "Welcome to MorseWave": "Ласкаво просимо до MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "MorseWave створено, щоб допомогти вам легко опанувати азбуку Морзе. Щойно ви засвоїте основи, ви зможете одразу перейти до наших інтерактивних ігор і вдосконалювати свої навички!",
+        "Your Feedback Matters: Help Us Build the Future": "Ваш відгук важливий: допоможіть нам будувати майбутнє",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Ми прагнемо досконалості. Якщо ви виявите помилки, проблеми з версткою або просто хочете поділитися думками, натисніть кнопку 'App Audit & Feedback' на екрані Налаштувань або скористайтеся нашою офіційною формою відгуку нижче.",
+        "Let's get started!": "Почнімо!",
+        "Welcome to the Learning Tab": "Ласкаво просимо на вкладку Навчання",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Привіт! Ви потрапили на вкладку Навчання. На цій вкладці ви вивчите всі літери азбуки Морзе від A до Z (за бажанням ви можете змінити мову літер у налаштуваннях, щоб вивчати літери з Морзе іншою мовою), а потім цифри від 0 до 9.",
+        "Start learning!": "Почати навчання!",
+        "Level Opened!": "Рівень відкрито!",
+        "A new level is unlocked. Keep up the great work!": "Відкрито новий рівень. Так тримати!",
+        "Continue": "Продовжити",
+        "Home": "Головна",
+        "Learn": "Навчання",
+        "Telegraph": "Телеграф",
+        "Practice": "Практика",
+        "Dictionary": "Словник",
+        "Translate": "Переклад",
+        "Games": "Ігри",
+        "Settings": "Налаштування",
+        "Change letter conversion from Morse to…": "Змінити перетворення літер з Морзе на…",
+        "Morse in 20 Languages": "Морзе 20 мовами",
+        "Loading letters…": "Завантаження літер…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — ОНОВЛЕНО",
+        "Learn Morse Code": "Вивчайте азбуку Морзе",
+        "the right way.": "правильним способом.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "Програма з 7 рівнів · Інтервальне повторення · 95 мов · Телеграфна клавіша · Чистий Web Audio API",
+        "Start Learning →": "Почати навчання →",
+        "Try Telegraph": "Спробувати телеграф",
+        "Universal Translator": "Універсальний перекладач",
+        "7-Level Progression": "Прогресія з 7 рівнів",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Покрокова програма від E&T до повного алфавіту. Відкривайте рівні, опановуючи кожен етап.",
+        "STRUCTURED COURSE": "СТРУКТУРОВАНИЙ КУРС",
+        "Spaced Repetition": "Інтервальне повторення",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Відстежує слабкі літери та показує їх частіше — система запамʼятовування, підкріплена наукою.",
+        "SRS ENGINE": "ДВИГУН SRS",
+        "Telegraph Tap Key": "Телеграфна клавіша",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Справжня інтерактивна клавіша — клацніть або натисніть Пробіл. Розшифровує через 1,2 с після останнього натискання.",
+        "TAP TO SEND": "НАТИСНІТЬ, ЩОБ НАДІСЛАТИ",
+        "Full Dictionary": "Повний словник",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Кожна літера, цифра та розділовий знак — 95 мовами. Натисніть будь-який символ, щоб почути його код Морзе.",
+        "English": "Англійська",
+        "Choose a Level": "Виберіть рівень",
+        "Select below to begin": "Виберіть нижче, щоб почати",
+        "7 LEVELS": "7 РІВНІВ",
+        "INTRO": "ВСТУП",
+        "← Levels": "← Рівні",
+        "Continue →": "Продовжити →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Інтервальне повторення — Ваш прогрес",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Коротке натискання = крапка · Довге = тире · Автоматичне розшифрування після 1,2 с тиші",
+        "MORSE TELEGRAPH": "ТЕЛЕГРАФ МОРЗЕ",
+        "Press & hold:": "Натисніть і утримуйте:",
+        "Space": "Пробіл",
+        "or": "або",
+        "· Or tap the key above": "· Або натисніть клавішу вище",
+        "Slow": "Повільно",
+        "Medium": "Середньо",
+        "Fast": "Швидко",
+        "Live decode (free-tap mode)": "Живе розшифрування (режим вільного натискання)",
+        "Correct": "Правильно",
+        "Streak": "Серія",
+        "Total": "Усього",
+        "Skip": "Пропустити",
+        "Play Target": "Відтворити ціль",
+        "Wrong": "Неправильно",
+        "Question": "Питання",
+        "Lang": "Мова",
+        "Mix": "Мікс",
+        "Med": "Сер",
+        "Listen and decode": "Слухайте та розшифровуйте",
+        "Play Signal": "Відтворити сигнал",
+        "Your answer": "Ваша відповідь",
+        "Enter to check": "Enter, щоб перевірити",
+        "Check": "Перевірити",
+        "Next →": "Далі →",
+        "Morse Dictionary": "Словник Морзе",
+        "Tap any character to hear it played.": "Натисніть будь-який символ, щоб почути його.",
+        "English A–Z + 0–9": "Англійська A–Z + 0–9",
+        "Current Language": "Поточна мова",
+        "Punctuation": "Розділові знаки",
+        "Sharpen your decoding instincts through play.": "Відточуйте навички розшифрування через гру.",
+        "Featured": "Рекомендоване",
+        "Morse Crossword": "Кросворд Морзе",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "Головоломка з 7 слів із пересічними відповідями. Кожна підказка відтворюється азбукою Морзе — слухайте, розшифровуйте та заповнюйте сітку.",
+        "Play →": "Грати →",
+        "New": "Нове",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Вгадайте слово з 5 літер за 6 спроб. Кожна спроба відтворюється аудіо Морзе, щоб ви чули свою відповідь.",
+        "Quickplay": "Швидка гра",
+        "Letter Drill": "Тренування літер",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Відтворюється випадковий сигнал — введіть відповідь. Створюйте серії та відстежуйте точність для літер, цифр і активної мови.",
+        "Endless": "Нескінченно",
+        "Easy → Hard": "Легко → Важко",
+        "Hard": "Важко",
+        "Speed Decode": "Швидке розшифрування",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 секунд. Розшифруйте якомога більше сигналів. Гонка з часом.",
+        "Morse": "Морзе",
+        "Crossword": "Кросворд",
+        "Listen to each clue in Morse and fill the grid.": "Слухайте кожну підказку азбукою Морзе та заповнюйте сітку.",
+        "Filled": "Заповнено",
+        "Solved": "Розвʼязано",
+        "Time": "Час",
+        "Pick a clue to begin": "Виберіть підказку, щоб почати",
+        "Clues": "Підказки",
+        "Across": "По горизонталі",
+        "Down": "По вертикалі",
+        "Check Answers": "Перевірити відповіді",
+        "Reveal Letter": "Показати літеру",
+        "Reveal Word": "Показати слово",
+        "Reset": "Скинути",
+        "Puzzle Solved!": "Головоломку розвʼязано!",
+        "You decoded every word. Nicely done, operator.": "Ви розшифрували кожне слово. Чудова робота, оператор.",
+        "Hints": "Підказки",
+        "Plays": "Зіграно",
+        "Play Again": "Грати знову",
+        "More Games": "Більше ігор",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Вгадайте слово з 5 літер за 6 спроб. Кожна спроба відтворюється азбукою Морзе.",
+        "Replay last guess": "Повторити останню спробу",
+        "New word": "Нове слово",
+        "Keyboard Mode": "Режим клавіатури",
+        "Letter display": "Відображення літер",
+        "Standard A–Z keyboard": "Стандартна клавіатура A–Z",
+        "Morse display": "Відображення Морзе",
+        "Keys show dots & dashes": "Клавіші показують крапки й тире",
+        "Morse sound": "Звук Морзе",
+        "1st click plays sound, 2nd click types letter": "1-ше клацання відтворює звук, 2-ге вводить літеру",
+        "Letter + sound": "Літера + звук",
+        "Click types & plays Morse simultaneously": "Клацання вводить і відтворює Морзе одночасно",
+        "Done": "Готово",
+        "How to play": "Як грати",
+        "Guess the hidden": "Вгадайте приховане",
+        "5-letter word": "слово з 5 літер",
+        "in 6 tries.": "за 6 спроб.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Після кожної спроби плитки перевертаються, а слово відтворюється аудіо Морзе.",
+        "Tile colors": "Кольори плиток",
+        "Green": "Зелений",
+        "— right letter, right spot.": "— правильна літера, правильне місце.",
+        "Gold": "Золотий",
+        "— letter exists but wrong spot.": "— літера є, але не на тому місці.",
+        "Gray": "Сірий",
+        "— letter not in word.": "— літери немає в слові.",
+        "Got it": "Зрозуміло",
+        "Solved!": "Розвʼязано!",
+        "Nicely decoded.": "Гарно розшифровано.",
+        "Played": "Зіграно",
+        "Win %": "% перемог",
+        "Best": "Найкраще",
+        "New Word": "Нове слово",
+        "60 seconds. Decode as many signals as you can.": "60 секунд. Розшифруйте якомога більше сигналів.",
+        "Missed": "Пропущено",
+        "Pause": "Пауза",
+        "Resume": "Продовжити",
+        "correct answers in 60 seconds": "правильних відповідей за 60 секунд",
+        "Accuracy": "Точність",
+        "Start Game": "Почати гру",
+        "Universal Morse Translator": "Універсальний перекладач Морзе",
+        "Translate text, images, or speech into Morse code in any language": "Перекладайте текст, зображення або мовлення в код Морзе будь-якою мовою",
+        "Text": "Текст",
+        "Image": "Зображення",
+        "Audio": "Аудіо",
+        "Video": "Відео",
+        "Drop image here or tap to upload": "Перетягніть зображення сюди або натисніть, щоб завантажити",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Підтримує JPG, PNG, GIF, WEBP — ШІ витягне текст",
+        "Hold to record": "Утримуйте, щоб записати",
+        "Tap to start speech recognition": "Натисніть, щоб почати розпізнавання мовлення",
+        "Start Camera": "Увімкнути камеру",
+        "Capture & Translate": "Зняти та перекласти",
+        "Auto (2s)": "Авто (2 с)",
+        "Language": "Мова",
+        "· change in Settings": "· змінити в Налаштуваннях",
+        "→ Morse": "→ Морзе",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Ввід Морзе (· або . для крапки, − або - для тире, пробіли між символами, 3 пробіли або / між словами)",
+        "Translate to Morse": "Перекласти в Морзе",
+        "Translating…": "Переклад…",
+        "📡 Morse Code": "📡 Код Морзе",
+        "Copy": "Копіювати",
+        "Print": "Друк",
+        "🔊 Audio Playback": "🔊 Відтворення аудіо",
+        "Download WAV": "Завантажити WAV",
+        "Play Morse": "Відтворити Морзе",
+        "Slow (8 WPM)": "Повільно (8 WPM)",
+        "Medium (14 WPM)": "Середньо (14 WPM)",
+        "Fast (22 WPM)": "Швидко (22 WPM)",
+        "🖼 Morse Image": "🖼 Зображення Морзе",
+        "Download PNG": "Завантажити PNG",
+        "Customize your MorseWave experience.": "Налаштуйте свій досвід MorseWave.",
+        "Automatically switch between answers": "Автоматично перемикатися між відповідями",
+        "Auto-advance": "Автоперехід",
+        "Automatically move to the next question": "Автоматично переходити до наступного питання",
+        "Switch after": "Перемкнути після",
+        "Both": "Обидва",
+        "answer, after": "відповідь, після",
+        "Custom…": "Власне…",
+        "Custom delay:": "Власна затримка:",
+        "seconds (0.001 – 3)": "секунд (0,001 – 3)",
+        "Interface Language": "Мова інтерфейсу",
+        "Letter conversion": "Перетворення літер",
+        "Feedback": "Відгук",
+        "App Audit & Feedback": "Аудит застосунку та відгук",
+        "🔍 Search translations…": "🔍 Пошук перекладів…",
+      },
+      sv: {
+        "Welcome to MorseWave": "Välkommen till MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "MorseWave är utformat för att hjälpa dig att bemästra morsekod med största lätthet. När du har lärt dig grunderna kan du gå direkt till våra interaktiva spel och öva dina färdigheter!",
+        "Your Feedback Matters: Help Us Build the Future": "Din feedback är viktig: hjälp oss att bygga framtiden",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Vi strävar efter perfektion. Om du stöter på buggar, layoutproblem eller bara vill dela med dig av dina tankar, klicka på knappen 'App Audit & Feedback' i Inställningar eller använd vårt officiella recensionsformulär nedan.",
+        "Let's get started!": "Nu kör vi!",
+        "Welcome to the Learning Tab": "Välkommen till fliken Lär dig",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Hej! Du har kommit till fliken Lär dig. På den här fliken lär du dig alla bokstäver i morse från A till Z (om du vill kan du ändra bokstavsspråket i inställningarna, så att du kan lära dig bokstäver från morse till ett annat språk), sedan siffrorna från 0 till 9.",
+        "Start learning!": "Börja lära dig!",
+        "Level Opened!": "Nivå upplåst!",
+        "A new level is unlocked. Keep up the great work!": "En ny nivå är upplåst. Fortsätt med det goda arbetet!",
+        "Continue": "Fortsätt",
+        "Home": "Hem",
+        "Learn": "Lär dig",
+        "Telegraph": "Telegraf",
+        "Practice": "Öva",
+        "Dictionary": "Ordbok",
+        "Translate": "Översätt",
+        "Games": "Spel",
+        "Settings": "Inställningar",
+        "Change letter conversion from Morse to…": "Ändra bokstavskonvertering från morse till…",
+        "Morse in 20 Languages": "Morse på 20 språk",
+        "Loading letters…": "Laddar bokstäver…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — UPPGRADERAD",
+        "Learn Morse Code": "Lär dig morsekod",
+        "the right way.": "på rätt sätt.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "7-nivåers kursplan · Spridd repetition · 95 språk · Telegraftangent · Ren Web Audio API",
+        "Start Learning →": "Börja lära dig →",
+        "Try Telegraph": "Prova telegrafen",
+        "Universal Translator": "Universell översättare",
+        "7-Level Progression": "7-nivåers progression",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Vägledd kursplan från E&T till hela alfabetet. Lås upp nivåer när du bemästrar varje steg.",
+        "STRUCTURED COURSE": "STRUKTURERAD KURS",
+        "Spaced Repetition": "Spridd repetition",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Spårar svaga bokstäver och visar dem oftare — ett vetenskapligt baserat minnessystem.",
+        "SRS ENGINE": "SRS-MOTOR",
+        "Telegraph Tap Key": "Telegraftangent",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Riktig interaktiv tangent — klicka eller tryck på Mellanslag. Avkodar 1,2 s efter din sista tryckning.",
+        "TAP TO SEND": "TRYCK FÖR ATT SKICKA",
+        "Full Dictionary": "Fullständig ordbok",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Varje bokstav, siffra och skiljetecken — på 95 språk. Tryck på valfritt tecken för att höra dess morsekod.",
+        "English": "Engelska",
+        "Choose a Level": "Välj en nivå",
+        "Select below to begin": "Välj nedan för att börja",
+        "7 LEVELS": "7 NIVÅER",
+        "INTRO": "INTRO",
+        "← Levels": "← Nivåer",
+        "Continue →": "Fortsätt →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Spridd repetition — Dina framsteg",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Kort tryck = punkt · Långt tryck = streck · Avkodar automatiskt efter 1,2 s tystnad",
+        "MORSE TELEGRAPH": "MORSETELEGRAF",
+        "Press & hold:": "Tryck och håll:",
+        "Space": "Mellanslag",
+        "or": "eller",
+        "· Or tap the key above": "· Eller tryck på tangenten ovan",
+        "Slow": "Långsam",
+        "Medium": "Medel",
+        "Fast": "Snabb",
+        "Live decode (free-tap mode)": "Liveavkodning (fritt tryckläge)",
+        "Correct": "Rätt",
+        "Streak": "Svit",
+        "Total": "Totalt",
+        "Skip": "Hoppa över",
+        "Play Target": "Spela mål",
+        "Wrong": "Fel",
+        "Question": "Fråga",
+        "Lang": "Språk",
+        "Mix": "Mix",
+        "Med": "Med",
+        "Listen and decode": "Lyssna och avkoda",
+        "Play Signal": "Spela signal",
+        "Your answer": "Ditt svar",
+        "Enter to check": "Enter för att kontrollera",
+        "Check": "Kontrollera",
+        "Next →": "Nästa →",
+        "Morse Dictionary": "Morseordbok",
+        "Tap any character to hear it played.": "Tryck på valfritt tecken för att höra det spelas.",
+        "English A–Z + 0–9": "Engelska A–Z + 0–9",
+        "Current Language": "Aktuellt språk",
+        "Punctuation": "Skiljetecken",
+        "Sharpen your decoding instincts through play.": "Skärp dina avkodningsinstinkter genom lek.",
+        "Featured": "Utvalt",
+        "Morse Crossword": "Morsekorsord",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "Ett pussel med 7 ord och korsande svar. Varje ledtråd spelas i morse — lyssna, avkoda och fyll i rutnätet.",
+        "Play →": "Spela →",
+        "New": "Ny",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Gissa ordet med 5 bokstäver på 6 försök. Varje gissning spelas upp i morseljud så att du kan höra ditt svar.",
+        "Quickplay": "Snabbspel",
+        "Letter Drill": "Bokstavsövning",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "En slumpmässig signal spelas — skriv svaret. Bygg svit och följ noggrannhet för bokstäver, siffror och ditt aktiva språk.",
+        "Endless": "Oändlig",
+        "Easy → Hard": "Lätt → Svår",
+        "Hard": "Svår",
+        "Speed Decode": "Snabbavkodning",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 sekunder. Avkoda så många signaler du kan. Kapplöpning mot klockan.",
+        "Morse": "Morse",
+        "Crossword": "Korsord",
+        "Listen to each clue in Morse and fill the grid.": "Lyssna på varje ledtråd i morse och fyll i rutnätet.",
+        "Filled": "Ifylld",
+        "Solved": "Löst",
+        "Time": "Tid",
+        "Pick a clue to begin": "Välj en ledtråd för att börja",
+        "Clues": "Ledtrådar",
+        "Across": "Vågrätt",
+        "Down": "Lodrätt",
+        "Check Answers": "Kontrollera svar",
+        "Reveal Letter": "Visa bokstav",
+        "Reveal Word": "Visa ord",
+        "Reset": "Återställ",
+        "Puzzle Solved!": "Pussel löst!",
+        "You decoded every word. Nicely done, operator.": "Du avkodade varje ord. Snyggt jobbat, operatör.",
+        "Hints": "Tips",
+        "Plays": "Spelningar",
+        "Play Again": "Spela igen",
+        "More Games": "Fler spel",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Gissa ordet med 5 bokstäver på 6 försök. Varje gissning spelas i morse.",
+        "Replay last guess": "Spela upp senaste gissningen igen",
+        "New word": "Nytt ord",
+        "Keyboard Mode": "Tangentbordsläge",
+        "Letter display": "Bokstavsvisning",
+        "Standard A–Z keyboard": "Standard A–Z-tangentbord",
+        "Morse display": "Morsevisning",
+        "Keys show dots & dashes": "Tangenterna visar punkter och streck",
+        "Morse sound": "Morseljud",
+        "1st click plays sound, 2nd click types letter": "1:a klicket spelar ljud, 2:a klicket skriver bokstaven",
+        "Letter + sound": "Bokstav + ljud",
+        "Click types & plays Morse simultaneously": "Klick skriver och spelar morse samtidigt",
+        "Done": "Klar",
+        "How to play": "Så spelar du",
+        "Guess the hidden": "Gissa det dolda",
+        "5-letter word": "ordet med 5 bokstäver",
+        "in 6 tries.": "på 6 försök.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Efter varje gissning vänds brickorna och ordet spelas i morseljud.",
+        "Tile colors": "Brickfärger",
+        "Green": "Grön",
+        "— right letter, right spot.": "— rätt bokstav, rätt plats.",
+        "Gold": "Guld",
+        "— letter exists but wrong spot.": "— bokstaven finns men på fel plats.",
+        "Gray": "Grå",
+        "— letter not in word.": "— bokstaven finns inte i ordet.",
+        "Got it": "Uppfattat",
+        "Solved!": "Löst!",
+        "Nicely decoded.": "Snyggt avkodat.",
+        "Played": "Spelade",
+        "Win %": "Vinst-%",
+        "Best": "Bäst",
+        "New Word": "Nytt ord",
+        "60 seconds. Decode as many signals as you can.": "60 sekunder. Avkoda så många signaler du kan.",
+        "Missed": "Missade",
+        "Pause": "Pausa",
+        "Resume": "Återuppta",
+        "correct answers in 60 seconds": "rätta svar på 60 sekunder",
+        "Accuracy": "Noggrannhet",
+        "Start Game": "Starta spel",
+        "Universal Morse Translator": "Universell morseöversättare",
+        "Translate text, images, or speech into Morse code in any language": "Översätt text, bilder eller tal till morsekod på vilket språk som helst",
+        "Text": "Text",
+        "Image": "Bild",
+        "Audio": "Ljud",
+        "Video": "Video",
+        "Drop image here or tap to upload": "Släpp bilden här eller tryck för att ladda upp",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Stöder JPG, PNG, GIF, WEBP — AI extraherar texten",
+        "Hold to record": "Håll in för att spela in",
+        "Tap to start speech recognition": "Tryck för att starta taligenkänning",
+        "Start Camera": "Starta kamera",
+        "Capture & Translate": "Ta bild och översätt",
+        "Auto (2s)": "Auto (2 s)",
+        "Language": "Språk",
+        "· change in Settings": "· ändra i Inställningar",
+        "→ Morse": "→ Morse",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Morseinmatning (· eller . för punkt, − eller - för streck, mellanslag mellan tecken, 3 mellanslag eller / mellan ord)",
+        "Translate to Morse": "Översätt till morse",
+        "Translating…": "Översätter…",
+        "📡 Morse Code": "📡 Morsekod",
+        "Copy": "Kopiera",
+        "Print": "Skriv ut",
+        "🔊 Audio Playback": "🔊 Ljuduppspelning",
+        "Download WAV": "Ladda ner WAV",
+        "Play Morse": "Spela morse",
+        "Slow (8 WPM)": "Långsam (8 WPM)",
+        "Medium (14 WPM)": "Medel (14 WPM)",
+        "Fast (22 WPM)": "Snabb (22 WPM)",
+        "🖼 Morse Image": "🖼 Morsebild",
+        "Download PNG": "Ladda ner PNG",
+        "Customize your MorseWave experience.": "Anpassa din MorseWave-upplevelse.",
+        "Automatically switch between answers": "Växla automatiskt mellan svar",
+        "Auto-advance": "Automatisk framåt",
+        "Automatically move to the next question": "Gå automatiskt till nästa fråga",
+        "Switch after": "Växla efter",
+        "Both": "Båda",
+        "answer, after": "svar, efter",
+        "Custom…": "Anpassad…",
+        "Custom delay:": "Anpassad fördröjning:",
+        "seconds (0.001 – 3)": "sekunder (0,001 – 3)",
+        "Interface Language": "Gränssnittsspråk",
+        "Letter conversion": "Bokstavskonvertering",
+        "Feedback": "Feedback",
+        "App Audit & Feedback": "Appgranskning och feedback",
+        "🔍 Search translations…": "🔍 Sök översättningar…",
+      },
+      cs: {
+        "Welcome to MorseWave": "Vítejte v MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "MorseWave je navržen tak, aby vám pomohl zvládnout Morseovu abecedu naprosto snadno. Jakmile se naučíte základy, můžete přejít rovnou k našim interaktivním hrám a procvičovat své dovednosti!",
+        "Your Feedback Matters: Help Us Build the Future": "Na vaší zpětné vazbě záleží: Pomozte nám budovat budoucnost",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Usilujeme o dokonalost. Pokud narazíte na chyby, problémy s rozložením nebo se chcete podělit o své názory, klikněte na tlačítko 'App Audit & Feedback' na obrazovce Nastavení nebo použijte náš oficiální formulář pro recenze níže.",
+        "Let's get started!": "Pojďme na to!",
+        "Welcome to the Learning Tab": "Vítejte na kartě Učení",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Ahoj! Dostali jste se na kartu Učení. Na této kartě se naučíte všechna písmena v Morseovce od A do Z (chcete-li, můžete v nastavení změnit jazyk písmen, abyste se učili písmena z Morseovky do jiného jazyka), poté čísla od 0 do 9.",
+        "Start learning!": "Začít se učit!",
+        "Level Opened!": "Úroveň odemčena!",
+        "A new level is unlocked. Keep up the great work!": "Byla odemčena nová úroveň. Jen tak dál!",
+        "Continue": "Pokračovat",
+        "Home": "Domů",
+        "Learn": "Učit se",
+        "Telegraph": "Telegraf",
+        "Practice": "Procvičovat",
+        "Dictionary": "Slovník",
+        "Translate": "Přeložit",
+        "Games": "Hry",
+        "Settings": "Nastavení",
+        "Change letter conversion from Morse to…": "Změnit převod písmen z Morseovky na…",
+        "Morse in 20 Languages": "Morseovka ve 20 jazycích",
+        "Loading letters…": "Načítání písmen…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — VYLEPŠENO",
+        "Learn Morse Code": "Naučte se Morseovku",
+        "the right way.": "správným způsobem.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "Osnova se 7 úrovněmi · Rozložené opakování · 95 jazyků · Telegrafní klávesa · Čisté Web Audio API",
+        "Start Learning →": "Začít se učit →",
+        "Try Telegraph": "Vyzkoušet telegraf",
+        "Universal Translator": "Univerzální překladač",
+        "7-Level Progression": "Postup v 7 úrovních",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Vedená osnova od E&T až po celou abecedu. Odemykejte úrovně, jak zvládáte jednotlivé fáze.",
+        "STRUCTURED COURSE": "STRUKTUROVANÝ KURZ",
+        "Spaced Repetition": "Rozložené opakování",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Sleduje slabá písmena a zobrazuje je častěji — paměťový systém podložený vědou.",
+        "SRS ENGINE": "MOTOR SRS",
+        "Telegraph Tap Key": "Telegrafní klávesa",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Skutečná interaktivní klávesa — klikněte nebo stiskněte mezerník. Dekóduje 1,2 s po posledním klepnutí.",
+        "TAP TO SEND": "KLEPNUTÍM ODEŠLETE",
+        "Full Dictionary": "Úplný slovník",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Každé písmeno, číslice a interpunkční znaménko — v 95 jazycích. Klepnutím na libovolný znak uslyšíte jeho Morseův kód.",
+        "English": "Angličtina",
+        "Choose a Level": "Vyberte úroveň",
+        "Select below to begin": "Začněte výběrem níže",
+        "7 LEVELS": "7 ÚROVNÍ",
+        "INTRO": "ÚVOD",
+        "← Levels": "← Úrovně",
+        "Continue →": "Pokračovat →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Rozložené opakování — Váš pokrok",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Krátké stisknutí = tečka · Dlouhé = čárka · Automatické dekódování po 1,2 s ticha",
+        "MORSE TELEGRAPH": "MORSEŮV TELEGRAF",
+        "Press & hold:": "Stiskněte a podržte:",
+        "Space": "Mezerník",
+        "or": "nebo",
+        "· Or tap the key above": "· Nebo klepněte na klávesu výše",
+        "Slow": "Pomalu",
+        "Medium": "Středně",
+        "Fast": "Rychle",
+        "Live decode (free-tap mode)": "Živé dekódování (režim volného klepání)",
+        "Correct": "Správně",
+        "Streak": "Série",
+        "Total": "Celkem",
+        "Skip": "Přeskočit",
+        "Play Target": "Přehrát cíl",
+        "Wrong": "Špatně",
+        "Question": "Otázka",
+        "Lang": "Jazyk",
+        "Mix": "Mix",
+        "Med": "Stř",
+        "Listen and decode": "Poslouchejte a dekódujte",
+        "Play Signal": "Přehrát signál",
+        "Your answer": "Vaše odpověď",
+        "Enter to check": "Enter pro kontrolu",
+        "Check": "Zkontrolovat",
+        "Next →": "Další →",
+        "Morse Dictionary": "Morseův slovník",
+        "Tap any character to hear it played.": "Klepnutím na znak si jej přehrajete.",
+        "English A–Z + 0–9": "Angličtina A–Z + 0–9",
+        "Current Language": "Aktuální jazyk",
+        "Punctuation": "Interpunkce",
+        "Sharpen your decoding instincts through play.": "Vybruste si instinkt pro dekódování hrou.",
+        "Featured": "Doporučené",
+        "Morse Crossword": "Morseova křížovka",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "Hádanka o 7 slovech s protínajícími se odpověďmi. Každá nápověda se přehraje v Morseovce — poslouchejte, dekódujte a vyplňte mřížku.",
+        "Play →": "Hrát →",
+        "New": "Nové",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Uhodněte pětipísmenné slovo na 6 pokusů. Každý pokus se přehraje jako Morseův zvuk, abyste slyšeli svou odpověď.",
+        "Quickplay": "Rychlá hra",
+        "Letter Drill": "Procvičování písmen",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Přehraje se náhodný signál — napište odpověď. Budujte série a sledujte přesnost u písmen, čísel a vašeho aktivního jazyka.",
+        "Endless": "Nekonečné",
+        "Easy → Hard": "Snadné → Těžké",
+        "Hard": "Těžké",
+        "Speed Decode": "Rychlé dekódování",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 sekund. Dekódujte co nejvíce signálů. Závod s časem.",
+        "Morse": "Morse",
+        "Crossword": "Křížovka",
+        "Listen to each clue in Morse and fill the grid.": "Poslouchejte každou nápovědu v Morseovce a vyplňte mřížku.",
+        "Filled": "Vyplněno",
+        "Solved": "Vyřešeno",
+        "Time": "Čas",
+        "Pick a clue to begin": "Začněte výběrem nápovědy",
+        "Clues": "Nápovědy",
+        "Across": "Vodorovně",
+        "Down": "Svisle",
+        "Check Answers": "Zkontrolovat odpovědi",
+        "Reveal Letter": "Odhalit písmeno",
+        "Reveal Word": "Odhalit slovo",
+        "Reset": "Resetovat",
+        "Puzzle Solved!": "Hádanka vyřešena!",
+        "You decoded every word. Nicely done, operator.": "Dekódovali jste každé slovo. Dobrá práce, operátore.",
+        "Hints": "Nápovědy",
+        "Plays": "Přehrání",
+        "Play Again": "Hrát znovu",
+        "More Games": "Více her",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Uhodněte pětipísmenné slovo na 6 pokusů. Každý pokus se přehraje v Morseovce.",
+        "Replay last guess": "Přehrát poslední pokus",
+        "New word": "Nové slovo",
+        "Keyboard Mode": "Režim klávesnice",
+        "Letter display": "Zobrazení písmen",
+        "Standard A–Z keyboard": "Standardní klávesnice A–Z",
+        "Morse display": "Zobrazení Morseovky",
+        "Keys show dots & dashes": "Klávesy zobrazují tečky a čárky",
+        "Morse sound": "Zvuk Morseovky",
+        "1st click plays sound, 2nd click types letter": "1. kliknutí přehraje zvuk, 2. napíše písmeno",
+        "Letter + sound": "Písmeno + zvuk",
+        "Click types & plays Morse simultaneously": "Kliknutí současně píše a přehrává Morseovku",
+        "Done": "Hotovo",
+        "How to play": "Jak hrát",
+        "Guess the hidden": "Uhodněte skryté",
+        "5-letter word": "pětipísmenné slovo",
+        "in 6 tries.": "na 6 pokusů.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Po každém pokusu se dlaždice otočí a slovo se přehraje jako Morseův zvuk.",
+        "Tile colors": "Barvy dlaždic",
+        "Green": "Zelená",
+        "— right letter, right spot.": "— správné písmeno, správné místo.",
+        "Gold": "Zlatá",
+        "— letter exists but wrong spot.": "— písmeno existuje, ale na špatném místě.",
+        "Gray": "Šedá",
+        "— letter not in word.": "— písmeno není ve slově.",
+        "Got it": "Rozumím",
+        "Solved!": "Vyřešeno!",
+        "Nicely decoded.": "Pěkně dekódováno.",
+        "Played": "Odehráno",
+        "Win %": "% výher",
+        "Best": "Nejlepší",
+        "New Word": "Nové slovo",
+        "60 seconds. Decode as many signals as you can.": "60 sekund. Dekódujte co nejvíce signálů.",
+        "Missed": "Zmeškáno",
+        "Pause": "Pozastavit",
+        "Resume": "Pokračovat",
+        "correct answers in 60 seconds": "správných odpovědí za 60 sekund",
+        "Accuracy": "Přesnost",
+        "Start Game": "Spustit hru",
+        "Universal Morse Translator": "Univerzální překladač Morseovky",
+        "Translate text, images, or speech into Morse code in any language": "Překládejte text, obrázky nebo řeč do Morseova kódu v jakémkoli jazyce",
+        "Text": "Text",
+        "Image": "Obrázek",
+        "Audio": "Zvuk",
+        "Video": "Video",
+        "Drop image here or tap to upload": "Přetáhněte obrázek sem nebo klepnutím nahrajte",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Podporuje JPG, PNG, GIF, WEBP — AI extrahuje text",
+        "Hold to record": "Podržením nahrajete",
+        "Tap to start speech recognition": "Klepnutím spustíte rozpoznávání řeči",
+        "Start Camera": "Spustit kameru",
+        "Capture & Translate": "Vyfotit a přeložit",
+        "Auto (2s)": "Auto (2 s)",
+        "Language": "Jazyk",
+        "· change in Settings": "· změnit v Nastavení",
+        "→ Morse": "→ Morse",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Zadání Morseovky (· nebo . pro tečku, − nebo - pro čárku, mezery mezi znaky, 3 mezery nebo / mezi slovy)",
+        "Translate to Morse": "Přeložit do Morseovky",
+        "Translating…": "Překládání…",
+        "📡 Morse Code": "📡 Morseův kód",
+        "Copy": "Kopírovat",
+        "Print": "Tisk",
+        "🔊 Audio Playback": "🔊 Přehrávání zvuku",
+        "Download WAV": "Stáhnout WAV",
+        "Play Morse": "Přehrát Morseovku",
+        "Slow (8 WPM)": "Pomalu (8 WPM)",
+        "Medium (14 WPM)": "Středně (14 WPM)",
+        "Fast (22 WPM)": "Rychle (22 WPM)",
+        "🖼 Morse Image": "🖼 Obrázek Morseovky",
+        "Download PNG": "Stáhnout PNG",
+        "Customize your MorseWave experience.": "Přizpůsobte si svůj zážitek z MorseWave.",
+        "Automatically switch between answers": "Automaticky přepínat mezi odpověďmi",
+        "Auto-advance": "Automatický postup",
+        "Automatically move to the next question": "Automaticky přejít na další otázku",
+        "Switch after": "Přepnout po",
+        "Both": "Obojí",
+        "answer, after": "odpověď, po",
+        "Custom…": "Vlastní…",
+        "Custom delay:": "Vlastní prodleva:",
+        "seconds (0.001 – 3)": "sekund (0,001 – 3)",
+        "Interface Language": "Jazyk rozhraní",
+        "Letter conversion": "Převod písmen",
+        "Feedback": "Zpětná vazba",
+        "App Audit & Feedback": "Audit aplikace a zpětná vazba",
+        "🔍 Search translations…": "🔍 Hledat překlady…",
+      },
+      ro: {
+        "Welcome to MorseWave": "Bun venit la MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "MorseWave este conceput să te ajute să stăpânești codul Morse cu cea mai mare ușurință. După ce înveți noțiunile de bază, poți trece direct la jocurile noastre interactive și să-ți exersezi abilitățile!",
+        "Your Feedback Matters: Help Us Build the Future": "Părerea ta contează: ajută-ne să construim viitorul",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Ne dedicăm perfecțiunii. Dacă întâlnești erori, probleme de aspect sau pur și simplu vrei să-ți împărtășești părerile, apasă butonul 'App Audit & Feedback' din ecranul Setări sau folosește formularul nostru oficial de recenzie de mai jos.",
+        "Let's get started!": "Să începem!",
+        "Welcome to the Learning Tab": "Bun venit la fila Învățare",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Salut! Ai ajuns la fila Învățare. În această filă vei învăța toate literele în Morse de la A la Z (dacă vrei, poți schimba limba literelor în setări, ca să înveți litere din Morse într-o altă limbă), apoi cifrele de la 0 la 9.",
+        "Start learning!": "Începe să înveți!",
+        "Level Opened!": "Nivel deblocat!",
+        "A new level is unlocked. Keep up the great work!": "Un nou nivel a fost deblocat. Continuă tot așa!",
+        "Continue": "Continuă",
+        "Home": "Acasă",
+        "Learn": "Învață",
+        "Telegraph": "Telegraf",
+        "Practice": "Exersează",
+        "Dictionary": "Dicționar",
+        "Translate": "Tradu",
+        "Games": "Jocuri",
+        "Settings": "Setări",
+        "Change letter conversion from Morse to…": "Schimbă conversia literelor din Morse în…",
+        "Morse in 20 Languages": "Morse în 20 de limbi",
+        "Loading letters…": "Se încarcă literele…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — ÎMBUNĂTĂȚIT",
+        "Learn Morse Code": "Învață codul Morse",
+        "the right way.": "în mod corect.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "Curriculum cu 7 niveluri · Repetiție eșalonată · 95 de limbi · Tastă de telegraf · Web Audio API pur",
+        "Start Learning →": "Începe să înveți →",
+        "Try Telegraph": "Încearcă telegraful",
+        "Universal Translator": "Traducător universal",
+        "7-Level Progression": "Progresie pe 7 niveluri",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Curriculum ghidat de la E&T până la întregul alfabet. Deblochează niveluri pe măsură ce stăpânești fiecare etapă.",
+        "STRUCTURED COURSE": "CURS STRUCTURAT",
+        "Spaced Repetition": "Repetiție eșalonată",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Urmărește literele slabe și le afișează mai des — sistem de memorie bazat pe știință.",
+        "SRS ENGINE": "MOTOR SRS",
+        "Telegraph Tap Key": "Tastă de telegraf",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Tastă interactivă reală — apasă clic sau Space. Decodează la 1,2 s după ultima apăsare.",
+        "TAP TO SEND": "APASĂ PENTRU A TRIMITE",
+        "Full Dictionary": "Dicționar complet",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Fiecare literă, cifră și semn de punctuație — în 95 de limbi. Apasă orice caracter pentru a-i auzi codul Morse.",
+        "English": "Engleză",
+        "Choose a Level": "Alege un nivel",
+        "Select below to begin": "Selectează mai jos pentru a începe",
+        "7 LEVELS": "7 NIVELURI",
+        "INTRO": "INTRO",
+        "← Levels": "← Niveluri",
+        "Continue →": "Continuă →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Repetiție eșalonată — Progresul tău",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Apăsare scurtă = punct · Apăsare lungă = linie · Decodează automat după 1,2 s de liniște",
+        "MORSE TELEGRAPH": "TELEGRAF MORSE",
+        "Press & hold:": "Apasă și ține:",
+        "Space": "Space",
+        "or": "sau",
+        "· Or tap the key above": "· Sau apasă tasta de mai sus",
+        "Slow": "Lent",
+        "Medium": "Mediu",
+        "Fast": "Rapid",
+        "Live decode (free-tap mode)": "Decodare live (mod apăsare liberă)",
+        "Correct": "Corect",
+        "Streak": "Serie",
+        "Total": "Total",
+        "Skip": "Sari",
+        "Play Target": "Redă ținta",
+        "Wrong": "Greșit",
+        "Question": "Întrebare",
+        "Lang": "Limbă",
+        "Mix": "Mixt",
+        "Med": "Med",
+        "Listen and decode": "Ascultă și decodează",
+        "Play Signal": "Redă semnalul",
+        "Your answer": "Răspunsul tău",
+        "Enter to check": "Enter pentru verificare",
+        "Check": "Verifică",
+        "Next →": "Următorul →",
+        "Morse Dictionary": "Dicționar Morse",
+        "Tap any character to hear it played.": "Apasă orice caracter pentru a-l auzi redat.",
+        "English A–Z + 0–9": "Engleză A–Z + 0–9",
+        "Current Language": "Limba curentă",
+        "Punctuation": "Punctuație",
+        "Sharpen your decoding instincts through play.": "Ascute-ți instinctele de decodare prin joc.",
+        "Featured": "Recomandate",
+        "Morse Crossword": "Careu Morse",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "Un puzzle de 7 cuvinte cu răspunsuri care se intersectează. Fiecare indiciu este redat în Morse — ascultă, decodează și completează grila.",
+        "Play →": "Joacă →",
+        "New": "Nou",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Ghicește cuvântul de 5 litere în 6 încercări. Fiecare încercare este redată în audio Morse ca să-ți auzi răspunsul.",
+        "Quickplay": "Joc rapid",
+        "Letter Drill": "Exercițiu de litere",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Se redă un semnal aleatoriu — scrie răspunsul. Construiește serii și urmărește acuratețea pentru litere, cifre și limba ta activă.",
+        "Endless": "Nesfârșit",
+        "Easy → Hard": "Ușor → Greu",
+        "Hard": "Greu",
+        "Speed Decode": "Decodare rapidă",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 de secunde. Decodează cât mai multe semnale. Cursă contra cronometru.",
+        "Morse": "Morse",
+        "Crossword": "Careu",
+        "Listen to each clue in Morse and fill the grid.": "Ascultă fiecare indiciu în Morse și completează grila.",
+        "Filled": "Completat",
+        "Solved": "Rezolvat",
+        "Time": "Timp",
+        "Pick a clue to begin": "Alege un indiciu pentru a începe",
+        "Clues": "Indicii",
+        "Across": "Orizontal",
+        "Down": "Vertical",
+        "Check Answers": "Verifică răspunsurile",
+        "Reveal Letter": "Dezvăluie litera",
+        "Reveal Word": "Dezvăluie cuvântul",
+        "Reset": "Resetează",
+        "Puzzle Solved!": "Puzzle rezolvat!",
+        "You decoded every word. Nicely done, operator.": "Ai decodat fiecare cuvânt. Bravo, operatorule.",
+        "Hints": "Indicii",
+        "Plays": "Redări",
+        "Play Again": "Joacă din nou",
+        "More Games": "Mai multe jocuri",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Ghicește cuvântul de 5 litere în 6 încercări. Fiecare încercare este redată în Morse.",
+        "Replay last guess": "Redă din nou ultima încercare",
+        "New word": "Cuvânt nou",
+        "Keyboard Mode": "Mod tastatură",
+        "Letter display": "Afișare litere",
+        "Standard A–Z keyboard": "Tastatură standard A–Z",
+        "Morse display": "Afișare Morse",
+        "Keys show dots & dashes": "Tastele afișează puncte și linii",
+        "Morse sound": "Sunet Morse",
+        "1st click plays sound, 2nd click types letter": "Primul clic redă sunetul, al 2-lea scrie litera",
+        "Letter + sound": "Literă + sunet",
+        "Click types & plays Morse simultaneously": "Clicul scrie și redă Morse simultan",
+        "Done": "Gata",
+        "How to play": "Cum se joacă",
+        "Guess the hidden": "Ghicește cuvântul",
+        "5-letter word": "ascuns de 5 litere",
+        "in 6 tries.": "în 6 încercări.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "După fiecare încercare, plăcuțele se întorc și cuvântul este redat în audio Morse.",
+        "Tile colors": "Culorile plăcuțelor",
+        "Green": "Verde",
+        "— right letter, right spot.": "— literă corectă, poziție corectă.",
+        "Gold": "Auriu",
+        "— letter exists but wrong spot.": "— litera există, dar poziția e greșită.",
+        "Gray": "Gri",
+        "— letter not in word.": "— litera nu se află în cuvânt.",
+        "Got it": "Am înțeles",
+        "Solved!": "Rezolvat!",
+        "Nicely decoded.": "Decodat frumos.",
+        "Played": "Jucate",
+        "Win %": "% câștiguri",
+        "Best": "Cel mai bun",
+        "New Word": "Cuvânt nou",
+        "60 seconds. Decode as many signals as you can.": "60 de secunde. Decodează cât mai multe semnale.",
+        "Missed": "Ratate",
+        "Pause": "Pauză",
+        "Resume": "Reia",
+        "correct answers in 60 seconds": "răspunsuri corecte în 60 de secunde",
+        "Accuracy": "Acuratețe",
+        "Start Game": "Începe jocul",
+        "Universal Morse Translator": "Traducător Morse universal",
+        "Translate text, images, or speech into Morse code in any language": "Traduce text, imagini sau vorbire în cod Morse în orice limbă",
+        "Text": "Text",
+        "Image": "Imagine",
+        "Audio": "Audio",
+        "Video": "Video",
+        "Drop image here or tap to upload": "Trage imaginea aici sau apasă pentru a încărca",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Acceptă JPG, PNG, GIF, WEBP — AI va extrage textul",
+        "Hold to record": "Ține apăsat pentru a înregistra",
+        "Tap to start speech recognition": "Apasă pentru a porni recunoașterea vocală",
+        "Start Camera": "Pornește camera",
+        "Capture & Translate": "Capturează și tradu",
+        "Auto (2s)": "Auto (2 s)",
+        "Language": "Limbă",
+        "· change in Settings": "· schimbă în Setări",
+        "→ Morse": "→ Morse",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Introducere Morse (· sau . pentru punct, − sau - pentru linie, spații între caractere, 3 spații sau / între cuvinte)",
+        "Translate to Morse": "Tradu în Morse",
+        "Translating…": "Se traduce…",
+        "📡 Morse Code": "📡 Cod Morse",
+        "Copy": "Copiază",
+        "Print": "Printează",
+        "🔊 Audio Playback": "🔊 Redare audio",
+        "Download WAV": "Descarcă WAV",
+        "Play Morse": "Redă Morse",
+        "Slow (8 WPM)": "Lent (8 WPM)",
+        "Medium (14 WPM)": "Mediu (14 WPM)",
+        "Fast (22 WPM)": "Rapid (22 WPM)",
+        "🖼 Morse Image": "🖼 Imagine Morse",
+        "Download PNG": "Descarcă PNG",
+        "Customize your MorseWave experience.": "Personalizează-ți experiența MorseWave.",
+        "Automatically switch between answers": "Comută automat între răspunsuri",
+        "Auto-advance": "Avansare automată",
+        "Automatically move to the next question": "Treci automat la următoarea întrebare",
+        "Switch after": "Comută după",
+        "Both": "Ambele",
+        "answer, after": "răspuns, după",
+        "Custom…": "Personalizat…",
+        "Custom delay:": "Întârziere personalizată:",
+        "seconds (0.001 – 3)": "secunde (0,001 – 3)",
+        "Interface Language": "Limba interfeței",
+        "Letter conversion": "Conversia literelor",
+        "Feedback": "Feedback",
+        "App Audit & Feedback": "Audit aplicație și feedback",
+        "🔍 Search translations…": "🔍 Caută traduceri…",
+      },
 };
 
     // Original-text cache so switching languages (and back to English) is lossless.
@@ -7810,7 +9071,7 @@
     //    with every change. To add a language: append its code to I18N_LANGS,
     //    add a full keyed block to I18N, and add an <option> to #uiLangSel.
     // ════════════════════════════════════════════════════════════════
-    const I18N_LANGS = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'ru', 'it', 'zh', 'hi', 'ja', 'ko', 'tr', 'nl', 'pl', 'id', 'vi'];
+    const I18N_LANGS = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'ru', 'it', 'zh', 'hi', 'ja', 'ko', 'tr', 'nl', 'pl', 'id', 'vi', 'el', 'th', 'uk', 'sv', 'cs', 'ro'];
 
     // Central interface-language update: swaps all DOM text, sets RTL for Arabic, persists.
     function applyUILang(code) {
@@ -7826,7 +9087,7 @@
       var _sel = document.getElementById('uiLangSel'); if (_sel) _sel.value = code;
       try { if (typeof syncUILangPickerRow === 'function') syncUILangPickerRow(code); } catch (e) {}
     }
-    const UI_LANG_NAMES = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt'};
+    const UI_LANG_NAMES = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt',el:'Ελληνικά',th:'ไทย',uk:'Українська',sv:'Svenska',cs:'Čeština',ro:'Română'};
 const WORDLE_UI_NOTICE = {
   en:'The app has been translated into {lang}, but the Wordle game does not change language from English. Thank you for understanding!',
   es:'La aplicación se ha traducido al {lang}, pero el juego Wordle no cambia de idioma y permanece en inglés. ¡Gracias por tu comprensión!',
@@ -7844,7 +9105,13 @@ const WORDLE_UI_NOTICE = {
   nl:'De app is vertaald naar het {lang}, maar het Wordle-spel verandert niet van taal en blijft Engels. Bedankt voor je begrip!',
   pl:'Aplikacja została przetłumaczona na język {lang}, ale gra Wordle nie zmienia języka i pozostaje w języku angielskim. Dziękujemy za zrozumienie!',
   id:'Aplikasi telah diterjemahkan ke dalam {lang}, tetapi permainan Wordle tidak berubah bahasanya dan tetap dalam bahasa Inggris. Terima kasih atas pengertian Anda!',
-  vi:'Ứng dụng đã được dịch sang {lang}, nhưng trò chơi Wordle không đổi ngôn ngữ và vẫn giữ tiếng Anh. Cảm ơn bạn đã thông cảm!'
+  vi:'Ứng dụng đã được dịch sang {lang}, nhưng trò chơi Wordle không đổi ngôn ngữ và vẫn giữ tiếng Anh. Cảm ơn bạn đã thông cảm!',
+  el:'Η εφαρμογή μεταφράστηκε στα {lang}, αλλά το παιχνίδι Wordle δεν αλλάζει γλώσσα και παραμένει στα Αγγλικά. Ευχαριστούμε για την κατανόηση!',
+  th:'แอปได้รับการแปลเป็น{lang}แล้ว แต่เกม Wordle จะไม่เปลี่ยนภาษาและยังคงเป็นภาษาอังกฤษ ขอบคุณที่เข้าใจ!',
+  uk:'Застосунок перекладено на {lang}, але гра Wordle не змінює мову й залишається англійською. Дякуємо за розуміння!',
+  sv:'Appen har översatts till {lang}, men Wordle-spelet byter inte språk och förblir på engelska. Tack för din förståelse!',
+  cs:'Aplikace byla přeložena do jazyka {lang}, ale hra Wordle jazyk nemění a zůstává v angličtině. Děkujeme za pochopení!',
+  ro:'Aplicația a fost tradusă în {lang}, dar jocul Wordle nu își schimbă limba și rămâne în engleză. Mulțumim pentru înțelegere!'
 };
 function setUILang(code) {
   applyUILang(code);
