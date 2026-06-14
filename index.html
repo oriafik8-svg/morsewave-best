@@ -1137,6 +1137,15 @@
         [dir=rtl] #backArrow:hover{transform:translateX(2px);}
         @media(max-width:600px){[dir=rtl] #backArrow{left:auto;right:8px;}}
         [dir=rtl] .srow-left,[dir=rtl] .sgroup-title{text-align:right;}
+        /* ── Cloud sync UI ── */
+        .lbtn.small{flex:0 0 auto;padding:.45rem .8rem;font-size:.78rem;}
+        .sync-code-box{display:flex;align-items:center;gap:.6rem;margin:.5rem 0;flex-wrap:wrap;}
+        .sync-code{font-family:monospace;font-size:1.05rem;font-weight:700;letter-spacing:.08em;background:rgba(124,108,255,.14);
+                   border:1px solid rgba(124,108,255,.4);border-radius:10px;padding:.45rem .7rem;color:var(--accent,#b9acff);}
+        .sync-link-row{display:flex;gap:.5rem;margin-top:.4rem;align-items:stretch;}
+        .sync-input{flex:1;min-width:0;padding:.6rem .7rem;border-radius:10px;border:1px solid rgba(124,108,255,.4);
+                    background:rgba(255,255,255,.04);color:inherit;font-family:monospace;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;}
+        .sync-input:focus{outline:none;border-color:var(--accent,#7c6cff);}
     </style>
 </head>
 <body>
@@ -2102,6 +2111,16 @@
                 </div>
             </div>
 
+            <!-- ── Sync across devices (opt-in) ── -->
+            <div class="sgroup">
+                <div class="sgroup-header" style="cursor:default">
+                    <span class="sgroup-title">Sync across devices</span>
+                </div>
+                <div class="sgroup-body open" style="max-height:none;padding:.6rem 1.25rem 1.1rem">
+                    <div id="syncSlot"></div>
+                </div>
+            </div>
+
             <!-- ── App Audit & Feedback ── -->
             <div class="sgroup">
                 <div class="sgroup-header" style="cursor:default">
@@ -2304,9 +2323,9 @@
 
     // ── INTERFACE-LANGUAGE PICKER (mirrors the letter-language picker) ──
     // Native display names for every interface language (UI_LANG_NAMES holds these too).
-    const UI_LANG_NATIVE = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt',el:'Ελληνικά',th:'ไทย',uk:'Українська',sv:'Svenska',cs:'Čeština',ro:'Română'};
+    const UI_LANG_NATIVE = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt',el:'Ελληνικά',th:'ไทย',uk:'Українська',sv:'Svenska',cs:'Čeština',ro:'Română',hu:'Magyar',fil:'Filipino',fi:'Suomi'};
     // English label for searchability (e.g. typing "spanish" finds Español).
-    const UI_LANG_EN = {en:'English',es:'Spanish',ar:'Arabic',fr:'French',de:'German',pt:'Portuguese',ru:'Russian',it:'Italian',zh:'Chinese',hi:'Hindi',ja:'Japanese',ko:'Korean',tr:'Turkish',nl:'Dutch',pl:'Polish',id:'Indonesian',vi:'Vietnamese',el:'Greek',th:'Thai',uk:'Ukrainian',sv:'Swedish',cs:'Czech',ro:'Romanian'};
+    const UI_LANG_EN = {en:'English',es:'Spanish',ar:'Arabic',fr:'French',de:'German',pt:'Portuguese',ru:'Russian',it:'Italian',zh:'Chinese',hi:'Hindi',ja:'Japanese',ko:'Korean',tr:'Turkish',nl:'Dutch',pl:'Polish',id:'Indonesian',vi:'Vietnamese',el:'Greek',th:'Thai',uk:'Ukrainian',sv:'Swedish',cs:'Czech',ro:'Romanian',hu:'Hungarian',fil:'Filipino',fi:'Finnish'};
 
     function _curUILang(){
       try { return window.__uiLang || localStorage.getItem('mw_ui_lang') || 'en'; } catch(e){ return window.__uiLang || 'en'; }
@@ -9024,6 +9043,612 @@
         "App Audit & Feedback": "Audit aplicație și feedback",
         "🔍 Search translations…": "🔍 Caută traduceri…",
       },
+      hu: {
+        "Welcome to MorseWave": "Üdvözlünk a MorseWave-ben",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "A MorseWave célja, hogy könnyedén elsajátítsd a Morse-kódot. Miután megtanultad az alapokat, egyből belevetheted magad interaktív játékainkba, és gyakorolhatod a tudásod!",
+        "Your Feedback Matters: Help Us Build the Future": "A véleményed számít: segíts nekünk megépíteni a jövőt",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "A tökéletességre törekszünk. Ha hibákba, elrendezési problémákba ütközöl, vagy egyszerűen csak megosztanád a gondolataidat, kattints az 'App Audit & Feedback' gombra a Beállítások képernyőn, vagy használd az alábbi hivatalos értékelő űrlapot.",
+        "Let's get started!": "Vágjunk bele!",
+        "Welcome to the Learning Tab": "Üdvözlünk a Tanulás lapon",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Szia! Megérkeztél a Tanulás lapra. Ezen a lapon megtanulod az összes betűt Morse-kódban A-tól Z-ig (ha szeretnéd, a beállításokban megváltoztathatod a betűk nyelvét, így Morse-kódból más nyelvre is tanulhatsz betűket), majd a számokat 0-tól 9-ig.",
+        "Start learning!": "Kezdj el tanulni!",
+        "Level Opened!": "Szint feloldva!",
+        "A new level is unlocked. Keep up the great work!": "Új szint nyílt meg. Csak így tovább!",
+        "Continue": "Folytatás",
+        "Home": "Kezdőlap",
+        "Learn": "Tanulás",
+        "Telegraph": "Távíró",
+        "Practice": "Gyakorlás",
+        "Dictionary": "Szótár",
+        "Translate": "Fordítás",
+        "Games": "Játékok",
+        "Settings": "Beállítások",
+        "Change letter conversion from Morse to…": "Betűkonverzió módosítása Morse-ból erre…",
+        "Morse in 20 Languages": "Morse 20 nyelven",
+        "Loading letters…": "Betűk betöltése…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — FEJLESZTVE",
+        "Learn Morse Code": "Tanuld meg a Morse-kódot",
+        "the right way.": "a helyes módon.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "7 szintes tananyag · Időzített ismétlés · 95 nyelv · Távíró-billentyű · Tiszta Web Audio API",
+        "Start Learning →": "Tanulás indítása →",
+        "Try Telegraph": "Próbáld ki a távírót",
+        "Universal Translator": "Univerzális fordító",
+        "7-Level Progression": "7 szintes haladás",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Vezetett tananyag az E&T-től a teljes ábécédig. Oldd fel a szinteket, ahogy elsajátítod az egyes szakaszokat.",
+        "STRUCTURED COURSE": "STRUKTURÁLT KURZUS",
+        "Spaced Repetition": "Időzített ismétlés",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Követi a gyenge betűket, és gyakrabban megjeleníti őket — tudományosan alátámasztott memóriarendszer.",
+        "SRS ENGINE": "SRS MOTOR",
+        "Telegraph Tap Key": "Távíró-billentyű",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Valódi interaktív billentyű — kattints vagy nyomd meg a szóközt. 1,2 mp-cel az utolsó koppintás után dekódol.",
+        "TAP TO SEND": "KOPPINTS A KÜLDÉSHEZ",
+        "Full Dictionary": "Teljes szótár",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Minden betű, szám és írásjel — 95 nyelven. Koppints bármelyik karakterre, hogy halld a Morse-kódját.",
+        "English": "Angol",
+        "Choose a Level": "Válassz szintet",
+        "Select below to begin": "Válassz lent a kezdéshez",
+        "7 LEVELS": "7 SZINT",
+        "INTRO": "BEVEZETŐ",
+        "← Levels": "← Szintek",
+        "Continue →": "Folytatás →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Időzített ismétlés — A haladásod",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Rövid nyomás = pont · Hosszú = vonal · Automatikus dekódolás 1,2 mp csend után",
+        "MORSE TELEGRAPH": "MORSE-TÁVÍRÓ",
+        "Press & hold:": "Nyomd és tartsd:",
+        "Space": "Szóköz",
+        "or": "vagy",
+        "· Or tap the key above": "· Vagy koppints a fenti billentyűre",
+        "Slow": "Lassú",
+        "Medium": "Közepes",
+        "Fast": "Gyors",
+        "Live decode (free-tap mode)": "Élő dekódolás (szabad koppintós mód)",
+        "Correct": "Helyes",
+        "Streak": "Sorozat",
+        "Total": "Összesen",
+        "Skip": "Kihagyás",
+        "Play Target": "Cél lejátszása",
+        "Wrong": "Hibás",
+        "Question": "Kérdés",
+        "Lang": "Nyelv",
+        "Mix": "Vegyes",
+        "Med": "Köz",
+        "Listen and decode": "Hallgasd és dekódold",
+        "Play Signal": "Jel lejátszása",
+        "Your answer": "A válaszod",
+        "Enter to check": "Enter az ellenőrzéshez",
+        "Check": "Ellenőrzés",
+        "Next →": "Tovább →",
+        "Morse Dictionary": "Morse-szótár",
+        "Tap any character to hear it played.": "Koppints bármelyik karakterre a lejátszáshoz.",
+        "English A–Z + 0–9": "Angol A–Z + 0–9",
+        "Current Language": "Jelenlegi nyelv",
+        "Punctuation": "Írásjelek",
+        "Sharpen your decoding instincts through play.": "Élesítsd a dekódolási ösztönödet játék közben.",
+        "Featured": "Kiemelt",
+        "Morse Crossword": "Morse-keresztrejtvény",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "7 szavas rejtvény keresztező válaszokkal. Minden nyom Morse-ban szól — hallgasd, dekódold és töltsd ki a rácsot.",
+        "Play →": "Játék →",
+        "New": "Új",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Találd ki az 5 betűs szót 6 próbálkozásból. Minden tipp Morse-hangként szól vissza, hogy halld a válaszod.",
+        "Quickplay": "Gyors játék",
+        "Letter Drill": "Betűgyakorlat",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Véletlenszerű jel szól — írd be a választ. Építs sorozatokat, és kövesd a pontosságot betűk, számok és az aktív nyelved esetében.",
+        "Endless": "Végtelen",
+        "Easy → Hard": "Könnyű → Nehéz",
+        "Hard": "Nehéz",
+        "Speed Decode": "Gyors dekódolás",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 másodperc. Dekódolj annyi jelet, amennyit csak tudsz. Verseny az idővel.",
+        "Morse": "Morse",
+        "Crossword": "Keresztrejtvény",
+        "Listen to each clue in Morse and fill the grid.": "Hallgasd meg minden nyomot Morse-ban, és töltsd ki a rácsot.",
+        "Filled": "Kitöltve",
+        "Solved": "Megoldva",
+        "Time": "Idő",
+        "Pick a clue to begin": "Válassz egy nyomot a kezdéshez",
+        "Clues": "Nyomok",
+        "Across": "Vízszintes",
+        "Down": "Függőleges",
+        "Check Answers": "Válaszok ellenőrzése",
+        "Reveal Letter": "Betű felfedése",
+        "Reveal Word": "Szó felfedése",
+        "Reset": "Visszaállítás",
+        "Puzzle Solved!": "Rejtvény megoldva!",
+        "You decoded every word. Nicely done, operator.": "Minden szót dekódoltál. Szép munka, operátor.",
+        "Hints": "Tippek",
+        "Plays": "Lejátszások",
+        "Play Again": "Új játék",
+        "More Games": "További játékok",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Találd ki az 5 betűs szót 6 próbálkozásból. Minden tipp Morse-ban szól.",
+        "Replay last guess": "Utolsó tipp újrajátszása",
+        "New word": "Új szó",
+        "Keyboard Mode": "Billentyűzet mód",
+        "Letter display": "Betűk megjelenítése",
+        "Standard A–Z keyboard": "Normál A–Z billentyűzet",
+        "Morse display": "Morse megjelenítése",
+        "Keys show dots & dashes": "A billentyűk pontokat és vonalakat mutatnak",
+        "Morse sound": "Morse-hang",
+        "1st click plays sound, 2nd click types letter": "Az 1. kattintás hangot játszik, a 2. beírja a betűt",
+        "Letter + sound": "Betű + hang",
+        "Click types & plays Morse simultaneously": "A kattintás egyszerre ír és lejátssza a Morse-t",
+        "Done": "Kész",
+        "How to play": "Hogyan játssz",
+        "Guess the hidden": "Találd ki a rejtett",
+        "5-letter word": "5 betűs szót",
+        "in 6 tries.": "6 próbálkozásból.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Minden tipp után a lapok megfordulnak, és a szó Morse-hangként szól.",
+        "Tile colors": "Lapszínek",
+        "Green": "Zöld",
+        "— right letter, right spot.": "— jó betű, jó hely.",
+        "Gold": "Arany",
+        "— letter exists but wrong spot.": "— a betű létezik, de rossz helyen.",
+        "Gray": "Szürke",
+        "— letter not in word.": "— a betű nincs a szóban.",
+        "Got it": "Értem",
+        "Solved!": "Megoldva!",
+        "Nicely decoded.": "Szépen dekódoltad.",
+        "Played": "Lejátszva",
+        "Win %": "Győzelem %",
+        "Best": "Legjobb",
+        "New Word": "Új szó",
+        "60 seconds. Decode as many signals as you can.": "60 másodperc. Dekódolj annyi jelet, amennyit csak tudsz.",
+        "Missed": "Kihagyva",
+        "Pause": "Szünet",
+        "Resume": "Folytatás",
+        "correct answers in 60 seconds": "helyes válasz 60 másodperc alatt",
+        "Accuracy": "Pontosság",
+        "Start Game": "Játék indítása",
+        "Universal Morse Translator": "Univerzális Morse-fordító",
+        "Translate text, images, or speech into Morse code in any language": "Fordíts szöveget, képeket vagy beszédet Morse-kódra bármilyen nyelven",
+        "Text": "Szöveg",
+        "Image": "Kép",
+        "Audio": "Hang",
+        "Video": "Videó",
+        "Drop image here or tap to upload": "Húzd ide a képet, vagy koppints a feltöltéshez",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Támogatja: JPG, PNG, GIF, WEBP — az MI kinyeri a szöveget",
+        "Hold to record": "Tartsd lenyomva a rögzítéshez",
+        "Tap to start speech recognition": "Koppints a beszédfelismerés indításához",
+        "Start Camera": "Kamera indítása",
+        "Capture & Translate": "Rögzítés és fordítás",
+        "Auto (2s)": "Automatikus (2 mp)",
+        "Language": "Nyelv",
+        "· change in Settings": "· módosítás a Beállításokban",
+        "→ Morse": "→ Morse",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Morse-bevitel (· vagy . a pontnak, − vagy - a vonalnak, szóközök a karakterek között, 3 szóköz vagy / a szavak között)",
+        "Translate to Morse": "Fordítás Morse-ra",
+        "Translating…": "Fordítás…",
+        "📡 Morse Code": "📡 Morse-kód",
+        "Copy": "Másolás",
+        "Print": "Nyomtatás",
+        "🔊 Audio Playback": "🔊 Hanglejátszás",
+        "Download WAV": "WAV letöltése",
+        "Play Morse": "Morse lejátszása",
+        "Slow (8 WPM)": "Lassú (8 WPM)",
+        "Medium (14 WPM)": "Közepes (14 WPM)",
+        "Fast (22 WPM)": "Gyors (22 WPM)",
+        "🖼 Morse Image": "🖼 Morse-kép",
+        "Download PNG": "PNG letöltése",
+        "Customize your MorseWave experience.": "Szabd testre a MorseWave élményedet.",
+        "Automatically switch between answers": "Automatikus váltás a válaszok között",
+        "Auto-advance": "Automatikus továbblépés",
+        "Automatically move to the next question": "Automatikus ugrás a következő kérdésre",
+        "Switch after": "Váltás ennyi után",
+        "Both": "Mindkettő",
+        "answer, after": "válasz, utána",
+        "Custom…": "Egyéni…",
+        "Custom delay:": "Egyéni késleltetés:",
+        "seconds (0.001 – 3)": "másodperc (0,001 – 3)",
+        "Interface Language": "Felület nyelve",
+        "Letter conversion": "Betűkonverzió",
+        "Feedback": "Visszajelzés",
+        "App Audit & Feedback": "Alkalmazás-ellenőrzés és visszajelzés",
+        "🔍 Search translations…": "🔍 Fordítások keresése…",
+      },
+      fil: {
+        "Welcome to MorseWave": "Maligayang pagdating sa MorseWave",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "Ang MorseWave ay dinisenyo upang tulungan kang madaling matutuhan ang Morse code. Kapag natutuhan mo na ang mga pangunahing kaalaman, maaari kang dumiretso sa aming mga interactive na laro at sanayin ang iyong mga kasanayan!",
+        "Your Feedback Matters: Help Us Build the Future": "Mahalaga ang Iyong Feedback: Tulungan Mo Kaming Buuin ang Kinabukasan",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Nakatuon kami sa pagiging perpekto. Kung makakita ka ng mga bug, problema sa layout, o gusto mo lang magbahagi ng iyong mga saloobin, i-click ang 'App Audit & Feedback' na button sa loob ng Settings screen o gamitin ang aming opisyal na review form sa ibaba.",
+        "Let's get started!": "Magsimula na tayo!",
+        "Welcome to the Learning Tab": "Maligayang pagdating sa Learning tab",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Kumusta! Nakarating ka na sa Learning tab. Sa tab na ito matututuhan mo ang lahat ng letra sa Morse mula A hanggang Z (kung gusto mo, maaari mong baguhin ang wika ng mga letra sa settings, para matuto ng mga letra mula Morse patungo sa ibang wika), pagkatapos ang mga numero mula 0 hanggang 9.",
+        "Start learning!": "Simulan ang pag-aaral!",
+        "Level Opened!": "Nabuksan ang Level!",
+        "A new level is unlocked. Keep up the great work!": "May bagong level na na-unlock. Ituloy ang magandang trabaho!",
+        "Continue": "Magpatuloy",
+        "Home": "Home",
+        "Learn": "Matuto",
+        "Telegraph": "Telegrapo",
+        "Practice": "Magsanay",
+        "Dictionary": "Diksyunaryo",
+        "Translate": "Isalin",
+        "Games": "Mga Laro",
+        "Settings": "Mga Setting",
+        "Change letter conversion from Morse to…": "Baguhin ang conversion ng letra mula Morse patungo sa…",
+        "Morse in 20 Languages": "Morse sa 20 Wika",
+        "Loading letters…": "Naglo-load ng mga letra…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — NA-UPGRADE",
+        "Learn Morse Code": "Matuto ng Morse Code",
+        "the right way.": "sa tamang paraan.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "Kurikulum na 7 level · Spaced repetition · 95 wika · Telegraph tap key · Purong Web Audio API",
+        "Start Learning →": "Simulan ang Pag-aaral →",
+        "Try Telegraph": "Subukan ang Telegrapo",
+        "Universal Translator": "Universal na Tagasalin",
+        "7-Level Progression": "7-Level na Pag-unlad",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Gabay na kurikulum mula E&T hanggang sa buong alpabeto. I-unlock ang mga level habang nada-master mo ang bawat yugto.",
+        "STRUCTURED COURSE": "STRUKTURADONG KURSO",
+        "Spaced Repetition": "Spaced Repetition",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Sinusubaybayan ang mahihinang letra at mas madalas itong ipinapakita — sistema ng memorya na batay sa agham.",
+        "SRS ENGINE": "SRS ENGINE",
+        "Telegraph Tap Key": "Telegraph Tap Key",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Tunay na interactive na key — i-click o pindutin ang Space. Nagde-decode 1.2s pagkatapos ng huling tap mo.",
+        "TAP TO SEND": "I-TAP PARA MAGPADALA",
+        "Full Dictionary": "Buong Diksyunaryo",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Bawat letra, numero at bantas — sa 95 wika. I-tap ang anumang karakter para marinig ang Morse code nito.",
+        "English": "Ingles",
+        "Choose a Level": "Pumili ng Level",
+        "Select below to begin": "Pumili sa ibaba para magsimula",
+        "7 LEVELS": "7 LEVEL",
+        "INTRO": "INTRO",
+        "← Levels": "← Mga Level",
+        "Continue →": "Magpatuloy →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Spaced Repetition — Ang Iyong Pag-unlad",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Maikling pindot = tuldok · Mahabang pindot = gitling · Awtomatikong nagde-decode pagkatapos ng 1.2s katahimikan",
+        "MORSE TELEGRAPH": "MORSE TELEGRAPO",
+        "Press & hold:": "Pindutin at hawakan:",
+        "Space": "Space",
+        "or": "o",
+        "· Or tap the key above": "· O i-tap ang key sa itaas",
+        "Slow": "Mabagal",
+        "Medium": "Katamtaman",
+        "Fast": "Mabilis",
+        "Live decode (free-tap mode)": "Live na decode (free-tap mode)",
+        "Correct": "Tama",
+        "Streak": "Streak",
+        "Total": "Kabuuan",
+        "Skip": "Laktawan",
+        "Play Target": "I-play ang Target",
+        "Wrong": "Mali",
+        "Question": "Tanong",
+        "Lang": "Wika",
+        "Mix": "Halo",
+        "Med": "Kat",
+        "Listen and decode": "Makinig at mag-decode",
+        "Play Signal": "I-play ang Signal",
+        "Your answer": "Ang iyong sagot",
+        "Enter to check": "Enter para suriin",
+        "Check": "Suriin",
+        "Next →": "Susunod →",
+        "Morse Dictionary": "Diksyunaryo ng Morse",
+        "Tap any character to hear it played.": "I-tap ang anumang karakter para marinig itong tumutugtog.",
+        "English A–Z + 0–9": "Ingles A–Z + 0–9",
+        "Current Language": "Kasalukuyang Wika",
+        "Punctuation": "Bantas",
+        "Sharpen your decoding instincts through play.": "Pahusayin ang iyong instinct sa pag-decode sa pamamagitan ng laro.",
+        "Featured": "Itinatampok",
+        "Morse Crossword": "Morse Crossword",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "Isang 7-salitang palaisipan na may nagsasalubong na sagot. Bawat clue ay tumutugtog sa Morse — makinig, mag-decode, at punan ang grid.",
+        "Play →": "Maglaro →",
+        "New": "Bago",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Hulaan ang 5-letrang salita sa 6 na subok. Bawat hula ay tumutugtog sa Morse audio para marinig mo ang iyong sagot.",
+        "Quickplay": "Quickplay",
+        "Letter Drill": "Letter Drill",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Random na signal ang tumutugtog — i-type ang sagot. Bumuo ng mga streak at subaybayan ang katumpakan sa mga letra, numero, at iyong aktibong wika.",
+        "Endless": "Walang Hanggan",
+        "Easy → Hard": "Madali → Mahirap",
+        "Hard": "Mahirap",
+        "Speed Decode": "Speed Decode",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 segundo. Mag-decode ng mga signal hangga't kaya mo. Makipagkarera sa oras.",
+        "Morse": "Morse",
+        "Crossword": "Crossword",
+        "Listen to each clue in Morse and fill the grid.": "Pakinggan ang bawat clue sa Morse at punan ang grid.",
+        "Filled": "Napunan",
+        "Solved": "Nalutas",
+        "Time": "Oras",
+        "Pick a clue to begin": "Pumili ng clue para magsimula",
+        "Clues": "Mga Clue",
+        "Across": "Pahalang",
+        "Down": "Pababa",
+        "Check Answers": "Suriin ang mga Sagot",
+        "Reveal Letter": "Ipakita ang Letra",
+        "Reveal Word": "Ipakita ang Salita",
+        "Reset": "I-reset",
+        "Puzzle Solved!": "Nalutas ang Palaisipan!",
+        "You decoded every word. Nicely done, operator.": "Na-decode mo ang bawat salita. Magaling, operator.",
+        "Hints": "Mga Pahiwatig",
+        "Plays": "Mga Play",
+        "Play Again": "Maglaro Muli",
+        "More Games": "Higit Pang Laro",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Hulaan ang 5-letrang salita sa 6 na subok. Bawat hula ay tumutugtog sa Morse.",
+        "Replay last guess": "I-replay ang huling hula",
+        "New word": "Bagong salita",
+        "Keyboard Mode": "Keyboard Mode",
+        "Letter display": "Pagpapakita ng letra",
+        "Standard A–Z keyboard": "Standard na A–Z keyboard",
+        "Morse display": "Pagpapakita ng Morse",
+        "Keys show dots & dashes": "Ipinapakita ng mga key ang tuldok at gitling",
+        "Morse sound": "Tunog ng Morse",
+        "1st click plays sound, 2nd click types letter": "Ang 1st click ay nagpapatugtog ng tunog, ang 2nd click ay nagta-type ng letra",
+        "Letter + sound": "Letra + tunog",
+        "Click types & plays Morse simultaneously": "Ang click ay nagta-type at nagpapatugtog ng Morse nang sabay",
+        "Done": "Tapos",
+        "How to play": "Paano maglaro",
+        "Guess the hidden": "Hulaan ang nakatagong",
+        "5-letter word": "5-letrang salita",
+        "in 6 tries.": "sa 6 na subok.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Pagkatapos ng bawat hula, lumilipat ang mga tile at tumutugtog ang salita sa Morse audio.",
+        "Tile colors": "Mga kulay ng tile",
+        "Green": "Berde",
+        "— right letter, right spot.": "— tamang letra, tamang lugar.",
+        "Gold": "Ginto",
+        "— letter exists but wrong spot.": "— may letra ngunit maling lugar.",
+        "Gray": "Kulay-abo",
+        "— letter not in word.": "— wala ang letra sa salita.",
+        "Got it": "Nakuha ko",
+        "Solved!": "Nalutas!",
+        "Nicely decoded.": "Magaling na pag-decode.",
+        "Played": "Nalaro",
+        "Win %": "Panalo %",
+        "Best": "Pinakamahusay",
+        "New Word": "Bagong Salita",
+        "60 seconds. Decode as many signals as you can.": "60 segundo. Mag-decode ng mga signal hangga't kaya mo.",
+        "Missed": "Nalaktawan",
+        "Pause": "I-pause",
+        "Resume": "Ipagpatuloy",
+        "correct answers in 60 seconds": "tamang sagot sa 60 segundo",
+        "Accuracy": "Katumpakan",
+        "Start Game": "Simulan ang Laro",
+        "Universal Morse Translator": "Universal na Tagasalin ng Morse",
+        "Translate text, images, or speech into Morse code in any language": "Isalin ang teksto, mga larawan, o pananalita sa Morse code sa anumang wika",
+        "Text": "Teksto",
+        "Image": "Larawan",
+        "Audio": "Audio",
+        "Video": "Video",
+        "Drop image here or tap to upload": "Ihulog ang larawan dito o i-tap para mag-upload",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Sinusuportahan ang JPG, PNG, GIF, WEBP — kukunin ng AI ang teksto",
+        "Hold to record": "Pindutin nang matagal para mag-record",
+        "Tap to start speech recognition": "I-tap para simulan ang speech recognition",
+        "Start Camera": "Buksan ang Camera",
+        "Capture & Translate": "Kumuha at Isalin",
+        "Auto (2s)": "Auto (2s)",
+        "Language": "Wika",
+        "· change in Settings": "· baguhin sa Settings",
+        "→ Morse": "→ Morse",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Morse Input (· o . para sa tuldok, − o - para sa gitling, mga espasyo sa pagitan ng mga karakter, 3 espasyo o / sa pagitan ng mga salita)",
+        "Translate to Morse": "Isalin sa Morse",
+        "Translating…": "Isinasalin…",
+        "📡 Morse Code": "📡 Morse Code",
+        "Copy": "Kopyahin",
+        "Print": "I-print",
+        "🔊 Audio Playback": "🔊 Audio Playback",
+        "Download WAV": "I-download ang WAV",
+        "Play Morse": "I-play ang Morse",
+        "Slow (8 WPM)": "Mabagal (8 WPM)",
+        "Medium (14 WPM)": "Katamtaman (14 WPM)",
+        "Fast (22 WPM)": "Mabilis (22 WPM)",
+        "🖼 Morse Image": "🖼 Larawan ng Morse",
+        "Download PNG": "I-download ang PNG",
+        "Customize your MorseWave experience.": "I-customize ang iyong karanasan sa MorseWave.",
+        "Automatically switch between answers": "Awtomatikong lumipat sa pagitan ng mga sagot",
+        "Auto-advance": "Awtomatikong pagsulong",
+        "Automatically move to the next question": "Awtomatikong lumipat sa susunod na tanong",
+        "Switch after": "Lumipat pagkatapos ng",
+        "Both": "Parehas",
+        "answer, after": "sagot, pagkatapos ng",
+        "Custom…": "Custom…",
+        "Custom delay:": "Custom na delay:",
+        "seconds (0.001 – 3)": "segundo (0.001 – 3)",
+        "Interface Language": "Wika ng Interface",
+        "Letter conversion": "Conversion ng letra",
+        "Feedback": "Feedback",
+        "App Audit & Feedback": "App Audit at Feedback",
+        "🔍 Search translations…": "🔍 Maghanap ng mga salin…",
+      },
+      fi: {
+        "Welcome to MorseWave": "Tervetuloa MorseWaveen",
+        "MorseWave is designed to help you master Morse code with absolute ease. Once you've learned the basics, you can jump straight into our interactive games and practice your skills!": "MorseWave on suunniteltu auttamaan sinua hallitsemaan morsekoodi äärimmäisen helposti. Kun olet oppinut perusteet, voit siirtyä suoraan interaktiivisiin peleihimme ja harjoitella taitojasi!",
+        "Your Feedback Matters: Help Us Build the Future": "Palautteesi on tärkeää: auta meitä rakentamaan tulevaisuutta",
+        "We are committed to perfection. If you encounter any bugs, run into layout clipping, or simply want to share your thoughts, click the 'App Audit & Feedback' button inside the Settings screen or use our official review form below.": "Tavoittelemme täydellisyyttä. Jos kohtaat virheitä tai asetteluongelmia tai haluat vain jakaa ajatuksesi, napsauta Asetukset-näytön 'App Audit & Feedback' -painiketta tai käytä alla olevaa virallista palautelomaketta.",
+        "Let's get started!": "Aloitetaan!",
+        "Welcome to the Learning Tab": "Tervetuloa Oppiminen-välilehdelle",
+        "Hi! You have arrived at the Learning tab. In this tab you will learn all the letters in Morse from A to Z (if you want, you can change the letter language in the settings, so you can learn letters from Morse to another language), then the numbers from 0 to 9.": "Hei! Saavuit Oppiminen-välilehdelle. Tällä välilehdellä opit kaikki morsekoodin kirjaimet A:sta Z:aan (halutessasi voit vaihtaa kirjainten kielen asetuksista, jotta voit oppia kirjaimia morsekoodista toiselle kielelle), sitten numerot 0:sta 9:ään.",
+        "Start learning!": "Aloita oppiminen!",
+        "Level Opened!": "Taso avattu!",
+        "A new level is unlocked. Keep up the great work!": "Uusi taso on avattu. Jatka hyvää työtä!",
+        "Continue": "Jatka",
+        "Home": "Koti",
+        "Learn": "Opi",
+        "Telegraph": "Lennätin",
+        "Practice": "Harjoittele",
+        "Dictionary": "Sanakirja",
+        "Translate": "Käännä",
+        "Games": "Pelit",
+        "Settings": "Asetukset",
+        "Change letter conversion from Morse to…": "Vaihda kirjainmuunnos morsekoodista kohteeseen…",
+        "Morse in 20 Languages": "Morse 20 kielellä",
+        "Loading letters…": "Ladataan kirjaimia…",
+        "MORSE WAVE 2.0 — UPGRADED": "MORSE WAVE 2.0 — PÄIVITETTY",
+        "Learn Morse Code": "Opi morsekoodi",
+        "the right way.": "oikealla tavalla.",
+        "7-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API": "7 tason opinto-ohjelma · Välitetty kertaus · 95 kieltä · Lennätinnäppäin · Puhdas Web Audio API",
+        "Start Learning →": "Aloita oppiminen →",
+        "Try Telegraph": "Kokeile lennätintä",
+        "Universal Translator": "Universaali kääntäjä",
+        "7-Level Progression": "7 tason eteneminen",
+        "Guided curriculum from E&T to your full alphabet. Unlock levels as you master each stage.": "Ohjattu opinto-ohjelma E:stä ja T:stä koko aakkostoon. Avaa tasoja, kun hallitset jokaisen vaiheen.",
+        "STRUCTURED COURSE": "JÄSENNELTY KURSSI",
+        "Spaced Repetition": "Välitetty kertaus",
+        "Tracks weak letters and surfaces them more often — science-backed memory system.": "Seuraa heikkoja kirjaimia ja näyttää ne useammin — tieteeseen perustuva muistijärjestelmä.",
+        "SRS ENGINE": "SRS-MOOTTORI",
+        "Telegraph Tap Key": "Lennätinnäppäin",
+        "Real interactive key — click or press Space. Decodes 1.2s after your last tap.": "Aito interaktiivinen näppäin — napsauta tai paina välilyöntiä. Purkaa 1,2 s viimeisen napautuksen jälkeen.",
+        "TAP TO SEND": "NAPAUTA LÄHETTÄÄKSESI",
+        "Full Dictionary": "Täysi sanakirja",
+        "Every letter, number & punctuation mark — in 95 languages. Tap any character to hear its Morse code.": "Jokainen kirjain, numero ja välimerkki — 95 kielellä. Napauta mitä tahansa merkkiä kuullaksesi sen morsekoodin.",
+        "English": "Englanti",
+        "Choose a Level": "Valitse taso",
+        "Select below to begin": "Valitse alta aloittaaksesi",
+        "7 LEVELS": "7 TASOA",
+        "INTRO": "JOHDANTO",
+        "← Levels": "← Tasot",
+        "Continue →": "Jatka →",
+        "🧠 Spaced Repetition — Your Progress": "🧠 Välitetty kertaus — Edistymisesi",
+        "Short press = dot · Long press = dash · Auto-decodes after 1.2s silence": "Lyhyt painallus = piste · Pitkä = viiva · Purkaa automaattisesti 1,2 s hiljaisuuden jälkeen",
+        "MORSE TELEGRAPH": "MORSELENNÄTIN",
+        "Press & hold:": "Paina ja pidä:",
+        "Space": "Välilyönti",
+        "or": "tai",
+        "· Or tap the key above": "· Tai napauta yllä olevaa näppäintä",
+        "Slow": "Hidas",
+        "Medium": "Keskitaso",
+        "Fast": "Nopea",
+        "Live decode (free-tap mode)": "Reaaliaikainen purku (vapaa napautustila)",
+        "Correct": "Oikein",
+        "Streak": "Putki",
+        "Total": "Yhteensä",
+        "Skip": "Ohita",
+        "Play Target": "Toista kohde",
+        "Wrong": "Väärin",
+        "Question": "Kysymys",
+        "Lang": "Kieli",
+        "Mix": "Sekoitus",
+        "Med": "Kesk",
+        "Listen and decode": "Kuuntele ja pura",
+        "Play Signal": "Toista signaali",
+        "Your answer": "Vastauksesi",
+        "Enter to check": "Enter tarkistaaksesi",
+        "Check": "Tarkista",
+        "Next →": "Seuraava →",
+        "Morse Dictionary": "Morsesanakirja",
+        "Tap any character to hear it played.": "Napauta mitä tahansa merkkiä kuullaksesi sen.",
+        "English A–Z + 0–9": "Englanti A–Z + 0–9",
+        "Current Language": "Nykyinen kieli",
+        "Punctuation": "Välimerkit",
+        "Sharpen your decoding instincts through play.": "Teroita purkuvaistosi pelaamalla.",
+        "Featured": "Esillä",
+        "Morse Crossword": "Morseristikko",
+        "A 7-word puzzle with intersecting answers. Each clue plays in Morse — listen, decode, and fill the grid.": "7 sanan pulma, jossa vastaukset risteävät. Jokainen vihje soitetaan morsena — kuuntele, pura ja täytä ruudukko.",
+        "Play →": "Pelaa →",
+        "New": "Uusi",
+        "Morse Wordle": "Morse Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays back in Morse audio so you can hear your answer.": "Arvaa 5-kirjaiminen sana 6 yrityksellä. Jokainen arvaus toistetaan morseäänenä, jotta kuulet vastauksesi.",
+        "Quickplay": "Pikapeli",
+        "Letter Drill": "Kirjainharjoitus",
+        "Random signal plays — type the answer. Build streaks and track accuracy across letters, numbers, and your active language.": "Satunnainen signaali soi — kirjoita vastaus. Rakenna putkia ja seuraa tarkkuutta kirjainten, numeroiden ja aktiivisen kielesi osalta.",
+        "Endless": "Loputon",
+        "Easy → Hard": "Helppo → Vaikea",
+        "Hard": "Vaikea",
+        "Speed Decode": "Nopea purku",
+        "60 seconds. Decode as many signals as you can. Race against the clock.": "60 sekuntia. Pura niin monta signaalia kuin pystyt. Kilpaa kelloa vastaan.",
+        "Morse": "Morse",
+        "Crossword": "Ristikko",
+        "Listen to each clue in Morse and fill the grid.": "Kuuntele jokainen vihje morsena ja täytä ruudukko.",
+        "Filled": "Täytetty",
+        "Solved": "Ratkaistu",
+        "Time": "Aika",
+        "Pick a clue to begin": "Valitse vihje aloittaaksesi",
+        "Clues": "Vihjeet",
+        "Across": "Vaaka",
+        "Down": "Pysty",
+        "Check Answers": "Tarkista vastaukset",
+        "Reveal Letter": "Paljasta kirjain",
+        "Reveal Word": "Paljasta sana",
+        "Reset": "Nollaa",
+        "Puzzle Solved!": "Pulma ratkaistu!",
+        "You decoded every word. Nicely done, operator.": "Puit jokaisen sanan. Hienoa työtä, operaattori.",
+        "Hints": "Vihjeet",
+        "Plays": "Toistot",
+        "Play Again": "Pelaa uudelleen",
+        "More Games": "Lisää pelejä",
+        "Wordle": "Wordle",
+        "Guess the 5-letter word in 6 tries. Each guess plays in Morse.": "Arvaa 5-kirjaiminen sana 6 yrityksellä. Jokainen arvaus soitetaan morsena.",
+        "Replay last guess": "Toista viimeisin arvaus",
+        "New word": "Uusi sana",
+        "Keyboard Mode": "Näppäimistötila",
+        "Letter display": "Kirjainnäyttö",
+        "Standard A–Z keyboard": "Vakio A–Z-näppäimistö",
+        "Morse display": "Morsenäyttö",
+        "Keys show dots & dashes": "Näppäimet näyttävät pisteet ja viivat",
+        "Morse sound": "Morseääni",
+        "1st click plays sound, 2nd click types letter": "1. napsautus toistaa äänen, 2. kirjoittaa kirjaimen",
+        "Letter + sound": "Kirjain + ääni",
+        "Click types & plays Morse simultaneously": "Napsautus kirjoittaa ja toistaa morsen samanaikaisesti",
+        "Done": "Valmis",
+        "How to play": "Pelin ohjeet",
+        "Guess the hidden": "Arvaa piilotettu",
+        "5-letter word": "5-kirjaiminen sana",
+        "in 6 tries.": "6 yrityksellä.",
+        "After each guess, tiles flip and the word plays in Morse audio.": "Jokaisen arvauksen jälkeen ruudut kääntyvät ja sana soitetaan morseäänenä.",
+        "Tile colors": "Ruutujen värit",
+        "Green": "Vihreä",
+        "— right letter, right spot.": "— oikea kirjain, oikea paikka.",
+        "Gold": "Kulta",
+        "— letter exists but wrong spot.": "— kirjain on olemassa, mutta väärässä paikassa.",
+        "Gray": "Harmaa",
+        "— letter not in word.": "— kirjainta ei ole sanassa.",
+        "Got it": "Selvä",
+        "Solved!": "Ratkaistu!",
+        "Nicely decoded.": "Hienosti purettu.",
+        "Played": "Pelattu",
+        "Win %": "Voitto-%",
+        "Best": "Paras",
+        "New Word": "Uusi sana",
+        "60 seconds. Decode as many signals as you can.": "60 sekuntia. Pura niin monta signaalia kuin pystyt.",
+        "Missed": "Ohi",
+        "Pause": "Tauko",
+        "Resume": "Jatka",
+        "correct answers in 60 seconds": "oikeaa vastausta 60 sekunnissa",
+        "Accuracy": "Tarkkuus",
+        "Start Game": "Aloita peli",
+        "Universal Morse Translator": "Universaali morsekääntäjä",
+        "Translate text, images, or speech into Morse code in any language": "Käännä tekstiä, kuvia tai puhetta morsekoodiksi millä tahansa kielellä",
+        "Text": "Teksti",
+        "Image": "Kuva",
+        "Audio": "Ääni",
+        "Video": "Video",
+        "Drop image here or tap to upload": "Pudota kuva tähän tai napauta ladataksesi",
+        "Supports JPG, PNG, GIF, WEBP — AI will extract the text": "Tukee JPG-, PNG-, GIF- ja WEBP-muotoja — tekoäly poimii tekstin",
+        "Hold to record": "Pidä painettuna nauhoittaaksesi",
+        "Tap to start speech recognition": "Napauta aloittaaksesi puheentunnistuksen",
+        "Start Camera": "Käynnistä kamera",
+        "Capture & Translate": "Ota kuva ja käännä",
+        "Auto (2s)": "Auto (2 s)",
+        "Language": "Kieli",
+        "· change in Settings": "· vaihda Asetuksissa",
+        "→ Morse": "→ Morse",
+        "Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)": "Morsesyöte (· tai . pisteelle, − tai - viivalle, välilyönnit merkkien välissä, 3 välilyöntiä tai / sanojen välissä)",
+        "Translate to Morse": "Käännä morseksi",
+        "Translating…": "Käännetään…",
+        "📡 Morse Code": "📡 Morsekoodi",
+        "Copy": "Kopioi",
+        "Print": "Tulosta",
+        "🔊 Audio Playback": "🔊 Äänen toisto",
+        "Download WAV": "Lataa WAV",
+        "Play Morse": "Toista morse",
+        "Slow (8 WPM)": "Hidas (8 WPM)",
+        "Medium (14 WPM)": "Keskitaso (14 WPM)",
+        "Fast (22 WPM)": "Nopea (22 WPM)",
+        "🖼 Morse Image": "🖼 Morsekuva",
+        "Download PNG": "Lataa PNG",
+        "Customize your MorseWave experience.": "Mukauta MorseWave-kokemuksesi.",
+        "Automatically switch between answers": "Vaihda automaattisesti vastausten välillä",
+        "Auto-advance": "Automaattinen eteneminen",
+        "Automatically move to the next question": "Siirry automaattisesti seuraavaan kysymykseen",
+        "Switch after": "Vaihda jälkeen",
+        "Both": "Molemmat",
+        "answer, after": "vastaus, jälkeen",
+        "Custom…": "Mukautettu…",
+        "Custom delay:": "Mukautettu viive:",
+        "seconds (0.001 – 3)": "sekuntia (0,001 – 3)",
+        "Interface Language": "Käyttöliittymän kieli",
+        "Letter conversion": "Kirjainmuunnos",
+        "Feedback": "Palaute",
+        "App Audit & Feedback": "Sovelluksen tarkistus ja palaute",
+        "🔍 Search translations…": "🔍 Hae käännöksiä…",
+      },
 };
 
     // Original-text cache so switching languages (and back to English) is lossless.
@@ -9071,7 +9696,7 @@
     //    with every change. To add a language: append its code to I18N_LANGS,
     //    add a full keyed block to I18N, and add an <option> to #uiLangSel.
     // ════════════════════════════════════════════════════════════════
-    const I18N_LANGS = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'ru', 'it', 'zh', 'hi', 'ja', 'ko', 'tr', 'nl', 'pl', 'id', 'vi', 'el', 'th', 'uk', 'sv', 'cs', 'ro'];
+    const I18N_LANGS = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'ru', 'it', 'zh', 'hi', 'ja', 'ko', 'tr', 'nl', 'pl', 'id', 'vi', 'el', 'th', 'uk', 'sv', 'cs', 'ro', 'hu', 'fil', 'fi'];
 
     // Central interface-language update: swaps all DOM text, sets RTL for Arabic, persists.
     function applyUILang(code) {
@@ -9087,7 +9712,7 @@
       var _sel = document.getElementById('uiLangSel'); if (_sel) _sel.value = code;
       try { if (typeof syncUILangPickerRow === 'function') syncUILangPickerRow(code); } catch (e) {}
     }
-    const UI_LANG_NAMES = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt',el:'Ελληνικά',th:'ไทย',uk:'Українська',sv:'Svenska',cs:'Čeština',ro:'Română'};
+    const UI_LANG_NAMES = {en:'English',es:'Español',ar:'العربية',fr:'Français',de:'Deutsch',pt:'Português',ru:'Русский',it:'Italiano',zh:'中文',hi:'हिन्दी',ja:'日本語',ko:'한국어',tr:'Türkçe',nl:'Nederlands',pl:'Polski',id:'Bahasa Indonesia',vi:'Tiếng Việt',el:'Ελληνικά',th:'ไทย',uk:'Українська',sv:'Svenska',cs:'Čeština',ro:'Română',hu:'Magyar',fil:'Filipino',fi:'Suomi'};
 const WORDLE_UI_NOTICE = {
   en:'The app has been translated into {lang}, but the Wordle game does not change language from English. Thank you for understanding!',
   es:'La aplicación se ha traducido al {lang}, pero el juego Wordle no cambia de idioma y permanece en inglés. ¡Gracias por tu comprensión!',
@@ -9111,7 +9736,10 @@ const WORDLE_UI_NOTICE = {
   uk:'Застосунок перекладено на {lang}, але гра Wordle не змінює мову й залишається англійською. Дякуємо за розуміння!',
   sv:'Appen har översatts till {lang}, men Wordle-spelet byter inte språk och förblir på engelska. Tack för din förståelse!',
   cs:'Aplikace byla přeložena do jazyka {lang}, ale hra Wordle jazyk nemění a zůstává v angličtině. Děkujeme za pochopení!',
-  ro:'Aplicația a fost tradusă în {lang}, dar jocul Wordle nu își schimbă limba și rămâne în engleză. Mulțumim pentru înțelegere!'
+  ro:'Aplicația a fost tradusă în {lang}, dar jocul Wordle nu își schimbă limba și rămâne în engleză. Mulțumim pentru înțelegere!',
+  hu:'Az alkalmazás le lett fordítva erre: {lang}, de a Wordle játék nyelve nem változik, és angol marad. Köszönjük a megértést!',
+  fil:'Naisalin na ang app sa {lang}, ngunit hindi nagbabago ng wika ang Wordle game at nananatiling Ingles. Salamat sa iyong pang-unawa!',
+  fi:'Sovellus on käännetty kielelle {lang}, mutta Wordle-peli ei vaihda kieltä ja pysyy englanniksi. Kiitos ymmärryksestäsi!'
 };
 function setUILang(code) {
   applyUILang(code);
@@ -9147,6 +9775,251 @@ function setUILang(code) {
     // Build the translator's own language dropdown (default English) and render the swap row.
     try { if (typeof trBuildLangDropdown === 'function') trBuildLangDropdown(); } catch(e){}
     try { if (typeof trRenderDirRow === 'function') trRenderDirRow(); } catch(e){}
+    try { if (typeof renderSyncUI === 'function') renderSyncUI(); } catch(e){}
+
+    // ═══════════════════════════════════════════════════════════════
+    //  OPTIONAL CLOUD SYNC — opt-in only; local-only stays the default.
+    //  Paste your Firebase project's config into FIREBASE_CONFIG below.
+    //  Until it's filled in, the Sync section says it isn't set up and
+    //  nothing else is affected. Sync NEVER deletes local progress.
+    // ═══════════════════════════════════════════════════════════════
+    const FIREBASE_CONFIG = {
+      // ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE (from the Firebase console) ▼▼▼
+      // apiKey:       "",
+      // authDomain:   "",
+      // databaseURL:  "https://YOUR-PROJECT-default-rtdb.firebaseio.com",
+      // projectId:    "",
+      // appId:        ""
+      // ▲▲▲ ------------------------------------------------------- ▲▲▲
+    };
+
+    const SYNC = {
+      keys: ['morsewave_onboarding_completed','mw_learn_onboarded','mw_lvls','mw_lvls_en',
+             'mw_speed_best','mw_srs','mw_streak','mw_theme','mw_lang','mw_ui_lang',
+             'mw_wordle_lang','mw_tr_history','mw_ui_lang_recent','mw_lang_recent','mw_tr_lang_recent'],
+      ready:false, app:null, db:null, ref:null, pushTimer:null, lastApplied:0, applying:false
+    };
+
+    function _syncConfigured(){ return !!(FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL && FIREBASE_CONFIG.apiKey); }
+    function _syncToast(m){ try { if (typeof toast === 'function') toast(m); } catch(e){} }
+    function _syncDevice(){
+      let d = null; try { d = localStorage.getItem('mw_sync_device'); } catch(e){}
+      if (!d){ d = 'd' + Math.random().toString(36).slice(2) + Date.now().toString(36); try { localStorage.setItem('mw_sync_device', d); } catch(e){} }
+      return d;
+    }
+    function _syncCode(){ try { return localStorage.getItem('mw_sync_code') || ''; } catch(e){ return ''; } }
+    function _syncEnabled(){ try { return localStorage.getItem('mw_sync_enabled') === '1' && !!_syncCode(); } catch(e){ return false; } }
+    function _syncNewCode(){
+      const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = '';
+      for (let g=0; g<3; g++){ for (let i=0;i<4;i++) s += A[Math.floor(Math.random()*A.length)]; if (g<2) s += '-'; }
+      return s;
+    }
+
+    // Lazy-load Firebase compat SDK from the CDN — only when sync is actually used.
+    function _loadFirebase(){
+      return new Promise((resolve, reject) => {
+        if (window.firebase && window.firebase.database) return resolve();
+        const urls = [
+          'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js',
+          'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js',
+          'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js'
+        ];
+        let i = 0;
+        const next = () => {
+          if (i >= urls.length) return resolve();
+          const s = document.createElement('script');
+          s.src = urls[i++]; s.async = false;
+          s.onload = next;
+          s.onerror = () => reject(new Error('network'));
+          document.head.appendChild(s);
+        };
+        next();
+      });
+    }
+
+    async function _syncInit(){
+      if (SYNC.ready) return true;
+      if (!_syncConfigured()) throw new Error('not-configured');
+      await _loadFirebase();
+      if (!SYNC.app){
+        SYNC.app = firebase.initializeApp(FIREBASE_CONFIG);
+        SYNC.db = firebase.database();
+        await firebase.auth().signInAnonymously();
+      }
+      SYNC.ready = true;
+      return true;
+    }
+
+    function _gatherLocal(){
+      const data = {};
+      SYNC.keys.forEach(k => { let v = null; try { v = localStorage.getItem(k); } catch(e){} if (v !== null) data[k] = v; });
+      return data;
+    }
+
+    // Conservative merge — keeps the most-progress for each key, never destroys local data.
+    function _mergeInto(remoteData){
+      if (!remoteData) return;
+      const numMax = (a,b) => { const x = parseFloat(a), y = parseFloat(b); return String(Math.max(isNaN(x)?-Infinity:x, isNaN(y)?-Infinity:y)); };
+      SYNC.keys.forEach(k => {
+        const rv = remoteData[k]; if (rv === undefined || rv === null) return;
+        let lv = null; try { lv = localStorage.getItem(k); } catch(e){}
+        const put = (val) => { try { localStorage.setItem(k, val); } catch(e){} };
+        if (lv === null){ put(rv); return; }
+        try {
+          if (k === 'mw_speed_best'){ put(numMax(lv, rv)); return; }
+          if (k === 'morsewave_onboarding_completed' || k === 'mw_learn_onboarded'){
+            put((lv === 'true' || rv === 'true') ? 'true' : lv); return;
+          }
+          if (k === 'mw_lvls' || k === 'mw_lvls_en'){
+            const a = JSON.parse(lv || '{}'), b = JSON.parse(rv || '{}'), out = Object.assign({}, a);
+            Object.keys(b).forEach(x => { out[x] = a[x] || b[x]; });   // OR — any device that finished a level keeps it
+            put(JSON.stringify(out)); return;
+          }
+          if (k === 'mw_srs'){
+            const a = JSON.parse(lv || '{}'), b = JSON.parse(rv || '{}'), out = Object.assign({}, a);
+            Object.keys(b).forEach(x => { out[x] = (a[x] === undefined) ? b[x] : Math.max(a[x], b[x]); });
+            put(JSON.stringify(out)); return;
+          }
+          if (k === 'mw_streak'){
+            const a = JSON.parse(lv || '{}'), b = JSON.parse(rv || '{}');
+            const out = { best: Math.max(a.best||0, b.best||0), total: Math.max(a.total||0, b.total||0) };
+            if ((b.last||'') > (a.last||'')){ out.last = b.last; out.current = b.current||0; }
+            else { out.last = a.last; out.current = a.current||0; }
+            put(JSON.stringify(out)); return;
+          }
+          if (k === 'mw_tr_history'){
+            const a = JSON.parse(lv || '[]'), b = JSON.parse(rv || '[]'), seen = {}, out = [];
+            a.concat(b).sort((x,y) => (y.time||0) - (x.time||0)).forEach(e => { const id = e && e.id; if (id && !seen[id]){ seen[id] = 1; out.push(e); } });
+            put(JSON.stringify(out.slice(0,60))); return;
+          }
+          if (k.slice(-7) === '_recent'){
+            const a = JSON.parse(lv || '[]'), b = JSON.parse(rv || '[]'), out = [];
+            a.concat(b).forEach(c => { if (out.indexOf(c) === -1) out.push(c); });
+            put(JSON.stringify(out.slice(0,40))); return;
+          }
+          put(rv);   // prefs (theme / langs): last-write-wins
+        } catch(e){ /* on any parse issue, keep local as-is */ }
+      });
+    }
+
+    function _syncRefreshUI(){
+      try { if (typeof applyUILang === 'function') applyUILang(localStorage.getItem('mw_ui_lang') || 'en'); } catch(e){}
+      try { const d = JSON.parse(localStorage.getItem('mw_streak') || '{}'); if (typeof renderStreak === 'function') renderStreak(d); } catch(e){}
+      try { srs = JSON.parse(localStorage.getItem('mw_srs') || '{}'); } catch(e){}
+      try { if (typeof renderLevels === 'function') renderLevels(); } catch(e){}
+      try { if (typeof renderLevelGrid === 'function') renderLevelGrid(); } catch(e){}
+    }
+
+    function _syncPushNow(){
+      if (!SYNC.ready || !_syncEnabled()) return;
+      try { SYNC.db.ref('sync/' + _syncCode()).set({ data: _gatherLocal(), _ts: Date.now(), _device: _syncDevice() }); } catch(e){}
+    }
+    function _syncPushDebounced(){
+      if (!_syncEnabled()) return;
+      clearTimeout(SYNC.pushTimer);
+      SYNC.pushTimer = setTimeout(() => { if (SYNC.ready) _syncPushNow(); }, 1500);
+    }
+
+    function _syncAttach(){
+      if (!SYNC.ready) return;
+      try { if (SYNC.ref) SYNC.ref.off(); } catch(e){}
+      SYNC.ref = SYNC.db.ref('sync/' + _syncCode());
+      SYNC.ref.on('value', snap => {
+        const val = snap.val();
+        if (!val || !val.data) return;
+        if (val._device === _syncDevice()) return;       // ignore our own writes
+        if ((val._ts || 0) <= SYNC.lastApplied) return;   // already applied
+        SYNC.lastApplied = val._ts || Date.now();
+        SYNC.applying = true;
+        _mergeInto(val.data);
+        SYNC.applying = false;
+        _syncRefreshUI();
+        _syncPushDebounced();   // push merged result so both devices converge
+      });
+    }
+
+    async function syncEnable(){
+      try {
+        syncStatus('Connecting…');
+        await _syncInit();
+        if (!_syncCode()) localStorage.setItem('mw_sync_code', _syncNewCode());
+        localStorage.setItem('mw_sync_enabled', '1');
+        _syncPushNow();
+        _syncAttach();
+        renderSyncUI();
+        _syncToast('Sync turned on');
+      } catch(e){ syncStatus(e && e.message === 'not-configured' ? 'Not set up yet' : 'Could not connect — check your connection'); renderSyncUI(); }
+    }
+
+    async function syncLink(){
+      const inp = document.getElementById('syncCodeInput');
+      const code = ((inp && inp.value) || '').trim().toUpperCase();
+      if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)){ syncStatus('Enter a valid code: XXXX-XXXX-XXXX'); return; }
+      try {
+        syncStatus('Linking…');
+        localStorage.setItem('mw_sync_code', code);
+        await _syncInit();
+        const snap = await SYNC.db.ref('sync/' + code).get();
+        const val = snap.val();
+        if (val && val.data){ SYNC.lastApplied = val._ts || Date.now(); _mergeInto(val.data); _syncRefreshUI(); }
+        localStorage.setItem('mw_sync_enabled', '1');
+        _syncPushNow();
+        _syncAttach();
+        renderSyncUI();
+        _syncToast('Device linked — progress merged');
+      } catch(e){ syncStatus(e && e.message === 'not-configured' ? 'Not set up yet' : 'Could not link — check the code and your connection'); renderSyncUI(); }
+    }
+
+    function syncOff(){
+      try { if (SYNC.ref) SYNC.ref.off(); } catch(e){}
+      try { localStorage.setItem('mw_sync_enabled', '0'); } catch(e){}
+      renderSyncUI();
+      _syncToast('Sync turned off — your data stays on this device');
+    }
+
+    function syncCopyCode(){ try { _copyText(_syncCode(), 'Sync code copied!'); } catch(e){} }
+    function syncStatus(msg){ const s = document.getElementById('syncStatus'); if (s) s.textContent = msg || ''; }
+
+    function renderSyncUI(){
+      const slot = document.getElementById('syncSlot');
+      if (!slot) return;
+      if (!_syncConfigured()){
+        slot.innerHTML = '<div class="srow-sub">Cloud sync isn\u2019t set up yet. Once the Firebase keys are added to the app, you\u2019ll be able to turn this on and share your progress across devices.</div>';
+        return;
+      }
+      if (_syncEnabled()){
+        slot.innerHTML =
+          '<div class="srow-sub" id="syncStatus">Sync is on \u2713</div>' +
+          '<div class="sync-code-box"><span class="sync-code">' + _syncCode() + '</span>' +
+          '<button class="lbtn small" onclick="syncCopyCode()">Copy</button></div>' +
+          '<div class="srow-sub">Enter this code on another device (Settings \u2192 Sync) to share your progress.</div>' +
+          '<button class="lbtn" onclick="syncOff()">Turn off sync</button>';
+      } else {
+        slot.innerHTML =
+          '<div class="srow-sub" id="syncStatus">Off \u2014 your progress is saved on this device only.</div>' +
+          '<button class="lbtn prime" onclick="syncEnable()">Enable sync on this device</button>' +
+          '<div class="srow-sub" style="margin-top:.7rem">Already have a sync code from another device?</div>' +
+          '<div class="sync-link-row"><input id="syncCodeInput" class="sync-input" placeholder="XXXX-XXXX-XXXX" maxlength="14" autocomplete="off" spellcheck="false">' +
+          '<button class="lbtn" onclick="syncLink()">Link</button></div>';
+      }
+    }
+
+    // Auto-push whenever any synced key changes (only while sync is on).
+    (function(){
+      try {
+        const _origSet = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = function(k, v){
+          _origSet(k, v);
+          try { if (!SYNC.applying && _syncEnabled() && SYNC.keys.indexOf(k) !== -1) _syncPushDebounced(); } catch(e){}
+        };
+      } catch(e){}
+    })();
+
+    // On load, quietly reconnect if sync was already on.
+    (function(){
+      try { if (_syncEnabled() && _syncConfigured()) _syncInit().then(() => { _syncPushNow(); _syncAttach(); }).catch(() => {}); } catch(e){}
+    })();
+
 </script>
 </body>
 </html>
