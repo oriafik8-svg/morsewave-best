@@ -2016,6 +2016,9 @@
                         <button class="tr-play-btn" id="trPlayBtn" onclick="trPlayMorse()">
                             <svg viewBox="0 0 12 12"><polygon points="2,1 11,6 2,11"/></svg>Play Morse
                         </button>
+                        <button class="tr-play-btn tr-stop-btn" id="trStopBtn" onclick="trStopMorse()" title="Stop" aria-label="Stop">
+                            <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" rx="1"/></svg>
+                        </button>
                         <select class="tr-wpm-sel" id="trWpmSel">
                             <option value="8">Slow (8 WPM)</option>
                             <option value="14" selected>Medium (14 WPM)</option>
@@ -2444,6 +2447,8 @@
         LEVELS = buildLevelsForLang(code);
         lvlDone = loadLvlDone(code);
         LP.session = 'level'; LP.lvlIdx = null;
+        // Rebuild the Learn grid now (even if hidden) so it's correct the moment you open it
+        if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector')) renderLevelGrid();
       } catch(e){}
       // Update dictionary language tab label / visibility
       if (typeof updateDictLangTab === 'function') updateDictLangTab();
@@ -2465,7 +2470,7 @@
       } else if (ret === 'tap') {
         if (typeof tapNextTarget === 'function') tapNextTarget();
       } else if (ret === 'learn') {
-        if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector') && document.getElementById('levelSelector').style.display !== 'none') renderLevelGrid();
+        if (typeof renderLevelGrid === 'function' && document.getElementById('levelSelector')) renderLevelGrid();
       } else if (ret === 'translation') {
         if (typeof initSim === 'function') initSim();
       }
@@ -2749,11 +2754,12 @@
      // Smart back arrow: hidden on tab-root hubs, visible inside sub-games / learn levels
      if (typeof updateBackArrow === 'function') updateBackArrow();
      if (id === 'learn' && typeof maybeLearnOnboard === 'function') maybeLearnOnboard();
+     if (id === 'learn' && typeof LP !== 'undefined' && LP.session === 'level' && typeof renderLevelGrid === 'function') { try { renderLevelGrid(); } catch(e){} }
      if (id==='practice' && typeof refreshPracticeUI==='function') refreshPracticeUI();
      if (id==='translation' && typeof initSim==='function') initSim();
      if (id==='dict' && pageInits['dict']) { if (typeof updateDictLangTab==='function') updateDictLangTab(); }
      if (!pageInits[id]) { pageInits[id] = true; if (id==='learn') initLearn(); if (id==='tap') initTap(); if (id==='practice') initPractice(); if (id==='dict') dictTab(document.querySelector('.dtab.on'),'en'); if (id==='translate' && !pageInits['translate_done']) { pageInits['translate_done']=true; }
-     if (id==='settings') { const sc=document.getElementById('settingsLangCurrent'); if(sc&&typeof LANG_MORSE!=='undefined'){ sc.textContent='Currently: '+((LANG_MORSE[currentLang]||LANG_MORSE.en).name); } } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='crossword') { try { buildCrosswordLangRow(); } catch(e){} } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } try { if(id!=='wordle' && typeof hideWlpNotice==='function') hideWlpNotice(); } catch(e){} if (id==='wordle') { try { buildWordleLangRow(); } catch(e){} try { if(typeof showWlpNotice==='function') showWlpNotice(); } catch(e){} } if (id==='speed') { if (SD && SD.running && SD.paused) { document.getElementById('speedStartBtn').style.display='none'; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='block'; const pb=document.getElementById('speedPauseBtn'); if(pb) pb.style.display='none'; const rb=document.getElementById('speedResumeBtn'); if(rb) rb.style.display=''; updateSpeedHud(); updateSpeedTimer(); } else { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; SD.paused=false; } } } }
+     if (id==='settings') { const sc=document.getElementById('settingsLangCurrent'); if(sc&&typeof LANG_MORSE!=='undefined'){ sc.textContent='Currently: '+((LANG_MORSE[currentLang]||LANG_MORSE.en).name); } if(typeof renderSyncUI==='function'){ try{ renderSyncUI(); }catch(e){} } } if (id==='crossword' && !pageInits['crossword_done']) { pageInits['crossword_done']=true; initCrossword(); } if (id==='crossword') { try { buildCrosswordLangRow(); } catch(e){} } if (id==='wordle' && !pageInits['wordle_done']) { pageInits['wordle_done']=true; initWordle(); } try { if(id!=='wordle' && typeof hideWlpNotice==='function') hideWlpNotice(); } catch(e){} if (id==='wordle') { try { buildWordleLangRow(); } catch(e){} try { if(typeof showWlpNotice==='function') showWlpNotice(); } catch(e){} } if (id==='speed') { if (SD && SD.running && SD.paused) { document.getElementById('speedStartBtn').style.display='none'; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='block'; const pb=document.getElementById('speedPauseBtn'); if(pb) pb.style.display='none'; const rb=document.getElementById('speedResumeBtn'); if(rb) rb.style.display=''; updateSpeedHud(); updateSpeedTimer(); } else { document.getElementById('speedStartBtn').style.display=''; document.getElementById('speedResult').style.display='none'; document.getElementById('speedGameCard').style.display='none'; if(SD && SD.running) { clearInterval(SD.timer); SD.running=false; SD.paused=false; } } } }
     }
 
     // ── TOAST ──
@@ -2813,17 +2819,36 @@
     }
 
     let _isPlaying = false;
+    let _playGen = 0;                       // increments each playback; old loops abort when stale
     async function playCode(code, wpm=14, freq=680) {
      stopAllOscs();
+     const myGen = ++_playGen;
       _isPlaying = true;
      const u = wuMs(wpm);
-     for (let i = 0; i < code.length; i++) {
-       if (!_isPlaying) break;
-       await beep(freq, (code[i]==='.'?1:3)*u/1000);
-       if (!_isPlaying) break;
-       if (i < code.length - 1) await sleep(u);
+     const norm = String(code).replace(/[·]/g,'.').replace(/[–—−]/g,'-');
+     const words = norm.split(/\s*\/\s*|\s{2,}/);   // words on / or 3+ spaces
+     for (let wi=0; wi<words.length; wi++) {
+       const letters = words[wi].trim().split(/\s+/).filter(Boolean);   // letters on single space
+       for (let li=0; li<letters.length; li++) {
+         const sym = letters[li];
+         for (let si=0; si<sym.length; si++) {
+           if (myGen !== _playGen) return;            // a newer playback started → abort this one
+           if (sym[si]==='.') await beep(freq, 1*u/1000);
+           else if (sym[si]==='-') await beep(freq, 3*u/1000);
+           else continue;
+           if (myGen !== _playGen) return;
+           if (si < sym.length-1) await sleep(u);     // intra-letter gap
+          }
+         if (myGen === _playGen && li < letters.length-1) await sleep(3*u);   // inter-letter gap
+        }
+       if (myGen === _playGen && wi < words.length-1) await sleep(7*u);       // inter-word gap
       }
-      _isPlaying = false;
+     if (myGen === _playGen) _isPlaying = false;
+    }
+    function trStopMorse() {                 // stop translator (or any) playback immediately
+     _playGen++;
+     _isPlaying = false;
+     try { stopAllOscs(); } catch(e){}
     }
 
     // ── STARS ──
@@ -11507,13 +11532,14 @@ function setUILang(code) {
     //  nothing else is affected. Sync NEVER deletes local progress.
     // ═══════════════════════════════════════════════════════════════
     const FIREBASE_CONFIG = {
-      // ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE (from the Firebase console) ▼▼▼
-      // apiKey:       "",
-      // authDomain:   "",
-      // databaseURL:  "https://YOUR-PROJECT-default-rtdb.firebaseio.com",
-      // projectId:    "",
-      // appId:        ""
-      // ▲▲▲ ------------------------------------------------------- ▲▲▲
+      apiKey: "AIzaSyBCR_70YRKJmb4Xh5Y3zhs-N8EQF687pec",
+      authDomain: "morsewave-d48db.firebaseapp.com",
+      databaseURL: "https://morsewave-d48db-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "morsewave-d48db",
+      storageBucket: "morsewave-d48db.firebasestorage.app",
+      messagingSenderId: "68889918687",
+      appId: "1:68889918687:web:efe6af924917fd2648bd6a",
+      measurementId: "G-CLGXQFHZVM"
     };
 
     const SYNC = {
