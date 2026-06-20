@@ -156,7 +156,7 @@
         /* Lesson card */
         .learn-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;animation:fadeUp .35s ease both;}
         .lc-head{padding:1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-        .phase-pill{font-size:.63rem;font-weight:700;letter-spacing:.13em;padding:.22rem .65rem;border-radius:999px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);color:var(--cyan);}
+        .phase-pill{display:none;}
         .step-info{font-size:.65rem;color:var(--txt2);font-weight:600;}
         .lprog{width:calc(100% - 2.8rem);height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:.9rem 1.4rem .2rem;}
         [data-theme=light] .lprog{background:rgba(0,0,0,.08);}
@@ -173,7 +173,7 @@
         [data-theme=light] .lbtn.ghost{background:rgba(0,0,0,.04);}
 
         /* SRS panel */
-        .srs-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.4rem;margin-top:.85rem;animation:fadeUp .4s .1s ease both;}
+        .srs-box{display:none;}
         .srs-title{font-size:.63rem;font-weight:700;letter-spacing:.12em;color:var(--txt2);text-transform:uppercase;margin-bottom:.65rem;}
         .srs-chips{display:flex;flex-wrap:wrap;gap:.35rem;}
         .chip{padding:.22rem .55rem;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;border:1px solid var(--border);display:flex;align-items:center;gap:3px;}
@@ -1428,7 +1428,6 @@
 <!-- ─── HOME ─── -->
 <div id="page-home" class="page on">
     <div class="hero">
-        <div class="hero-badge">MORSE WAVE 2.0 — UPGRADED</div>
         <h1>Learn Morse Code<br><span class="grad">the right way.</span></h1>
         <p class="hero-sub">18-level curriculum · Spaced repetition · 95 languages · Telegraph tap key · Pure Web Audio API</p>
         <div class="hero-btns">
@@ -5136,16 +5135,18 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
     function _revealSetup(){ if(!('IntersectionObserver' in window)) return;
       _revObs=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ _revealIn(e.target,0); } }); }, {threshold:0.05, rootMargin:'0px 0px -8% 0px'}); }
     function _revClass(el){ try{ return (el.className&&el.className.baseVal!==undefined)?el.className.baseVal:(el.className||''); }catch(e){ return ''; } }
-    function _revealTargets(root){ var out=[]; var kids=root.children; for(var i=0;i<kids.length;i++){ var el=kids[i]; var cn=_revClass(el); if(el.children.length>=2 && /grid|row|list|feat|cards|tiles/i.test(cn)){ for(var j=0;j<el.children.length;j++) out.push(el.children[j]); } else { out.push(el); } } return out; }
+    function _revealTargets(root){ var out=[]; var kids=root.children; for(var i=0;i<kids.length;i++){ var el=kids[i]; var cn=_revClass(el); var descend = el.children.length>=2 && !/hero|card|tile|cta|btn/i.test(cn) && (/grid|row|list|feat|cards|tiles|layout|tabs|wrap|panel|stack|cols?|group|sgroup/i.test(cn) || el.children.length>=4); if(descend){ for(var j=0;j<el.children.length;j++) out.push(el.children[j]); } else { out.push(el); } } return out; }
     function _revealIn(el, delay){ if(!el||el.classList.contains('in')) return; el.style.animationDelay=(delay||0)+'ms'; el.classList.add('in'); if(_revObs){ try{_revObs.unobserve(el);}catch(_){} } }
     function _revealScan(){ try {
       if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var page=document.querySelector('.page.on'); if(!page) return;
       var main=page.querySelector('main') || page;
-      var tg=_revealTargets(main);
-      for(var i=0;i<tg.length;i++){ var el=tg[i]; if(el.classList.contains('reveal')||el.classList.contains('in')) continue; el.classList.add('reveal'); if(_revObs) _revObs.observe(el); else el.classList.add('in'); }
+      try{ main.querySelectorAll('.reveal').forEach(function(el){ if(_revObs){try{_revObs.unobserve(el);}catch(_){}} el.classList.remove('reveal','in'); el.style.animationDelay=''; }); }catch(_){}
       void main.offsetHeight;
-      requestAnimationFrame(function(){ var shown=0; tg.forEach(function(el){ var r=el.getBoundingClientRect(); if(r.top<window.innerHeight*0.9 && r.bottom>0){ _revealIn(el, Math.min(shown,10)*70); shown++; } }); });
+      var tg=_revealTargets(main);
+      for(var i=0;i<tg.length;i++){ var el=tg[i]; el.classList.add('reveal'); if(_revObs) _revObs.observe(el); else el.classList.add('in'); }
+      void main.offsetHeight;
+      requestAnimationFrame(function(){ var shown=0; tg.forEach(function(el){ var r=el.getBoundingClientRect(); if(r.top<window.innerHeight*0.92 && r.bottom>0){ _revealIn(el, Math.min(shown,10)*70); shown++; } }); });
     } catch(e){} }
     function _navScroll(){ var y=_scY(); var nav=document.querySelector('nav'); if(!nav) return;
       if(y>90 && y>_lastSY+4){ nav.classList.add('nav-hidden'); if(typeof closeNavMore==='function') closeNavMore(); }
@@ -5165,6 +5166,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
       });
      currentPage = id;
      try { window.scrollTo(0,0); try{ var _se=_scEl(); if(_se&&_se.scrollTop!=null) _se.scrollTop=0; }catch(_e){} var _nv=document.querySelector('nav'); if(_nv) _nv.classList.remove('nav-hidden'); _lastSY=0; } catch(e){}
+     try { var _sb=document.getElementById('streakBadge'); if(_sb) _sb.style.display=(id==='home')?'':'none'; } catch(e){}
      try { requestAnimationFrame(_revealScan); } catch(e){}
      // Re-apply interface language to any freshly shown content
      if (window.__uiLang && window.__uiLang !== 'en' && typeof i18nApply === 'function') i18nApply(document.body, window.__uiLang); try{ var _mb=document.getElementById('ntMoreBtn'); if(_mb && typeof _syt==='function') _mb.textContent=_syt().more+' \u25be'; }catch(e){};
@@ -14524,7 +14526,9 @@ function setUILang(code) {
         _mergeInto(val.data);
         SYNC.applying = false;
         _syncRefreshUI();
-        _syncPushDebounced();   // push merged result so both devices converge
+        // Push back ONLY if our merge actually added something the remote lacked.
+        // Otherwise we'd ping-pong forever (each push has a new _ts → re-applies → re-pushes).
+        try { if (JSON.stringify(_gatherLocal()) !== JSON.stringify(val.data)) _syncPushDebounced(); } catch(e){}
       });
     }
 
@@ -14879,7 +14883,6 @@ function setUILang(code) {
       step.rows.forEach(function(r){ const label=t[r[1]]||r[1]; if(r[0]==='animal'){ h += sec(label, AV_ANIMALS.map(function(a){ return '<button class="av-opt av-animal'+(c.animal===a.k?' on':'')+'" onclick="avPickAnimal(\''+a.k+'\')">'+a.e+'</button>'; }).join('')); } else if(r[0]==='faceShape'){ let hh=''; for(let i=0;i<5;i++){ const cc=Object.assign({},c); cc.faceShape=i; hh+='<button class="av-opt av-mini'+(c.faceShape===i?' on':'')+'" onclick="avPickFS('+i+')">'+avatarSVG(cc,46)+'</button>'; } h += sec(label,hh); } else if(r[0]==='color'){ h += colorRow(r[1],label); } else { h += shapeRow(r[1],label); } });
       const last = (avStep===AV_STEPS.length-1);
       h += '<div class="av-nav"><button class="lbtn av-back" onclick="avNav(-1)">\u2039</button>'
-         + '<div class="av-step-dots">'+(avStep+1)+' / '+AV_STEPS.length+'</div>'
          + '<button class="lbtn prime av-next" onclick="avNav(1)">'+(last ? '\u2713' : (typeof _dt==='function'?_dt().next:'Next \u2192'))+'</button></div>';
       body.innerHTML = h;
     }
