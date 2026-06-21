@@ -2045,12 +2045,6 @@
             </button>
         </div>
 
-        <!-- Morse decode input (hidden by default) -->
-        <div id="trMorseInputWrap" style="display:none;margin-bottom:.75rem;">
-            <div style="font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--txt2);margin-bottom:.4rem;">Morse Input (· or . for dot, − or - for dash, spaces between chars, 3 spaces or / between words)</div>
-            <textarea id="trMorseInput" class="tr-textarea" placeholder="e.g.  .- -... -.-. / .... ..  →  ABC HI" style="font-family:'JetBrains Mono',monospace;font-size:.95rem;letter-spacing:.12em;"></textarea>
-        </div>
-
         <!-- Translate button -->
         <button class="tr-btn" id="trBtn" onclick="trTranslate()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -5470,7 +5464,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
         modal.style.display = 'none';
         renderAuthUI();
       } catch(e){
-        alert('Could not sign in: ' + ((e && e.message) || 'unknown error'));
+        try { toast((e && e.message) || 'Could not sign in.', 'err', 3000); } catch(_e){}
       }
     }
     function authConfirmCancel(){ const m = document.getElementById('authConfirmModal'); if (m) m.style.display = 'none'; }
