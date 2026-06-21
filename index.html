@@ -42,6 +42,12 @@
 
         /* ── NAV ── */
         nav{position:fixed;top:0;left:0;right:0;z-index:300;height:56px;padding:0 1.25rem;background:rgba(11,15,26,.85);backdrop-filter:blur(20px) saturate(160%);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:1rem;}
+        body.fs-mode nav{display:none!important;}
+        body.fs-mode #lessonArea{position:fixed;inset:0;z-index:480;background:var(--bg);overflow-y:auto;padding:1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom,0px));margin:0;}
+        body.fs-mode #page-practice main,
+        body.fs-mode #page-wordle main{position:fixed;inset:0;z-index:480;background:var(--bg);overflow-y:auto;padding:1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom,0px));margin:0;}
+        #fsCloseBtn{display:none;position:fixed;top:14px;right:14px;z-index:490;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:rgba(0,0,0,.4);backdrop-filter:blur(8px);color:#fff;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+        #fsCloseBtn:hover{background:rgba(0,0,0,.6);}
         [data-theme=light] nav{background:rgba(240,244,248,.9);}
         .logo{font-weight:700;font-size:.95rem;letter-spacing:-.02em;background:linear-gradient(120deg,var(--cyan),var(--mint));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;border:none;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:.45rem;flex-shrink:0;}
         .logo-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:ldot 2.4s ease-in-out infinite;flex-shrink:0;}
@@ -528,7 +534,7 @@
         .xwin-stat-l{font-size:0.58rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--txt2);font-weight:700;}
         .xwin-stat-v{font-size:1.4rem;font-weight:800;color:var(--mint);font-family:'JetBrains Mono',monospace;margin-top:0.15rem;}
         .xwin-buttons{display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;}
-        .xtoast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-30px);padding:0.7rem 1.5rem;background:rgba(6,9,18,0.9);border:1px solid var(--border2);border-radius:999px;font-size:0.85rem;font-weight:600;opacity:0;transition:all 0.4s ease;z-index:200;pointer-events:none;backdrop-filter:blur(20px);white-space:nowrap;}
+        .xtoast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-30px);padding:0.7rem 1.5rem;background:rgba(6,9,18,0.9);border:1px solid var(--border2);border-radius:999px;font-size:0.85rem;font-weight:600;opacity:0;transition:all 0.4s ease;z-index:485;pointer-events:none;backdrop-filter:blur(20px);white-space:nowrap;}
         .xtoast.show{opacity:1;transform:translateX(-50%) translateY(0);}
         .xtoast.success{border-color:rgba(0,255,166,0.4);color:var(--mint);}
         .xtoast.error{border-color:rgba(255,77,109,0.4);color:var(--rose);}
@@ -588,7 +594,7 @@
         .pill-btn svg{width:13px;height:13px;}
         .pill-btn.audio{color:var(--cyan);border-color:rgba(0,212,255,0.25);}
         .pill-btn.audio:hover{background:rgba(0,212,255,0.06);box-shadow:0 0 16px rgba(0,212,255,0.2);}
-        .wtoast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-30px);padding:0.7rem 1.5rem;background:rgba(6,9,18,0.92);border:1px solid var(--border2);border-radius:12px;font-size:0.85rem;font-weight:600;opacity:0;transition:all 0.35s ease;z-index:200;pointer-events:none;backdrop-filter:blur(20px);white-space:nowrap;}
+        .wtoast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-30px);padding:0.7rem 1.5rem;background:rgba(6,9,18,0.92);border:1px solid var(--border2);border-radius:12px;font-size:0.85rem;font-weight:600;opacity:0;transition:all 0.35s ease;z-index:485;pointer-events:none;backdrop-filter:blur(20px);white-space:nowrap;}
         .wtoast.show{opacity:1;transform:translateX(-50%) translateY(0);}
         .wtoast.success{border-color:rgba(0,255,166,0.4);color:var(--mint);}
         .wtoast.error{border-color:rgba(255,77,109,0.4);color:var(--rose);}
@@ -1322,6 +1328,9 @@
 </nav>
 <button id="backArrow" onclick="navBack()" title="Back to Home" aria-label="Back to Home" style="display:none">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</button>
+<button id="fsCloseBtn" onclick="fsClose()" title="Exit fullscreen" aria-label="Exit fullscreen" style="display:none">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
 </button>
 
 
@@ -5153,6 +5162,36 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
       else if(y<_lastSY-4 || y<60){ nav.classList.remove('nav-hidden'); } _lastSY=y;
       try{ var p=document.querySelector('.page.on'); if(p){ var ns=p.querySelectorAll('.reveal:not(.in)'); for(var k=0;k<ns.length;k++){ var r=ns[k].getBoundingClientRect(); if(r.top<window.innerHeight*0.85 && r.bottom>0) _revealIn(ns[k],0); } } }catch(_){} }
     try { _revealSetup(); document.addEventListener('scroll', _navScroll, {capture:true, passive:true}); window.addEventListener('scroll', _navScroll, {passive:true}); window.addEventListener('load', function(){ requestAnimationFrame(_revealScan); }); setInterval(function(){ try{ var p=document.querySelector('.page.on'); if(!p)return; p.querySelectorAll('.reveal:not(.in)').forEach(function(el){ var r=el.getBoundingClientRect(); if(r.top<window.innerHeight*0.9 && r.bottom>0) _revealIn(el,0); }); }catch(_){} }, 1000); } catch(e){}
+    /* ===== Fullscreen mode: Learning / Practice / Wordle (Part 7) ===== */
+    let _fsExitFn = null;
+    function _fsEnter(exitFn){
+      _fsExitFn = exitFn;
+      document.body.classList.add('fs-mode');
+      const x = document.getElementById('fsCloseBtn'); if (x) x.style.display = 'flex';
+    }
+    function _fsLeave(){
+      document.body.classList.remove('fs-mode');
+      _fsExitFn = null;
+      const x = document.getElementById('fsCloseBtn'); if (x) x.style.display = 'none';
+    }
+    function fsClose(){ if (_fsExitFn) _fsExitFn(); }
+    function lExitFullscreen(){
+      // Mirrors lBack()'s "exit to level grid" branch, callable directly from the X button.
+      try { if (typeof LP !== 'undefined' && LP.session === 'level' && typeof saveResume === 'function') saveResume(); } catch(e){}
+      try { if (typeof LP !== 'undefined') LP.session = 'level'; } catch(e){}
+      try { renderLevelGrid(); } catch(e){}
+      try { renderTrack(); } catch(e){}
+    }
+    let _syncLessonFs = function(){};
+    (function(){
+      const _la = document.getElementById('lessonArea');
+      if (!_la) return;
+      _syncLessonFs = function(){
+        if (_la.style.display === 'block') { _fsEnter(lExitFullscreen); }
+        else if (currentPage === 'learn') { _fsLeave(); }
+      };
+      try { new MutationObserver(_syncLessonFs).observe(_la, {attributes:true, attributeFilter:['style']}); } catch(e){}
+    })();
     function goPage(id) {
      document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
      document.getElementById('page-' + id).classList.add('on');
@@ -5167,6 +5206,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
      currentPage = id;
      try { window.scrollTo(0,0); try{ var _se=_scEl(); if(_se&&_se.scrollTop!=null) _se.scrollTop=0; }catch(_e){} var _nv=document.querySelector('nav'); if(_nv) _nv.classList.remove('nav-hidden'); _lastSY=0; } catch(e){}
      try { var _sb=document.getElementById('streakBadge'); if(_sb) _sb.style.display=(id==='home')?'':'none'; } catch(e){}
+     try { if (id==='practice' || id==='wordle') { _fsEnter(function(){ navTo('home'); }); } else if (id==='learn') { _syncLessonFs(); } else { _fsLeave(); } } catch(e){}
      try { requestAnimationFrame(_revealScan); } catch(e){}
      // Re-apply interface language to any freshly shown content
      if (window.__uiLang && window.__uiLang !== 'en' && typeof i18nApply === 'function') i18nApply(document.body, window.__uiLang); try{ var _mb=document.getElementById('ntMoreBtn'); if(_mb && typeof _syt==='function') _mb.textContent=_syt().more+' \u25be'; }catch(e){};
@@ -14498,8 +14538,16 @@ function setUILang(code) {
       try { if (typeof applyUILang === 'function') applyUILang(localStorage.getItem('mw_ui_lang') || 'en'); } catch(e){}
       try { const d = JSON.parse(localStorage.getItem('mw_streak') || '{}'); if (typeof renderStreak === 'function') renderStreak(d); } catch(e){}
       try { srs = JSON.parse(localStorage.getItem('mw_srs') || '{}'); } catch(e){}
-      try { if (typeof renderLevels === 'function') renderLevels(); } catch(e){}
-      try { if (typeof renderLevelGrid === 'function') renderLevelGrid(); } catch(e){}
+      // Don't force the UI back to the level grid while the person is mid-lesson —
+      // that was kicking them out of an open lesson the instant a sync update arrived.
+      // The freshly-merged data is already in localStorage; the grid will pick it up
+      // naturally next time it renders (e.g. when they exit the lesson).
+      const _laEl = document.getElementById('lessonArea');
+      const _inLesson = !!(_laEl && _laEl.style.display === 'block');
+      if (!_inLesson) {
+        try { if (typeof renderLevels === 'function') renderLevels(); } catch(e){}
+        try { if (typeof renderLevelGrid === 'function') renderLevelGrid(); } catch(e){}
+      }
     }
 
     function _syncPushNow(){
