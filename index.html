@@ -15073,6 +15073,25 @@ function setUILang(code) {
       try { if (_syncEnabled() && _syncConfigured()) _syncInit().then(() => { _syncPushNow(); _syncAttach(); }).catch(() => {}); } catch(e){}
     })();
 
+    // Mid-lesson sync was only ever picking up on a manual page refresh because the
+    // Firebase realtime connection silently drops when the app goes to the background
+    // (screen off, switch app) and never reconnects on its own. Re-attaching the
+    // listener the instant the app becomes visible/focused again fixes this WITHOUT a
+    // page reload — so it updates automatically, no button needed, and the person
+    // stays on exactly the screen they were on (nothing reloads or resets).
+    (function(){
+      function _syncReconnect(){
+        try {
+          if (!_syncEnabled() || !_syncConfigured()) return;
+          if (!SYNC.ready) { _syncInit().then(() => { _syncPushNow(); _syncAttach(); }).catch(() => {}); }
+          else { _syncPushNow(); _syncAttach(); }
+        } catch(e){}
+      }
+      try { document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') _syncReconnect(); }); } catch(e){}
+      try { window.addEventListener('focus', _syncReconnect); } catch(e){}
+      try { window.addEventListener('online', _syncReconnect); } catch(e){}
+    })();
+
 </script>
 </body>
 </html>
