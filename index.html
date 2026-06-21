@@ -5084,7 +5084,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
 
     function navBack() {
       const p = (typeof currentPage !== 'undefined') ? currentPage : 'home';
-      if (p === 'smartset') { navTo('home'); return; }
+      if (p === 'smartset') { navTo('settings'); return; }   // smartset is only ever reached FROM settings
       if (p === 'avatar') { goPage('smartset'); return; }
       if (p === 'qrshow') { goPage('settings'); return; }
       // Inside a mini-game → back to the Games hub (the games tab's own root)
