@@ -5889,6 +5889,79 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
      localStorage.setItem('mw_srs', JSON.stringify(srs));
     }
 
+    /* ============================================================
+       שיפוט חכם למבחן המיקום (הקפיצה) — שלב 1: פונקציית השיפוט עצמה
+       לא סופרת טעויות באופן נוקשה. משקללת שני גורמים, כמו מורה:
+         גורם 1 — התמונה הכללית: כמה ידעת מתוך הכל (רוב מוחלט = שליטה)
+         גורם 2 — בכמה אותיות *שונות* אתה באמת חלש (לא כמה טעויות)
+       טעות בודדת = פספוס, נרשמת לזיכרון אבל לא מענישה.
+       טעות חוזרת (2-3+) = אות שבאמת לא נשלטה.
+       ============================================================ */
+
+    // מקבלת מפה של {אות: כמה_פעמים_טעה_בה_במבחן} ומספר השאלות הכולל.
+    // מחזירה אובייקט שיפוט: האם לעבור, ואילו אותיות חלשות.
+    function judgePlacement(missCountByChar, totalQuestions) {
+      // הגנה: קלט לא תקין
+      missCountByChar = missCountByChar || {};
+      totalQuestions = totalQuestions || 0;
+
+      // --- גורם 2: זיהוי האותיות שבאמת לא נשלטו ---
+      // לכל אות שטעית בה, מחליטים אם זה "פספוס" או "באמת חלש"
+      const trulyWeak = [];   // אותיות שבאמת לא נשלטו
+      const forgiven = [];    // פספוסים חד-פעמיים (נרשמים לזיכרון, לא נספרים)
+      let totalMisses = 0;
+
+      for (const ch in missCountByChar) {
+        const misses = missCountByChar[ch] || 0;
+        if (misses <= 0) continue;
+        totalMisses += misses;
+
+        // טעות חוזרת (2 ומעלה) = באמת חלשה
+        if (misses >= 2) {
+          trulyWeak.push(ch);
+        } else {
+          // טעות בודדת: בודקים את ההיסטוריה (srs).
+          // אם גם בעבר היית חלש בה (ציון שלילי) — זה לא סתם פספוס, זה דפוס.
+          // אחרת — פספוס חד-פעמי באות שאתה בד"כ יודע, נסלח.
+          if (srsScore(ch) < 0) {
+            trulyWeak.push(ch);
+          } else {
+            forgiven.push(ch);
+          }
+        }
+      }
+
+      // --- גורם 1: התמונה הכללית ---
+      // כמה מהשאלות ענית נכון (אחוז כללי, לשימוש כגורם תומך)
+      const overallCorrectRatio = totalQuestions > 0
+        ? (totalQuestions - totalMisses) / totalQuestions
+        : 1;
+
+      // --- השילוב (שיפוט "כמו מורה") ---
+      // המספר שאכפת הוא כמה אותיות *שונות* באמת חלשות — לא כמה טעויות.
+      // הסף נגזר מהיקף המבחן, לא ממספר קבוע:
+      //   • במבחן קטן — סבלנות נמוכה יותר (פחות אותיות, כל אחת משמעותית)
+      //   • במבחן גדול — סבלנות לכמה אותיות חלשות בודדות סבירה
+      // מספר האותיות הייחודיות במבחן (כל אות מופיעה 3 פעמים, אז מחלקים ב-3)
+      const uniqueChars = Math.max(1, Math.round(totalQuestions / 3));
+
+      // כמה אותיות-חלשות מותר כדי עדיין לעבור:
+      // עד כ-15% מהאותיות הייחודיות, אבל לפחות 1 תמיד נסלחת
+      // (כך שבמבחן קטן, אות חלשה אחת לא מפילה; בגדול, כמה לא)
+      const allowedWeak = Math.max(1, Math.floor(uniqueChars * 0.15));
+
+      // מעבר: אם מספר האותיות שבאמת לא נשלטו בתוך המותר
+      const pass = trulyWeak.length <= allowedWeak;
+
+      return {
+        pass: pass,
+        trulyWeak: trulyWeak,        // האותיות לחזור עליהן (ייכנסו ל-srs ויחזרו בעתיד)
+        forgiven: forgiven,          // פספוסים שנסלחו
+        allowedWeak: allowedWeak,    // כמה היה מותר (לצורך הצגה/דיבאג)
+        overallCorrectRatio: overallCorrectRatio
+      };
+    }
+
     // ── AUDIO ENGINE ──
     let _actx = null;
     // Strictly manage oscillators to prevent WebAudio memory leaks
@@ -6035,7 +6108,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
     function lvlKey(code){ return 'mw_lvls_' + (code||'en'); }
     function loadLvlDone(code){ const d = JSON.parse(localStorage.getItem(lvlKey(code)) || '{}'); return d; }
 
-    let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false, session:'level', sessionChars:[], nextLvlIdx:null, placeTarget:null, score:0, total:0 };
+    let LP = { lvlIdx:null, stepIdx:0, steps:[], answered:false, session:'level', sessionChars:[], nextLvlIdx:null, placeTarget:null, score:0, total:0, missByChar:{} };
     let lvlDone = JSON.parse(localStorage.getItem('mw_lvls_en') || localStorage.getItem('mw_lvls') || '{}');
 
     function saveLvl(i, done) { lvlDone[i]=done; localStorage.setItem(lvlKey(currentLang), JSON.stringify(lvlDone)); }
@@ -6241,7 +6314,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
      LP.session = 'placement';
      LP.sessionChars = chars;
      LP.placeTarget = targetIdx;
-     LP.score = 0; LP.total = 0;
+     LP.score = 0; LP.total = 0; LP.missByChar = {};
      LP.steps = buildPlacementSteps(chars);
      LP.stepIdx = 0; LP.answered = false;
      document.getElementById('levelSelector').style.display = 'none';
@@ -6520,7 +6593,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
       });
      showLFb(ok, correct);
      srsRecord(correct, ok); renderSrsChips();
-     if (LP.session==='placement') { LP.total++; if(ok) LP.score++; }
+     if (LP.session==='placement') { LP.total++; if(ok) LP.score++; else LP.missByChar[correct] = (LP.missByChar[correct]||0) + 1; }
      document.getElementById('lNextBtn').disabled = false;
      if (ok) playCode(getMorse(correct));
      maybeAutoAdvance(ok, lNext);
@@ -6558,7 +6631,7 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
      const isHeb = (LP.session==='level') ? LEVELS[LP.lvlIdx].heb : isHebChar(correct);
      const ok = isHeb ? val === correct : val.toUpperCase() === correct.toUpperCase();
      inp.disabled = true; inp.className = `type-inp${isHeb?' heb':''} ${ok?'ok':'bad'}`;
-     if (LP.session==='placement') { LP.total++; if(ok) LP.score++; }
+     if (LP.session==='placement') { LP.total++; if(ok) LP.score++; else LP.missByChar[correct] = (LP.missByChar[correct]||0) + 1; }
      showLFb(ok, correct);
      srsRecord(correct, ok); renderSrsChips();
      document.getElementById('lNextBtn').disabled = false;
@@ -6776,8 +6849,10 @@ try{ if(typeof window!=="undefined" && typeof qrcode==="function") window.qrcode
       }
      // Placement test completed
      if (step.type === 'placeDone') {
-       const pct = LP.total ? Math.round(LP.score/LP.total*100) : 0;
-       if (pct >= 85) { startLevel(LP.placeTarget); renderTrack(); }
+       // שלב 3: שיפוט חכם במקום אחוז קבוע.
+       // judgePlacement משקללת כמה טעית בכל אות + היסטוריה (srs), כמו מורה.
+       const judgment = judgePlacement(LP.missByChar, LP.total);
+       if (judgment.pass) { startLevel(LP.placeTarget); renderTrack(); }
        else { LP.session='level'; renderLevelGrid(); renderTrack(); }
        return;
       }
