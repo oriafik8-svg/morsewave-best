@@ -1,47 +1,33 @@
-// MorseWave Service Worker — network-first for HTML so updates show immediately
-const CACHE = 'morsewave-v4';
+/* Service Worker – zadok80 PWA
+   אסטרטגיה: network-first (כדי שעדכונים יופיעו מיד), עם נפילה ל-cache במצב לא מקוון */
+const CACHE = "zadok80-v14";
+const ASSETS = [
+  "./", "./index.html", "./style.css", "./app.js?v=14", "./callback.html",
+  "./manifest.json", "./icon-192.png", "./icon-512.png"
+];
 
-self.addEventListener('install', e => {
-  self.skipWaiting(); // activate the new SW right away
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 
-self.addEventListener('activate', e => {
+self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.map(k => caches.delete(k)))) // clear ALL old caches
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', e => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return; // API/CDN pass through
-
-  const isHTML = req.mode === 'navigate' ||
-                 (req.headers.get('accept') || '').includes('text/html') ||
-                 url.pathname.endsWith('.html') || url.pathname.endsWith('/');
-
-  if (isHTML) {
-    // NETWORK-FIRST: always try to get the freshest page; fall back to cache offline
-    e.respondWith(
-      fetch(req).then(res => {
+self.addEventListener("fetch", (e) => {
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return; // Firebase / גופנים / CDN → תמיד רשת
+  e.respondWith(
+    fetch(e.request)
+      .then((res) => {
         const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy));
+        caches.open(CACHE).then((c) => c.put(e.request, copy));
         return res;
-      }).catch(() => caches.match(req).then(m => m || caches.match('./index.html')))
-    );
-  } else {
-    // CACHE-FIRST for static assets
-    e.respondWith(
-      caches.match(req).then(cached => cached || fetch(req).then(res => {
-        if (res && res.status === 200) {
-          const copy = res.clone();
-          caches.open(CACHE).then(c => c.put(req, copy));
-        }
-        return res;
-      }).catch(() => cached))
-    );
-  }
+      })
+      .catch(() => caches.match(e.request))
+  );
 });
